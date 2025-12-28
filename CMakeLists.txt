@@ -1,198 +1,172 @@
 cmake_minimum_required(VERSION 3.20)
-project(xjni VERSION 1.0.0 LANGUAGES C CXX)
+project(xjni VERSION 1.0.1 LANGUAGES C CXX)
 
 include(CMakePackageConfigHelpers)
+include(GNUInstallDirs)
+include(CTest)
 
+# ------------------------------
+# Options
+# ------------------------------
+option(XJNI_BUILD_STATIC "Build static library" ON)
+option(XJNI_BUILD_TESTS "Build JNI/Java tests" OFF)
+
+# ------------------------------
+# Find dependencies
+# ------------------------------
 find_package(Java REQUIRED)
 find_package(JNI REQUIRED)
 include(UseJava)
 
-set(CMAKE_VERBOSE_MAKEFILE ON)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
+# ------------------------------
+# Compiler standards
+# ------------------------------
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
-
-# Output directories
-set(OUTPUT_DIR "${CMAKE_BINARY_DIR}/build/${CMAKE_SYSTEM_PROCESSOR}")
-set(LIBS_OUTPUT_DIR "${OUTPUT_DIR}/lib")
-set(TEST_OUTPUT_DIR "${OUTPUT_DIR}/test")
-set(LIBS_TEST_OUTPUT_DIR "${TEST_OUTPUT_DIR}/lib")
-set(JAR_OUTPUT_DIR "${TEST_OUTPUT_DIR}/jar")
-set(HEADER_OUTPUT_DIR "${TEST_OUTPUT_DIR}/headers")
-file(MAKE_DIRECTORY "${LIBS_OUTPUT_DIR}" "${TEST_OUTPUT_DIR}" "${LIBS_TEST_OUTPUT_DIR}" "${JAR_OUTPUT_DIR}" "${HEADER_OUTPUT_DIR}")
-
+# ------------------------------
+# Source files
+# ------------------------------
 set(XJNI_SOURCES
-	${CMAKE_SOURCE_DIR}/src/xjni_arrayfield.c
-	${CMAKE_SOURCE_DIR}/src/xjni_stringarray.c
-	${CMAKE_SOURCE_DIR}/src/xjni2d.c
-	${CMAKE_SOURCE_DIR}/src/xjni.c
+    ${CMAKE_SOURCE_DIR}/src/xjni_arrayfield.c
+    ${CMAKE_SOURCE_DIR}/src/xjni_printf.c
+    ${CMAKE_SOURCE_DIR}/src/xjni_stringarray.c
+    ${CMAKE_SOURCE_DIR}/src/xjni2d.c
+    ${CMAKE_SOURCE_DIR}/src/xjni.c
 )
 
-# Build shared library
-add_library(${PROJECT_NAME} SHARED ${XJNI_SOURCES})
-
-# Set library version (for Unix)
-if(NOT WIN32 AND NOT CMAKE_SYSTEM_NAME STREQUAL Windows)
-	set_target_properties(${PROJECT_NAME} PROPERTIES
-		VERSION ${PROJECT_VERSION}
-		SOVERSION ${PROJECT_VERSION_MAJOR}
-	)
-endif()
-
-# Set output directories
-set_target_properties(${PROJECT_NAME} PROPERTIES
-	ARCHIVE_OUTPUT_DIRECTORY ${LIBS_OUTPUT_DIR}
-	LIBRARY_OUTPUT_DIRECTORY ${LIBS_OUTPUT_DIR}
-	RUNTIME_OUTPUT_DIRECTORY ${LIBS_OUTPUT_DIR}
+# ------------------------------
+# Shared library
+# ------------------------------
+add_library(xjni SHARED ${XJNI_SOURCES})
+target_link_libraries(xjni PUBLIC JNI::JNI)
+target_include_directories(xjni
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+        ${JNI_INCLUDE_DIRS}
 )
 
-# Include directories
-target_include_directories(${PROJECT_NAME}
-	PRIVATE
-		${CMAKE_SOURCE_DIR}/src
-		${CMAKE_SOURCE_DIR}/include
-	PUBLIC
-		${JNI_INCLUDE_DIRS}
-)
-
-# Build static library
-add_library(${PROJECT_NAME}_static STATIC ${XJNI_SOURCES})
-
-# Output directories for static library
-set_target_properties(${PROJECT_NAME}_static PROPERTIES
-	OUTPUT_NAME ${PROJECT_NAME}
-	ARCHIVE_OUTPUT_DIRECTORY ${LIBS_OUTPUT_DIR}
-)
-
-# Include directories
-target_include_directories(${PROJECT_NAME}_static
-	PRIVATE
-		${CMAKE_SOURCE_DIR}/src
-		${CMAKE_SOURCE_DIR}/include
-	PUBLIC
-		${JNI_INCLUDE_DIRS}
-)
-
-# Link JNI if needed
-target_link_libraries(${PROJECT_NAME}_static PUBLIC JNI::JNI)
-
-target_link_libraries(${PROJECT_NAME} PUBLIC JNI::JNI)
 if(NOT WIN32)
-	# -------------------
-	# Install Targets
-	# -------------------
-
-	# Install library
-	install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_static
-		EXPORT ${PROJECT_NAME}Targets
-		RUNTIME DESTINATION bin
-		LIBRARY DESTINATION lib
-		ARCHIVE DESTINATION lib
-	)
-
-	# Install headers
-	install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/
-		DESTINATION include
-		FILES_MATCHING PATTERN "*.h"
-	)
-
-	write_basic_package_version_file(
-		"${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
-		VERSION ${PROJECT_VERSION}
-		COMPATIBILITY AnyNewerVersion
-	)
-
-	configure_package_config_file(
-		"${CMAKE_SOURCE_DIR}/cmake/Config.cmake.in"
-		"${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
-		INSTALL_DESTINATION lib/cmake/${PROJECT_NAME}
-	)
-
-	install(FILES
-		"${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
-		"${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
-		DESTINATION lib/cmake/${PROJECT_NAME}
-	)
-
-	export(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_static FILE ${PROJECT_NAME}Targets.cmake)
-
-	# Optional: install CMake config for find_package()
-	install(EXPORT ${PROJECT_NAME}Targets
-		FILE ${PROJECT_NAME}Targets.cmake
-		NAMESPACE ${PROJECT_NAME}::
-		DESTINATION lib/cmake/${PROJECT_NAME}
-	)
-
-	if(EXISTS "${CMAKE_SOURCE_DIR}/cmake/uninstall.cmake")
-		add_custom_target(uninstall
-			COMMAND ${CMAKE_COMMAND} -P ${CMAKE_SOURCE_DIR}/cmake/uninstall.cmake
-			COMMENT "Uninstalling ${PROJECT_NAME}"
-		)
-	endif()
+    set_target_properties(xjni PROPERTIES
+        VERSION ${PROJECT_VERSION}
+        SOVERSION ${PROJECT_VERSION_MAJOR}
+    )
 endif()
 
-add_jar(
-	xjni-test-jar
-		${CMAKE_SOURCE_DIR}/test/java/TestStringArray.java
-		${CMAKE_SOURCE_DIR}/test/java/ArrayFieldTest.java
-		${CMAKE_SOURCE_DIR}/test/java/Array2DTest.java
-	VERSION ${PROJECT_VERSION}
-	OUTPUT_NAME "xjni-test"
-	OUTPUT_DIR "${JAR_OUTPUT_DIR}"
-	GENERATE_NATIVE_HEADERS xjni-test-native
-		DESTINATION "${HEADER_OUTPUT_DIR}"
+# ------------------------------
+# Optional static library
+# ------------------------------
+if(XJNI_BUILD_STATIC)
+    add_library(xjni_static STATIC ${XJNI_SOURCES})
+    set_target_properties(xjni_static PROPERTIES OUTPUT_NAME xjni)
+    target_link_libraries(xjni_static PUBLIC JNI::JNI)
+    target_include_directories(xjni_static
+        PUBLIC
+            $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+            ${JNI_INCLUDE_DIRS}
+    )
+endif()
+
+# ------------------------------
+# Installation
+# ------------------------------
+install(TARGETS xjni
+    EXPORT xjniTargets
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
-add_library(xjni_test SHARED
-	${CMAKE_SOURCE_DIR}/test/c/xjni_stringarray_test.c
-	${CMAKE_SOURCE_DIR}/test/c/xjni_arrayfield_test.c
-	${CMAKE_SOURCE_DIR}/test/c/xjni2d_test.c
-)
-target_include_directories(xjni_test PRIVATE ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/include)
-target_include_directories(xjni_test PUBLIC ${JNI_INCLUDE_DIRS})
-target_link_libraries(xjni_test PRIVATE xjni)
-set_target_properties(xjni_test PROPERTIES
-	ARCHIVE_OUTPUT_DIRECTORY ${LIBS_TEST_OUTPUT_DIR}
-	LIBRARY_OUTPUT_DIRECTORY ${LIBS_TEST_OUTPUT_DIR}
-	RUNTIME_OUTPUT_DIRECTORY ${LIBS_TEST_OUTPUT_DIR}
+if(XJNI_BUILD_STATIC)
+    install(TARGETS xjni_static
+        EXPORT xjniTargets
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ) # libxjni-dev
+endif()
+
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    FILES_MATCHING PATTERN "*.h"
 )
 
-add_custom_target(run_xjni_stringarray_test
-	COMMAND
-		${Java_JAVA_EXECUTABLE} -Djava.library.path=${LIBS_TEST_OUTPUT_DIR}
-		-cp ${JAR_OUTPUT_DIR}/xjni-test.jar TestStringArray
-	WORKING_DIRECTORY "${JAR_OUTPUT_DIR}"
-	DEPENDS ${PROJECT_NAME}
-	COMMENT "Running Java test class xjni-test for TestStringArray"
+write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/xjniConfigVersion.cmake"
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY AnyNewerVersion
 )
-add_custom_target(xjni_stringarray_test_run ALL DEPENDS run_xjni_stringarray_test)
 
-
-
-add_custom_target(run_xjni_arrayfield_test
-	COMMAND
-		${Java_JAVA_EXECUTABLE} -Djava.library.path=${LIBS_TEST_OUTPUT_DIR}
-		-cp ${JAR_OUTPUT_DIR}/xjni-test.jar ArrayFieldTest
-	WORKING_DIRECTORY "${JAR_OUTPUT_DIR}"
-	DEPENDS ${PROJECT_NAME}
-	COMMENT "Running Java test class xjni-test for ArrayFieldTest"
+configure_package_config_file(
+    "${CMAKE_SOURCE_DIR}/cmake/Config.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/xjniConfig.cmake"
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/xjni
 )
-add_custom_target(xjni_arrayfield_test_run ALL DEPENDS run_xjni_arrayfield_test)
 
+install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/xjniConfig.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/xjniConfigVersion.cmake"
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/xjni
+) # libxjni-dev
 
+install(EXPORT xjniTargets
+    FILE xjniTargets.cmake
+    NAMESPACE xjni::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/xjni
+) # libxjni-dev
 
-add_custom_target(run_xjni2d_test
-	COMMAND
-		${Java_JAVA_EXECUTABLE} -Djava.library.path=${LIBS_TEST_OUTPUT_DIR}
-		-cp ${JAR_OUTPUT_DIR}/xjni-test.jar Array2DTest
-	WORKING_DIRECTORY "${JAR_OUTPUT_DIR}"
-	DEPENDS ${PROJECT_NAME}
-	COMMENT "Running Java test class xjni-test for Array2DTest"
-)
-add_custom_target(xjni2d_test_run ALL DEPENDS run_xjni2d_test)
+# ------------------------------
+# Testing
+# ------------------------------
+if(XJNI_BUILD_TESTS)
+    enable_testing()
+
+    # Java test JAR
+    set(JAR_OUTPUT_DIR "${CMAKE_BINARY_DIR}/jar")
+    set(HEADER_OUTPUT_DIR "${CMAKE_BINARY_DIR}/headers")
+    file(MAKE_DIRECTORY "${JAR_OUTPUT_DIR}" "${HEADER_OUTPUT_DIR}")
+
+    add_jar(
+        xjni-test-jar
+        ${CMAKE_SOURCE_DIR}/test/java/TestStringArray.java
+        ${CMAKE_SOURCE_DIR}/test/java/ArrayFieldTest.java
+        ${CMAKE_SOURCE_DIR}/test/java/Array2DTest.java
+        ${CMAKE_SOURCE_DIR}/test/java/TestXJNI.java
+        VERSION ${PROJECT_VERSION}
+        OUTPUT_NAME "xjni-test"
+        OUTPUT_DIR "${JAR_OUTPUT_DIR}"
+        GENERATE_NATIVE_HEADERS xjni-test-native
+            DESTINATION "${HEADER_OUTPUT_DIR}"
+    )
+
+    # C test library
+    add_library(xjni_test SHARED
+        ${CMAKE_SOURCE_DIR}/test/c/xjni_stringarray_test.c
+        ${CMAKE_SOURCE_DIR}/test/c/xjni_arrayfield_test.c
+        ${CMAKE_SOURCE_DIR}/test/c/xjni2d_test.c
+        ${CMAKE_SOURCE_DIR}/test/c/xjni_test.c
+    )
+    target_include_directories(xjni_test PRIVATE ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/include)
+    target_include_directories(xjni_test PUBLIC ${JNI_INCLUDE_DIRS})
+    target_link_libraries(xjni_test PRIVATE xjni)
+
+    set(LIBS_TEST_OUTPUT_DIR "${CMAKE_BINARY_DIR}/test/lib")
+    set_target_properties(xjni_test PROPERTIES
+        ARCHIVE_OUTPUT_DIRECTORY ${LIBS_TEST_OUTPUT_DIR}
+        LIBRARY_OUTPUT_DIRECTORY ${LIBS_TEST_OUTPUT_DIR}
+        RUNTIME_OUTPUT_DIRECTORY ${LIBS_TEST_OUTPUT_DIR}
+    )
+
+    # Java test targets
+    foreach(TESTCLASS TestStringArray ArrayFieldTest Array2DTest TestXJNI)
+        add_custom_target(run_${TESTCLASS}
+            COMMAND ${Java_JAVA_EXECUTABLE} -Djava.library.path=${LIBS_TEST_OUTPUT_DIR} -cp ${JAR_OUTPUT_DIR}/xjni-test.jar ${TESTCLASS}
+            WORKING_DIRECTORY "${JAR_OUTPUT_DIR}"
+            DEPENDS xjni xjni_test xjni-test-jar
+            COMMENT "Running Java test ${TESTCLASS}"
+        )
+        add_custom_target(${TESTCLASS}_test_run ALL DEPENDS run_${TESTCLASS})
+    endforeach()
+endif()

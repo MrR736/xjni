@@ -59,8 +59,7 @@ Include the main header in your native code:
 ### Example: Modify 2D int array
 
 ```c
-JNIEXPORT void JNICALL Java_Array2DTest_nativeTest(JNIEnv *env, jobject obj) {
-    jobjectArray intArr = ...; // Obtain from Java object
+JNIEXPORT void JNICALL Java_Array2DTest_nativeTest(JNIEnv *env, jobject obj,jobjectArray intArr) {
     jint **ints = GetInt2DArrayElements(env, intArr, NULL);
 
     ints[0][0] = 42;

@@ -23,8 +23,13 @@
 #ifndef __XJNI_H__
 #define __XJNI_H__
 
+#include <stdio.h>
+#include <stddef.h>
+#include <stdbool.h>
+#include <pthread.h>
 #include <jni.h>
 
+#include <xjni_printf.h>
 #include <xjni_arrayfield.h>
 #include <xjni_stringarray.h>
 #include <xjni2d.h>
@@ -36,7 +41,7 @@
 #define _XJNI_VERSION_MINOR	0
 #endif
 #ifndef _XJNI_VERSION_PATCH
-#define _XJNI_VERSION_PATCH	0
+#define _XJNI_VERSION_PATCH	1
 #endif
 
 #define _XJNI_VERSION		((_XJNI_VERSION_MAJOR * 1000) + (_XJNI_VERSION_MINOR * 100) + _XJNI_VERSION_PATCH)
@@ -47,7 +52,20 @@ extern "C" {
 
 extern const char* xjni_version(void);
 
-extern void throwJava(JNIEnv *env, const char* tag, const char* msg, const char* cls);
+extern char xjni_tochar(const jchar c);
+extern jchar xjni_tojchar(const char c);
+
+extern char* xjni_tostring(const jchar* c);
+extern jchar* xjni_tojstring(const char* c);
+
+extern bool xjni_fromstring(const char *src, jchar *dst, size_t *dstlen);
+extern bool xjni_fromjstring(const jchar *src, char *dst, size_t *dstlen);
+
+extern void throwJava(JNIEnv *env, const char* tag, const char* msg, const char* cls_name, jclass* cache,pthread_mutex_t* mutex);
+
+// deletes all global references, preventing memory leaks.
+extern void JNI_OnUnload(JavaVM* vm, void* reserved);
+
 extern void throwIOException(JNIEnv *env, const char* tag, const char* msg);
 extern void throwCharConversionException(JNIEnv *env, const char* tag, const char* msg);
 extern void throwEOFException(JNIEnv *env, const char* tag, const char* msg);

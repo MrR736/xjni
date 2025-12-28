@@ -214,6 +214,8 @@
 #define _DeleteLocalRef(env, f) env->DeleteLocalRef(f)
 #define _ExceptionCheck(env) env->ExceptionCheck()
 #define _ExceptionDescribe(env) env->ExceptionDescribe()
+
+#define _GetEnv(vm, env, ver) vm->GetEnv((void**)&env, ver)
 #else
 #define BASE_EXTERN_CXX
 #define BASE_EXTERN_C
@@ -339,6 +341,8 @@
 #define _DeleteLocalRef(env,f) (*env)->DeleteLocalRef(env,f)
 #define _ExceptionCheck(env) (*env)->ExceptionCheck(env)
 #define _ExceptionDescribe(env) (*env)->ExceptionDescribe(env)
+
+#define _GetEnv(vm, env, ver) (*vm)->GetEnv(vm, (void**)&env, ver)
 #endif
 
 #ifdef __cplusplus
@@ -358,7 +362,7 @@
 #endif
 
 # ifdef __ANDROID__
-#define BASE_LOGE(fmt, ...) __android_log_print(ANDROID_LOG_ERROR,   LOG_TAG, fmt, ##__VA_ARGS__)
+#define BASE_LOGE(fmt, ...) __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,fmt, ##__VA_ARGS__)
 #else
 #define BASE_LOGE(fmt, ...) fprintf(stderr, "[" LOG_TAG "] ERROR: " fmt, ##__VA_ARGS__)
 #endif
