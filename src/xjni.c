@@ -316,7 +316,7 @@ JNIEXPORTC void throwJava(JNIEnv *env,const char* tag,const char* msg,const char
 
 JNIEXPORTC void JNI_OnUnload(JavaVM* vm, void* reserved) {
 	JNIEnv* env;
-	_GetEnv(vm,env,JNI_VERSION_1_6);
+	_GetEnv(vm,(void**)&env,JNI_VERSION_1_6);
 	class_free(env,ioExceptionCls,ioExceptionMutex);
 	class_free(env,charConversionExceptionCls,charConversionExceptionMutex);
 	class_free(env,eofExceptionCls,eofExceptionMutex);
