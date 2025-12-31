@@ -31,19 +31,19 @@ extern "C" {
 
 // String[] - Access and release functions for Java String[].
 
-extern jobjectArray NewStringUTFArray(JNIEnv *env, const char **utf,jsize count);
-extern const char **GetStringUTFArrayChars(JNIEnv *env, jobjectArray array,jboolean *isCopy);
-extern void ReleaseStringUTFArrayChars(JNIEnv *env, jobjectArray array,const char **elements, jint mode);
-extern void GetStringUTFArrayRegion(JNIEnv *env,jobjectArray str,jsize start,jsize len,char **buf);
-extern void SetStringUTFArrayRegion(JNIEnv *env, jobjectArray array, jsize start, jsize len, const char **buf);
-extern jsize GetStringUTFArrayLength(JNIEnv *env, jobjectArray str);
+JNIEXPORT jobjectArray JNICALL NewStringUTFArray(JNIEnv *env, const char **utf,jsize count);
+JNIEXPORT const char** JNICALL GetStringUTFArrayChars(JNIEnv *env, jobjectArray array,jboolean *isCopy);
+JNIEXPORT void JNICALL ReleaseStringUTFArrayChars(JNIEnv *env, jobjectArray array,const char **elements, jint mode);
+JNIEXPORT void JNICALL GetStringUTFArrayRegion(JNIEnv *env,jobjectArray str,jsize start,jsize len,char **buf);
+JNIEXPORT void JNICALL SetStringUTFArrayRegion(JNIEnv *env, jobjectArray array, jsize start, jsize len, const char **buf);
+JNIEXPORT jsize JNICALL GetStringUTFArrayLength(JNIEnv *env, jobjectArray str);
 
-extern jobjectArray NewStringArray(JNIEnv *env, const jchar **unicode, jsize len, jsize n);
-extern jsize GetStringArrayLength(JNIEnv *env, jobjectArray str);
-extern const jchar **GetStringArrayChars(JNIEnv *env, jobjectArray str, jboolean *isCopy);
-extern void ReleaseStringArrayChars(JNIEnv *env, jobjectArray str, const jchar **chars);
-extern void GetStringArrayRegion(JNIEnv *env,jobjectArray str,jsize start,jsize len,jchar **buf);
-extern void SetStringArrayRegion(JNIEnv *env, jobjectArray array, jsize start, jsize len, const jchar **buf);
+JNIEXPORT jobjectArray JNICALL NewStringArray(JNIEnv *env, const jchar **unicode, jsize len, jsize n);
+JNIEXPORT jsize JNICALL GetStringArrayLength(JNIEnv *env, jobjectArray str);
+JNIEXPORT const jchar** JNICALL GetStringArrayChars(JNIEnv *env, jobjectArray str, jboolean *isCopy);
+JNIEXPORT void JNICALL ReleaseStringArrayChars(JNIEnv *env, jobjectArray str, const jchar **chars);
+JNIEXPORT void JNICALL GetStringArrayRegion(JNIEnv *env,jobjectArray str,jsize start,jsize len,jchar **buf);
+JNIEXPORT void JNICALL SetStringArrayRegion(JNIEnv *env, jobjectArray array, jsize start, jsize len, const jchar **buf);
 
 #ifdef __cplusplus
 }

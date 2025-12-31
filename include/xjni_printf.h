@@ -31,20 +31,20 @@
 extern "C" {
 #endif
 
-extern int vsjprintf(jchar * __s,const jchar * __format,va_list __arg);
-extern int sjprintf(jchar * __s, const jchar * __format,...);
+JNIEXPORT int JNICALL vsjprintf(jchar * __s,const jchar * __format,va_list __arg);
+JNIEXPORT int JNICALL sjprintf(jchar * __s, const jchar * __format,...);
 
-extern int vsnjprintf(jchar * __s,size_t __maxlen,const jchar * __format,va_list __arg);
-extern int snjprintf(jchar * __s,size_t __maxlen,const jchar * __format, ...);
+JNIEXPORT int JNICALL vsnjprintf(jchar * __s,size_t __maxlen,const jchar * __format,va_list __arg);
+JNIEXPORT int JNICALL snjprintf(jchar * __s,size_t __maxlen,const jchar * __format, ...);
 
-extern int vjfprintf(FILE* __stream, const jchar* __format, va_list __arg);
-extern int jfprintf(FILE* __stream, const jchar* __format, ...);
+JNIEXPORT int JNICALL vjfprintf(FILE* __stream, const jchar* __format, va_list __arg);
+JNIEXPORT int JNICALL jfprintf(FILE* __stream, const jchar* __format, ...);
 
-extern int vjdprintf(int __fd, const jchar* __format, va_list __arg);
-extern int jdprintf(int __fd, const jchar* __format, ...);
+JNIEXPORT int JNICALL vjdprintf(int __fd, const jchar* __format, va_list __arg);
+JNIEXPORT int JNICALL jdprintf(int __fd, const jchar* __format, ...);
 
-extern int vjprintf(const jchar* __format, va_list __arg);
-extern int jprintf(const jchar* __format, ...);
+JNIEXPORT int JNICALL vjprintf(const jchar* __format, va_list __arg);
+JNIEXPORT int JNICALL jprintf(const jchar* __format, ...);
 
 #ifdef __cplusplus
 }

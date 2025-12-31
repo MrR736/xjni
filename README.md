@@ -37,15 +37,6 @@ cmake ..
 cmake --build . --config Release
 ```
 
-3. Libraries and headers will be generated in:
-
-```
-build/x86_64/lib          # Shared/static library
-build/x86_64/test/lib     # Test libraries
-build/x86_64/test/jar     # Java test JAR
-build/x86_64/test/headers # Generated JNI headers
-```
-
 ---
 
 ## Usage

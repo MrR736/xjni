@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.20)
-project(xjni VERSION 1.0.1 LANGUAGES C CXX)
+project(xjni VERSION 1.0.3 LANGUAGES C CXX)
+
+set(CMAKE_VERBOSE_MAKEFILE ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)
@@ -31,8 +34,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # ------------------------------
 set(XJNI_SOURCES
     ${CMAKE_SOURCE_DIR}/src/xjni_arrayfield.c
+    ${CMAKE_SOURCE_DIR}/src/xjni_new.c
     ${CMAKE_SOURCE_DIR}/src/xjni_printf.c
     ${CMAKE_SOURCE_DIR}/src/xjni_stringarray.c
+    ${CMAKE_SOURCE_DIR}/src/xjni_stringbuilder.c
     ${CMAKE_SOURCE_DIR}/src/xjni2d.c
     ${CMAKE_SOURCE_DIR}/src/xjni.c
 )
@@ -133,6 +138,7 @@ if(XJNI_BUILD_TESTS)
         ${CMAKE_SOURCE_DIR}/test/java/TestStringArray.java
         ${CMAKE_SOURCE_DIR}/test/java/ArrayFieldTest.java
         ${CMAKE_SOURCE_DIR}/test/java/Array2DTest.java
+        ${CMAKE_SOURCE_DIR}/test/java/TestStringBuilder.java
         ${CMAKE_SOURCE_DIR}/test/java/TestXJNI.java
         VERSION ${PROJECT_VERSION}
         OUTPUT_NAME "xjni-test"
@@ -145,6 +151,7 @@ if(XJNI_BUILD_TESTS)
     add_library(xjni_test SHARED
         ${CMAKE_SOURCE_DIR}/test/c/xjni_stringarray_test.c
         ${CMAKE_SOURCE_DIR}/test/c/xjni_arrayfield_test.c
+        ${CMAKE_SOURCE_DIR}/test/c/xjni_stringbuilder_test.c
         ${CMAKE_SOURCE_DIR}/test/c/xjni2d_test.c
         ${CMAKE_SOURCE_DIR}/test/c/xjni_test.c
     )
@@ -160,7 +167,7 @@ if(XJNI_BUILD_TESTS)
     )
 
     # Java test targets
-    foreach(TESTCLASS TestStringArray ArrayFieldTest Array2DTest TestXJNI)
+    foreach(TESTCLASS TestStringArray ArrayFieldTest Array2DTest TestXJNI TestStringBuilder)
         add_custom_target(run_${TESTCLASS}
             COMMAND ${Java_JAVA_EXECUTABLE} -Djava.library.path=${LIBS_TEST_OUTPUT_DIR} -cp ${JAR_OUTPUT_DIR}/xjni-test.jar ${TESTCLASS}
             WORKING_DIRECTORY "${JAR_OUTPUT_DIR}"

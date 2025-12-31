@@ -41,7 +41,7 @@ extern "C" {
  * @return         A jbyte** (array of pointers to jbyte arrays), or NULL on failure
  *                 Must be released with ReleaseByte2DArrayElements()
  */
-extern jbyte **GetByte2DArrayElements(JNIEnv *env, jobjectArray array,jboolean *isCopy);
+JNIEXPORT jbyte** JNICALL GetByte2DArrayElements(JNIEnv *env, jobjectArray array,jboolean *isCopy);
 
 /**
  * Releases the native 2D pointer view obtained via GetByte2DArrayElements
@@ -51,7 +51,7 @@ extern jbyte **GetByte2DArrayElements(JNIEnv *env, jobjectArray array,jboolean *
  * @param elements The jbyte** array returned by GetByte2DArrayElements
  * @param mode     Release mode: 0 (copy back), JNI_COMMIT, or JNI_ABORT
  */
-extern void ReleaseByte2DArrayElements(JNIEnv *env, jobjectArray array,jbyte **elements, jint mode);
+JNIEXPORT void JNICALL ReleaseByte2DArrayElements(JNIEnv *env, jobjectArray array,jbyte **elements, jint mode);
 
 /**
  * Copies data from a native 2D buffer into a Java byte[][]
@@ -62,7 +62,7 @@ extern void ReleaseByte2DArrayElements(JNIEnv *env, jobjectArray array,jbyte **e
  * @param len      Number of rows to write
  * @param buf      The native buffer (array of byte array pointers)
  */
-extern void SetByte2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,jsize len, const jbyte **buf);
+JNIEXPORT void JNICALL SetByte2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,jsize len, const jbyte **buf);
 
 /**
  * Copies data from a Java int[][] array into a native 2D buffer
@@ -75,7 +75,7 @@ extern void SetByte2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,js
  *                 Each buf[i] must be pre-allocated with at least the size
  *                 of the corresponding inner array length.
  */
-extern void GetByte2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,jsize len, jbyte **buf);
+JNIEXPORT void JNICALL GetByte2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,jsize len, jbyte **buf);
 
 // Int2D - Access and release functions for Java int[][]
 
@@ -89,7 +89,7 @@ extern void GetByte2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,js
  * @return         A jint** (array of pointers to jint arrays), or NULL on failure
  *                 Must be released with ReleaseInt2DArrayElements()
  */
-extern jint **GetInt2DArrayElements(JNIEnv *env, jobjectArray array, jboolean *isCopy);
+JNIEXPORT jint** JNICALL GetInt2DArrayElements(JNIEnv *env, jobjectArray array, jboolean *isCopy);
 
 /**
  * Releases the native 2D pointer view obtained via ReleaseInt2DArrayElements
@@ -99,7 +99,7 @@ extern jint **GetInt2DArrayElements(JNIEnv *env, jobjectArray array, jboolean *i
  * @param elements The jint** array returned by ReleaseInt2DArrayElements
  * @param mode     Release mode: 0 (copy back), JNI_COMMIT, or JNI_ABORT
  */
-extern void ReleaseInt2DArrayElements(JNIEnv *env, jobjectArray array, jint **elements,jint mode);
+JNIEXPORT void JNICALL ReleaseInt2DArrayElements(JNIEnv *env, jobjectArray array, jint **elements,jint mode);
 
 /**
  * Copies data from a native 2D buffer into a Java int[][]
@@ -110,7 +110,7 @@ extern void ReleaseInt2DArrayElements(JNIEnv *env, jobjectArray array, jint **el
  * @param len      Number of rows to write
  * @param buf      The native buffer (array of int array pointers)
  */
-extern void SetInt2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,jsize len, const jint **buf);
+JNIEXPORT void JNICALL SetInt2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,jsize len, const jint **buf);
 
 /**
  * Copies data from a Java int[][] array into a native 2D buffer
@@ -123,7 +123,7 @@ extern void SetInt2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,jsi
  *                 Each buf[i] must be pre-allocated with at least the size
  *                 of the corresponding inner array length.
  */
-extern void GetInt2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,jsize len, jint **buf);
+JNIEXPORT void JNICALL GetInt2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,jsize len, jint **buf);
 
 // Long2D - Access and release functions for Java long[][]
 
@@ -135,7 +135,7 @@ extern void GetInt2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,jsi
  * @param elements The jlong** array returned by GetLong2DArrayElements
  * @param mode     Release mode: 0 (copy back), JNI_COMMIT, or JNI_ABORT
  */
-extern jlong **GetLong2DArrayElements(JNIEnv *env, jobjectArray array,jboolean *isCopy);
+JNIEXPORT jlong** JNICALL GetLong2DArrayElements(JNIEnv *env, jobjectArray array,jboolean *isCopy);
 
 /**
  * Releases the native 2D pointer view obtained via ReleaseLong2DArrayElements
@@ -145,7 +145,7 @@ extern jlong **GetLong2DArrayElements(JNIEnv *env, jobjectArray array,jboolean *
  * @param elements The jlong** array returned by ReleaseLong2DArrayElements
  * @param mode     Release mode: 0 (copy back), JNI_COMMIT, or JNI_ABORT
  */
-extern void ReleaseLong2DArrayElements(JNIEnv *env, jobjectArray array,jlong **elements, jint mode);
+JNIEXPORT void JNICALL ReleaseLong2DArrayElements(JNIEnv *env, jobjectArray array,jlong **elements, jint mode);
 
 /**
  * Copies data from a native 2D buffer into a Java long[][]
@@ -156,7 +156,7 @@ extern void ReleaseLong2DArrayElements(JNIEnv *env, jobjectArray array,jlong **e
  * @param len      Number of rows to write
  * @param buf      The native buffer (array of long array pointers)
  */
-extern void SetLong2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,jsize len, const jlong **buf);
+JNIEXPORT void JNICALL SetLong2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,jsize len, const jlong **buf);
 
 /**
  * Copies data from a Java long[][] array into a native 2D buffer
@@ -169,7 +169,7 @@ extern void SetLong2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,js
  *                 Each buf[i] must be pre-allocated with at least the size
  *                 of the corresponding inner array length.
  */
-extern void GetLong2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,jsize len, jlong **buf);
+JNIEXPORT void JNICALL GetLong2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,jsize len, jlong **buf);
 
 // Float2D - Access and release functions for Java float[][]
 
@@ -181,7 +181,7 @@ extern void GetLong2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,js
  * @param elements The jfloat** array returned by GetFloat2DArrayElements
  * @param mode     Release mode: 0 (copy back), JNI_COMMIT, or JNI_ABORT
  */
-extern jfloat **GetFloat2DArrayElements(JNIEnv *env, jobjectArray array,jboolean *isCopy);
+JNIEXPORT jfloat** JNICALL GetFloat2DArrayElements(JNIEnv *env, jobjectArray array,jboolean *isCopy);
 
 /**
  * Releases the native 2D pointer view obtained via ReleaseFloat2DArrayElements
@@ -191,7 +191,7 @@ extern jfloat **GetFloat2DArrayElements(JNIEnv *env, jobjectArray array,jboolean
  * @param elements The jfloat** array returned by ReleaseFloat2DArrayElements
  * @param mode     Release mode: 0 (copy back), JNI_COMMIT, or JNI_ABORT
  */
-extern void ReleaseFloat2DArrayElements(JNIEnv *env, jobjectArray array,jfloat **elements, jint mode);
+JNIEXPORT void JNICALL ReleaseFloat2DArrayElements(JNIEnv *env, jobjectArray array,jfloat **elements, jint mode);
 
 /**
  * Copies data from a native 2D buffer into a Java float[][]
@@ -202,7 +202,7 @@ extern void ReleaseFloat2DArrayElements(JNIEnv *env, jobjectArray array,jfloat *
  * @param len      Number of rows to write
  * @param buf      The native buffer (array of float array pointers)
  */
-extern void SetFloat2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,jsize len, const jfloat **buf);
+JNIEXPORT void JNICALL SetFloat2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,jsize len, const jfloat **buf);
 
 /**
  * Copies data from a Java float[][] array into a native 2D buffer
@@ -215,7 +215,7 @@ extern void SetFloat2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,j
  *                 Each buf[i] must be pre-allocated with at least the size
  *                 of the corresponding inner array length.
  */
-extern void GetFloat2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,jsize len, jfloat **buf);
+JNIEXPORT void JNICALL GetFloat2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,jsize len, jfloat **buf);
 
 // Double2D - Access and release functions for Java double[][].
 
@@ -227,7 +227,7 @@ extern void GetFloat2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,j
  * @param elements The jdouble** array returned by GetDouble2DArrayElements
  * @param mode     Release mode: 0 (copy back), JNI_COMMIT, or JNI_ABORT
  */
-extern jdouble **GetDouble2DArrayElements(JNIEnv *env, jobjectArray array,jboolean *isCopy);
+JNIEXPORT jdouble** JNICALL GetDouble2DArrayElements(JNIEnv *env, jobjectArray array,jboolean *isCopy);
 
 /**
  * Releases the native 2D pointer view obtained via ReleaseDouble2DArrayElements
@@ -237,7 +237,7 @@ extern jdouble **GetDouble2DArrayElements(JNIEnv *env, jobjectArray array,jboole
  * @param elements The jdouble** array returned by ReleaseDouble2DArrayElements
  * @param mode     Release mode: 0 (copy back), JNI_COMMIT, or JNI_ABORT
  */
-extern void ReleaseDouble2DArrayElements(JNIEnv *env, jobjectArray array,jdouble **elements, jint mode);
+JNIEXPORT void JNICALL ReleaseDouble2DArrayElements(JNIEnv *env, jobjectArray array,jdouble **elements, jint mode);
 
 /**
  * Copies data from a native 2D buffer into a Java double[][]
@@ -248,7 +248,7 @@ extern void ReleaseDouble2DArrayElements(JNIEnv *env, jobjectArray array,jdouble
  * @param len      Number of rows to write
  * @param buf      The native buffer (array of double array pointers)
  */
-extern void SetDouble2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,jsize len, const jdouble **buf);
+JNIEXPORT void JNICALL SetDouble2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,jsize len, const jdouble **buf);
 
 /**
  * Copies data from a Java double[][] array into a native 2D buffer
@@ -261,7 +261,7 @@ extern void SetDouble2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,
  *                 Each buf[i] must be pre-allocated with at least the size
  *                 of the corresponding inner array length.
  */
-extern void GetDouble2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,jsize len, jdouble **buf);
+JNIEXPORT void JNICALL GetDouble2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,jsize len, jdouble **buf);
 
 // Short2D - Access and release functions for Java short[][].
 
@@ -273,7 +273,7 @@ extern void GetDouble2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,
  * @param elements The jshort** array returned by GetShort2DArrayElements
  * @param mode     Release mode: 0 (copy back), JNI_COMMIT, or JNI_ABORT
  */
-extern jshort **GetShort2DArrayElements(JNIEnv *env, jobjectArray array,jboolean *isCopy);
+JNIEXPORT jshort** JNICALL GetShort2DArrayElements(JNIEnv *env, jobjectArray array,jboolean *isCopy);
 
 /**
  * Releases the native 2D pointer view obtained via ReleaseShort2DArrayElements
@@ -283,7 +283,7 @@ extern jshort **GetShort2DArrayElements(JNIEnv *env, jobjectArray array,jboolean
  * @param elements The jshort** array returned by ReleaseShort2DArrayElements
  * @param mode     Release mode: 0 (copy back), JNI_COMMIT, or JNI_ABORT
  */
-extern void ReleaseShort2DArrayElements(JNIEnv *env, jobjectArray array,jshort **elements, jint mode);
+JNIEXPORT void JNICALL ReleaseShort2DArrayElements(JNIEnv *env, jobjectArray array,jshort **elements, jint mode);
 
 /**
  * Copies data from a native 2D buffer into a Java short[][]
@@ -294,7 +294,7 @@ extern void ReleaseShort2DArrayElements(JNIEnv *env, jobjectArray array,jshort *
  * @param len      Number of rows to write
  * @param buf      The native buffer (array of short array pointers)
  */
-extern void SetShort2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,jsize len, const jshort **buf);
+JNIEXPORT void JNICALL SetShort2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,jsize len, const jshort **buf);
 
 /**
  * Copies data from a Java short[][] array into a native 2D buffer
@@ -307,7 +307,7 @@ extern void SetShort2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,j
  *                 Each buf[i] must be pre-allocated with at least the size
  *                 of the corresponding inner array length.
  */
-extern void GetShort2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,jsize len, jshort **buf);
+JNIEXPORT void JNICALL GetShort2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,jsize len, jshort **buf);
 
 
 // Char2D - Access and release functions for Java char[][].
@@ -320,7 +320,7 @@ extern void GetShort2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,j
  * @param elements The jchar** array returned by GetChar2DArrayElements
  * @param mode     Release mode: 0 (copy back), JNI_COMMIT, or JNI_ABORT
  */
-extern jchar **GetChar2DArrayElements(JNIEnv *env, jobjectArray array,jboolean *isCopy);
+JNIEXPORT jchar** JNICALL GetChar2DArrayElements(JNIEnv *env, jobjectArray array,jboolean *isCopy);
 
 /**
  * Releases the native 2D pointer view obtained via ReleaseChar2DArrayElements
@@ -330,7 +330,7 @@ extern jchar **GetChar2DArrayElements(JNIEnv *env, jobjectArray array,jboolean *
  * @param elements The jchar** array returned by ReleaseChar2DArrayElements
  * @param mode     Release mode: 0 (copy back), JNI_COMMIT, or JNI_ABORT
  */
-extern void ReleaseChar2DArrayElements(JNIEnv *env, jobjectArray array,jchar **elements, jint mode);
+JNIEXPORT void JNICALL ReleaseChar2DArrayElements(JNIEnv *env, jobjectArray array,jchar **elements, jint mode);
 
 /**
  * Copies data from a native 2D buffer into a Java char[][]
@@ -341,7 +341,7 @@ extern void ReleaseChar2DArrayElements(JNIEnv *env, jobjectArray array,jchar **e
  * @param len      Number of rows to write
  * @param buf      The native buffer (array of char array pointers)
  */
-extern void SetChar2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,jsize len, const jchar **buf);
+JNIEXPORT void JNICALL SetChar2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,jsize len, const jchar **buf);
 
 /**
  * Copies data from a Java char[][] array into a native 2D buffer
@@ -354,7 +354,7 @@ extern void SetChar2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,js
  *                 Each buf[i] must be pre-allocated with at least the size
  *                 of the corresponding inner array length.
  */
-extern void GetChar2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,jsize len, jchar **buf);
+JNIEXPORT void JNICALL GetChar2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,jsize len, jchar **buf);
 
 
 // StringUTF2D - Access and release functions for Java String[][].
@@ -367,7 +367,7 @@ extern void GetChar2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,js
  * @param elements The const char*** array returned by GetStringUTF2DArrayElements
  * @param mode     Release mode: 0 (copy back), JNI_COMMIT, or JNI_ABORT
  */
-extern const char ***GetStringUTF2DArrayElements(JNIEnv *env, jobjectArray array, jboolean *isCopy);
+JNIEXPORT const char*** JNICALL GetStringUTF2DArrayElements(JNIEnv *env, jobjectArray array, jboolean *isCopy);
 
 /**
  * Releases the native 2D pointer view obtained via ReleaseStringUTF2DArrayChars
@@ -377,7 +377,7 @@ extern const char ***GetStringUTF2DArrayElements(JNIEnv *env, jobjectArray array
  * @param elements The const char*** array returned by ReleaseStringUTF2DArrayChars
  * @param mode     Release mode: 0 (copy back), JNI_COMMIT, or JNI_ABORT
  */
-extern void ReleaseStringUTF2DArrayChars(JNIEnv *env, jobjectArray array, const char ***elements, jint mode);
+JNIEXPORT void JNICALL ReleaseStringUTF2DArrayChars(JNIEnv *env, jobjectArray array, const char ***elements, jint mode);
 
 /**
  * Copies data from a native 2D buffer into a Java String[][]
@@ -388,7 +388,7 @@ extern void ReleaseStringUTF2DArrayChars(JNIEnv *env, jobjectArray array, const 
  * @param len      Number of rows to write
  * @param buf      The native buffer (array of String array pointers)
  */
-extern void SetStringUTF2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start, jsize len, const char ***buf);
+JNIEXPORT void JNICALL SetStringUTF2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start, jsize len, const char ***buf);
 
 /**
  * Copies data from a native 2D buffer into a Java String[][]
@@ -399,7 +399,7 @@ extern void SetStringUTF2DArrayRegion(JNIEnv *env, jobjectArray array, jsize sta
  * @param len      Number of rows to write
  * @param buf      The native buffer (array of String array pointers)
  */
-extern void GetStringUTF2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start, jsize len, char ***buf);
+JNIEXPORT void JNICALL GetStringUTF2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start, jsize len, char ***buf);
 
 // String2D - Access and release functions for Java String[][].
 
@@ -411,7 +411,7 @@ extern void GetStringUTF2DArrayRegion(JNIEnv *env, jobjectArray array, jsize sta
  * @param elements The const jchar*** array returned by GetString2DArrayElements
  * @param mode     Release mode: 0 (copy back), JNI_COMMIT, or JNI_ABORT
  */
-extern const jchar ***GetString2DArrayElements(JNIEnv *env, jobjectArray array, jboolean *isCopy);
+JNIEXPORT const jchar*** JNICALL GetString2DArrayElements(JNIEnv *env, jobjectArray array, jboolean *isCopy);
 
 /**
  * Releases the native 2D pointer view obtained via ReleaseString2DArrayChars
@@ -421,7 +421,7 @@ extern const jchar ***GetString2DArrayElements(JNIEnv *env, jobjectArray array, 
  * @param elements The const jchar*** array returned by ReleaseString2DArrayChars
  * @param mode     Release mode: 0 (copy back), JNI_COMMIT, or JNI_ABORT
  */
-extern void ReleaseString2DArrayChars(JNIEnv *env, jobjectArray array, const jchar ***elements);
+JNIEXPORT void JNICALL ReleaseString2DArrayChars(JNIEnv *env, jobjectArray array, const jchar ***elements);
 
 /**
  * Copies data from a native 2D buffer into a Java String[][]
@@ -432,7 +432,7 @@ extern void ReleaseString2DArrayChars(JNIEnv *env, jobjectArray array, const jch
  * @param len      Number of rows to write
  * @param buf      The native buffer (array of String array pointers)
  */
-extern void SetString2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start, jsize len, const jchar ***buf);
+JNIEXPORT void JNICALL SetString2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start, jsize len, const jchar ***buf);
 
 /**
  * Copies data from a native 2D buffer into a Java String[][]
@@ -443,7 +443,7 @@ extern void SetString2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,
  * @param len      Number of rows to write
  * @param buf      The native buffer (array of String array pointers)
  */
-extern void GetString2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start, jsize len, jchar ***buf);
+JNIEXPORT void JNICALL GetString2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start, jsize len, jchar ***buf);
 
 #ifdef __cplusplus
 }

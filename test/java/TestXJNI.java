@@ -2,7 +2,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-public class TestXJNIStress {
+public class TestXJNI {
 
     static { System.loadLibrary("xjni_test"); }
 
@@ -11,12 +11,13 @@ public class TestXJNIStress {
     public native void testUTFException() throws java.io.UTFDataFormatException;
     public native void testFileNotFoundException() throws java.io.FileNotFoundException;
     public native void testUnsupportedEncodingException() throws java.io.UnsupportedEncodingException;
+    public native void testStringUtilities(char[] input);
 
     private static final int THREADS = 8;
     private static final int ITERATIONS = 1000;
 
     public static void main(String[] args) throws InterruptedException {
-        TestXJNIStress t = new TestXJNIStress();
+        TestXJNI t = new TestXJNI();
 
         ExecutorService pool = Executors.newFixedThreadPool(THREADS);
 
@@ -56,5 +57,8 @@ public class TestXJNIStress {
         pool.awaitTermination(1, TimeUnit.MINUTES);
 
         System.out.println("Multithreaded stress test finished.");
+
+        char[] input = "Hello JNI".toCharArray();
+        t.testStringUtilities(input);
     }
 }

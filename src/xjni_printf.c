@@ -5,9 +5,9 @@
 #define LOG_TAG "xjni"
 #include "base-jni.h"
 
-#include "xjni.h"
+#include <xjni.h>
 
-JNIEXPORTC int vsjprintf(jchar * __s,const jchar * __format,va_list __arg) {
+JNIEXPORTC int JNICALL vsjprintf(jchar * __s,const jchar * __format,va_list __arg) {
 	if (!__s || !__format)
 		return -1;
 
@@ -24,7 +24,7 @@ JNIEXPORTC int vsjprintf(jchar * __s,const jchar * __format,va_list __arg) {
 	va_list aq;
 	va_copy(aq, __arg);
 
-#if defined(_MSC_VER)
+#ifdef _MSC_VER
 	int needed = _vscprintf(cformat, aq);
 #else
 	int needed = vsnprintf(NULL, 0, cformat, aq);
@@ -64,7 +64,7 @@ cleanup:
 	return ret;
 }
 
-JNIEXPORTC int sjprintf(jchar * __s, const jchar * __format,...) {
+JNIEXPORTC int JNICALL sjprintf(jchar * __s, const jchar * __format,...) {
 	if (!__s || !__format)
 		return -1;
 
@@ -76,8 +76,8 @@ JNIEXPORTC int sjprintf(jchar * __s, const jchar * __format,...) {
 	return ret;
 }
 
-JNIEXPORTC int vsnjprintf(jchar * __s,size_t __maxlen,const jchar * __format,va_list __arg) {
-	if (!__s || !__format || __maxlen == 0)
+JNIEXPORTC int JNICALL vsnjprintf(jchar * __s,size_t __maxlen,const jchar * __format,va_list __arg) {
+	if (!__s || !__format || __maxlen <= 0)
 		return -1;
 
 	int ret = -1;
@@ -97,7 +97,7 @@ JNIEXPORTC int vsnjprintf(jchar * __s,size_t __maxlen,const jchar * __format,va_
 	va_list ac;
 	va_copy(ac, __arg);
 
-#if defined(_MSC_VER)
+#ifdef _MSC_VER
 	ret = _vsnprintf(cbuffer, __maxlen, cformat, ac);
 	if (ret < 0 || (size_t)ret >= __maxlen) {
 		cbuffer[__maxlen - 1] = '\0';
@@ -124,7 +124,7 @@ cleanup:
 	return ret;
 }
 
-JNIEXPORTC int snjprintf(jchar * __s,size_t __maxlen,const jchar * __format, ...) {
+JNIEXPORTC int JNICALL snjprintf(jchar * __s,size_t __maxlen,const jchar * __format, ...) {
 	va_list ac;
 	va_start(ac,__format);
 	int ret = vsnjprintf(__s,__maxlen,__format, ac);
@@ -132,7 +132,7 @@ JNIEXPORTC int snjprintf(jchar * __s,size_t __maxlen,const jchar * __format, ...
 	return ret;
 }
 
-JNIEXPORTC int vjfprintf(FILE* __stream, const jchar* __format, va_list __arg) {
+JNIEXPORTC int JNICALL vjfprintf(FILE* __stream, const jchar* __format, va_list __arg) {
 	if (!__stream || !__format) return -1;
 	char* cret = xjni_tostring(__format);
 	if (!cret) return -1;
@@ -144,7 +144,7 @@ JNIEXPORTC int vjfprintf(FILE* __stream, const jchar* __format, va_list __arg) {
 	return ret;
 }
 
-JNIEXPORTC int jfprintf(FILE* __stream, const jchar* __format, ...) {
+JNIEXPORTC int JNICALL jfprintf(FILE* __stream, const jchar* __format, ...) {
 	va_list ac;
 	va_start(ac,__format);
 	int ret = vjfprintf(__stream, __format, ac);
@@ -152,11 +152,11 @@ JNIEXPORTC int jfprintf(FILE* __stream, const jchar* __format, ...) {
 	return ret;
 }
 
-JNIEXPORTC int vjprintf(const jchar* __format, va_list __arg) {
+JNIEXPORTC int JNICALL vjprintf(const jchar* __format, va_list __arg) {
 	return vjfprintf(stdout,__format,__arg);
 }
 
-JNIEXPORTC int jprintf(const jchar* __format, ...) {
+JNIEXPORTC int JNICALL jprintf(const jchar* __format, ...) {
 	va_list ac;
 	va_start(ac,__format);
 	int ret = vjprintf(__format, ac);
@@ -164,7 +164,7 @@ JNIEXPORTC int jprintf(const jchar* __format, ...) {
 	return ret;
 }
 
-JNIEXPORTC int vjdprintf(int __fd, const jchar* __format, va_list __arg) {
+JNIEXPORTC int JNICALL vjdprintf(int __fd, const jchar* __format, va_list __arg) {
 	if (__fd < 0 || !__format) return -1;
 	char* cret = xjni_tostring(__format);
 	if (!cret) return -1;
@@ -176,7 +176,7 @@ JNIEXPORTC int vjdprintf(int __fd, const jchar* __format, va_list __arg) {
 	return ret;
 }
 
-JNIEXPORTC int jdprintf(int __fd, const jchar* __format, ...) {
+JNIEXPORTC int JNICALL jdprintf(int __fd, const jchar* __format, ...) {
 	va_list ac;
 	va_start(ac,__format);
 	int ret = vjdprintf(__fd, __format, ac);

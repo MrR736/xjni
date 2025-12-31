@@ -6,8 +6,7 @@
 #define LOG_TAG "xjni"
 #include "base-jni.h"
 
-#include "xjni2d.h"
-#include "xjni_stringarray.h"
+#include <xjni.h>
 
 #ifdef __cplusplus
 #define _GetArrayElement(env,A,name,array,index) A name = (reinterpret_cast<A>(env->GetObjectArrayElement((array),(index))))
@@ -22,7 +21,7 @@
 #endif
 
 #define GetT2DArrayRegion(name,func,A, T) \
-JNIEXPORTC void name(JNIEnv *env, jobjectArray array, jsize start, jsize len, T **buf) {\
+JNIEXPORTC void JNICALL name(JNIEnv *env, jobjectArray array, jsize start, jsize len, T **buf) {\
     if (buf == NULL) return; \
     jsize outer_len = _GetArrayLength(env, array); \
     if (start < 0 || len < 0 || start + len > outer_len) return; \
@@ -40,7 +39,7 @@ JNIEXPORTC void name(JNIEnv *env, jobjectArray array, jsize start, jsize len, T 
 }
 
 #define ReleaseT2DArrayElements(name,func,A, T) \
-JNIEXPORTC void name(JNIEnv *env, jobjectArray array, T **elements, jint mode) { \
+JNIEXPORTC void JNICALL name(JNIEnv *env, jobjectArray array, T **elements, jint mode) { \
     if (elements == NULL) return; \
     jsize outer_len = _GetArrayLength(env, array); \
     for (jsize i = 0; i < outer_len; ++i) { \
@@ -55,7 +54,7 @@ JNIEXPORTC void name(JNIEnv *env, jobjectArray array, T **elements, jint mode) {
 }
 
 #define GetT2DArrayElements(name,func,A, T) \
-JNIEXPORTC T **name(JNIEnv *env, jobjectArray array, jboolean *isCopy) { \
+JNIEXPORTC T** JNICALL name(JNIEnv *env, jobjectArray array, jboolean *isCopy) { \
     jsize outer_len = _GetArrayLength(env, array); \
     T **elements = ((T **)(calloc(outer_len, sizeof(T*)))); \
     if (!elements) return NULL; \
@@ -118,7 +117,7 @@ GetT2DArrayRegion(SetChar2DArrayRegion,SetCharArrayRegion,jcharArray, const jcha
 GetT2DArrayRegion(GetChar2DArrayRegion,GetCharArrayRegion,jcharArray, jchar)
 
 // StringUTF2D - Access and release functions for Java String[][].
-JNIEXPORTC const char ***GetStringUTF2DArrayElements(JNIEnv *env, jobjectArray array, jboolean *isCopy) {
+JNIEXPORTC const char*** JNICALL GetStringUTF2DArrayElements(JNIEnv *env, jobjectArray array, jboolean *isCopy) {
 	jsize outer_len = _GetArrayLength(env, array);
 	const char ***elements = ((const char ***)(uintptr_t)(calloc(outer_len, sizeof(const char**))));
 	if (!elements) return NULL;
@@ -138,7 +137,7 @@ JNIEXPORTC const char ***GetStringUTF2DArrayElements(JNIEnv *env, jobjectArray a
 	return elements;
 }
 
-JNIEXPORTC void ReleaseStringUTF2DArrayChars(JNIEnv *env, jobjectArray array, const char ***elements, jint mode) {
+JNIEXPORTC void JNICALL ReleaseStringUTF2DArrayChars(JNIEnv *env, jobjectArray array, const char ***elements, jint mode) {
 	if (elements == NULL) return;
 	jsize outer_len = _GetArrayLength(env,array);
 	for (jsize i = 0; i < outer_len; ++i) {
@@ -152,7 +151,7 @@ JNIEXPORTC void ReleaseStringUTF2DArrayChars(JNIEnv *env, jobjectArray array, co
 	free((void*)elements);
 }
 
-JNIEXPORTC void SetStringUTF2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start, jsize len, const char ***buf) {
+JNIEXPORTC void JNICALL SetStringUTF2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start, jsize len, const char ***buf) {
 	if (buf == NULL) return;
 	jsize outer_len = _GetArrayLength(env, array);
 	if (start < 0 || len < 0 || start + len > outer_len) return;
@@ -169,7 +168,7 @@ JNIEXPORTC void SetStringUTF2DArrayRegion(JNIEnv *env, jobjectArray array, jsize
 	}
 }
 
-JNIEXPORTC void GetStringUTF2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start, jsize len, char ***buf) {
+JNIEXPORTC void JNICALL GetStringUTF2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start, jsize len, char ***buf) {
 	if (buf == NULL) return;
 	jsize outer_len = _GetArrayLength(env, array);
 	if (start < 0 || len < 0 || start + len > outer_len) return;
@@ -188,7 +187,7 @@ JNIEXPORTC void GetStringUTF2DArrayRegion(JNIEnv *env, jobjectArray array, jsize
 
 // String2D - Access and release functions for Java String[][].
 
-JNIEXPORTC const jchar ***GetString2DArrayElements(JNIEnv *env, jobjectArray array, jboolean *isCopy) {
+JNIEXPORTC const jchar*** JNICALL GetString2DArrayElements(JNIEnv *env, jobjectArray array, jboolean *isCopy) {
 	jsize outer_len = _GetArrayLength(env, array);
 	const jchar ***elements = ((const jchar ***)(uintptr_t)(calloc(outer_len, sizeof(const jchar**))));
 	if (!elements) return NULL;
@@ -208,7 +207,7 @@ JNIEXPORTC const jchar ***GetString2DArrayElements(JNIEnv *env, jobjectArray arr
 	return elements;
 }
 
-JNIEXPORTC void ReleaseString2DArrayChars(JNIEnv *env, jobjectArray array, const jchar ***elements) {
+JNIEXPORTC void JNICALL ReleaseString2DArrayChars(JNIEnv *env, jobjectArray array, const jchar ***elements) {
 	if (elements == NULL) return;
 	jsize outer_len = _GetArrayLength(env,array);
 	for (jsize i = 0; i < outer_len; ++i) {
@@ -222,7 +221,7 @@ JNIEXPORTC void ReleaseString2DArrayChars(JNIEnv *env, jobjectArray array, const
 	free((void*)elements);
 }
 
-JNIEXPORTC void SetString2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start, jsize len, const jchar ***buf) {
+JNIEXPORTC void JNICALL SetString2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start, jsize len, const jchar ***buf) {
 	if (buf == NULL) return;
 	jsize outer_len = _GetArrayLength(env, array);
 	if (start < 0 || len < 0 || start + len > outer_len) return;
@@ -239,7 +238,7 @@ JNIEXPORTC void SetString2DArrayRegion(JNIEnv *env, jobjectArray array, jsize st
 	}
 }
 
-JNIEXPORTC void GetString2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start, jsize len, jchar ***buf) {
+JNIEXPORTC void JNICALL GetString2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start, jsize len, jchar ***buf) {
 	if (buf == NULL) return;
 	jsize outer_len = _GetArrayLength(env, array);
 	if (start < 0 || len < 0 || start + len > outer_len) return;
