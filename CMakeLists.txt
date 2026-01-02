@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(xjni VERSION 1.0.3 LANGUAGES C CXX)
+project(xjni VERSION 1.0.4 LANGUAGES C)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -18,16 +18,15 @@ option(XJNI_BUILD_TESTS "Build JNI/Java tests" OFF)
 # Find dependencies
 # ------------------------------
 find_package(Java REQUIRED)
-find_package(JNI REQUIRED)
 include(UseJava)
+set(JNI_FIND_REQUIRED_AWT OFF)
+find_package(JNI REQUIRED)
 
 # ------------------------------
 # Compiler standards
 # ------------------------------
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # ------------------------------
 # Source files
@@ -38,6 +37,8 @@ set(XJNI_SOURCES
     ${CMAKE_SOURCE_DIR}/src/xjni_printf.c
     ${CMAKE_SOURCE_DIR}/src/xjni_stringarray.c
     ${CMAKE_SOURCE_DIR}/src/xjni_stringbuilder.c
+    ${CMAKE_SOURCE_DIR}/src/xjni_stringreader.c
+    ${CMAKE_SOURCE_DIR}/src/xjni_stringwriter.c
     ${CMAKE_SOURCE_DIR}/src/xjni2d.c
     ${CMAKE_SOURCE_DIR}/src/xjni.c
 )
@@ -129,8 +130,8 @@ if(XJNI_BUILD_TESTS)
     enable_testing()
 
     # Java test JAR
-    set(JAR_OUTPUT_DIR "${CMAKE_BINARY_DIR}/jar")
-    set(HEADER_OUTPUT_DIR "${CMAKE_BINARY_DIR}/headers")
+    set(JAR_OUTPUT_DIR "${CMAKE_BINARY_DIR}/build/jar")
+    set(HEADER_OUTPUT_DIR "${CMAKE_BINARY_DIR}//build/headers")
     file(MAKE_DIRECTORY "${JAR_OUTPUT_DIR}" "${HEADER_OUTPUT_DIR}")
 
     add_jar(
@@ -139,6 +140,8 @@ if(XJNI_BUILD_TESTS)
         ${CMAKE_SOURCE_DIR}/test/java/ArrayFieldTest.java
         ${CMAKE_SOURCE_DIR}/test/java/Array2DTest.java
         ${CMAKE_SOURCE_DIR}/test/java/TestStringBuilder.java
+        ${CMAKE_SOURCE_DIR}/test/java/TestStringReader.java
+        ${CMAKE_SOURCE_DIR}/test/java/TestStringWriter.java
         ${CMAKE_SOURCE_DIR}/test/java/TestXJNI.java
         VERSION ${PROJECT_VERSION}
         OUTPUT_NAME "xjni-test"
@@ -152,6 +155,8 @@ if(XJNI_BUILD_TESTS)
         ${CMAKE_SOURCE_DIR}/test/c/xjni_stringarray_test.c
         ${CMAKE_SOURCE_DIR}/test/c/xjni_arrayfield_test.c
         ${CMAKE_SOURCE_DIR}/test/c/xjni_stringbuilder_test.c
+        ${CMAKE_SOURCE_DIR}/test/c/xjni_stringwriter_test.c
+        ${CMAKE_SOURCE_DIR}/test/c/xjni_stringreader_test.c
         ${CMAKE_SOURCE_DIR}/test/c/xjni2d_test.c
         ${CMAKE_SOURCE_DIR}/test/c/xjni_test.c
     )
@@ -159,7 +164,7 @@ if(XJNI_BUILD_TESTS)
     target_include_directories(xjni_test PUBLIC ${JNI_INCLUDE_DIRS})
     target_link_libraries(xjni_test PRIVATE xjni)
 
-    set(LIBS_TEST_OUTPUT_DIR "${CMAKE_BINARY_DIR}/test/lib")
+    set(LIBS_TEST_OUTPUT_DIR "${CMAKE_BINARY_DIR}/build/lib")
     set_target_properties(xjni_test PROPERTIES
         ARCHIVE_OUTPUT_DIRECTORY ${LIBS_TEST_OUTPUT_DIR}
         LIBRARY_OUTPUT_DIRECTORY ${LIBS_TEST_OUTPUT_DIR}
@@ -167,7 +172,7 @@ if(XJNI_BUILD_TESTS)
     )
 
     # Java test targets
-    foreach(TESTCLASS TestStringArray ArrayFieldTest Array2DTest TestXJNI TestStringBuilder)
+    foreach(TESTCLASS TestStringArray ArrayFieldTest Array2DTest TestXJNI TestStringBuilder TestStringWriter TestStringReader)
         add_custom_target(run_${TESTCLASS}
             COMMAND ${Java_JAVA_EXECUTABLE} -Djava.library.path=${LIBS_TEST_OUTPUT_DIR} -cp ${JAR_OUTPUT_DIR}/xjni-test.jar ${TESTCLASS}
             WORKING_DIRECTORY "${JAR_OUTPUT_DIR}"

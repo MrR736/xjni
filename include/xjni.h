@@ -31,8 +31,10 @@
 #include <xjni_new.h>
 #include <xjni_printf.h>
 #include <xjni_arrayfield.h>
-#include <xjni_stringbuilder.h>
 #include <xjni_stringarray.h>
+#include <xjni_stringbuilder.h>
+#include <xjni_stringreader.h>
+#include <xjni_stringwriter.h>
 #include <xjni2d.h>
 
 #ifndef _XJNI_VERSION_MAJOR

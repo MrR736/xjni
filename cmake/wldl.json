@@ -1,0 +1,8 @@
+{
+	"downloads": [
+		{
+			"package": "SDL2",
+			"url-dev": "https://github.com/libsdl-org/SDL/releases/download/release-2.32.10/SDL2-devel-2.32.10-VC.zip"
+		}
+	]
+}
