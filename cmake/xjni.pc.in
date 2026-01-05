@@ -1,0 +1,10 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=${prefix}
+includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@
+libdir=${prefix}/@CMAKE_INSTALL_LIBDIR@
+
+Name: @PROJECT_NAME@
+Description: JNI helper library for UTF-16, arrays, and formatting
+Version: @PROJECT_VERSION@
+Libs: -L${libdir} -lxjni
+Cflags: -I${includedir}
