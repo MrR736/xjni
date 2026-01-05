@@ -24,6 +24,7 @@
 #define __XJNI_STRINGBUILDER_H__
 
 #include <jni.h>
+#include <xjni_stringbuffer.h>
 
 typedef jobject jstringBuilder;
 
@@ -44,7 +45,7 @@ JNIEXPORT char* JNICALL StringBuilderToStringUTF(JNIEnv *env, jstringBuilder sb)
 JNIEXPORT void JNICALL StringBuilderAppendString(JNIEnv *env, jstringBuilder sb, jstring obj);
 JNIEXPORT void JNICALL StringBuilderAppendStringUTF(JNIEnv *env, jstringBuilder sb, const char* str);
 JNIEXPORT void JNICALL StringBuilderAppendObject(JNIEnv *env, jstringBuilder sb, jobject obj);
-JNIEXPORT void JNICALL StringBuilderAppendStringBuffer(JNIEnv *env, jstringBuilder sb, jobject obj);
+JNIEXPORT void JNICALL StringBuilderAppendStringBuffer(JNIEnv *env, jstringBuilder sb, jstringBuffer obj);
 JNIEXPORT void JNICALL StringBuilderAppendBoolean(JNIEnv *env, jstringBuilder sb, jboolean obj);
 JNIEXPORT void JNICALL StringBuilderAppendChar(JNIEnv *env, jstringBuilder sb, jchar obj);
 JNIEXPORT void JNICALL StringBuilderAppendInt(JNIEnv *env, jstringBuilder sb, jint obj);
@@ -52,7 +53,7 @@ JNIEXPORT void JNICALL StringBuilderAppendLong(JNIEnv *env, jstringBuilder sb, j
 JNIEXPORT void JNICALL StringBuilderAppendFloat(JNIEnv *env, jstringBuilder sb, jfloat obj);
 JNIEXPORT void JNICALL StringBuilderAppendDouble(JNIEnv *env, jstringBuilder sb, jdouble obj);
 
-JNIEXPORT void JNICALL StringBuilderAppendCharIntInt(JNIEnv *env, jstringBuilder sb,jcharArray obj,jint offset,jint len);
+JNIEXPORT void JNICALL StringBuilderAppendCharArrayIntInt(JNIEnv *env, jstringBuilder sb,jcharArray obj,jint offset,jint len);
 JNIEXPORT void JNICALL StringBuilderAppendCodePoint(JNIEnv *env, jstringBuilder sb,jint codePoint);
 
 JNIEXPORT void JNICALL StringBuilderDelete(JNIEnv *env, jstringBuilder sb,jint start,jint end);
@@ -61,7 +62,7 @@ JNIEXPORT void JNICALL StringBuilderDeleteCharAt(JNIEnv *env, jstringBuilder sb,
 JNIEXPORT void JNICALL StringBuilderReplace(JNIEnv *env, jstringBuilder sb,jint start,jint end,jstring str);
 JNIEXPORT void JNICALL StringBuilderReplaceUTF(JNIEnv *env, jstringBuilder sb,jint start,jint end,const char* str);
 
-JNIEXPORT void JNICALL StringBuilderInsert(JNIEnv *env, jstringBuilder sb,jint index,jcharArray str,jint offset,jint len);
+JNIEXPORT void JNICALL StringBuilderInsertCharArrayIntInt(JNIEnv *env, jstringBuilder sb,jint index,jcharArray str,jint offset,jint len);
 JNIEXPORT void JNICALL StringBuilderInsertString(JNIEnv *env,jstringBuilder sb,jint offset,jstring obj);
 JNIEXPORT void JNICALL StringBuilderInsertStringUTF(JNIEnv *env, jstringBuilder sb, jint offset,const char* str);
 JNIEXPORT void JNICALL StringBuilderInsertObject(JNIEnv *env, jstringBuilder sb, jint offset,jobject obj);

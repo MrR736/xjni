@@ -2,6 +2,7 @@ public class TestStringBuilder {
 	static { System.loadLibrary("xjni_test"); }
 
 	// Declare the native methods
+	public native StringBuilder NewStringBuilder();
 	public native void StringBuilderAppendString(StringBuilder sb, String str);
 	public native void StringBuilderAppendInt(StringBuilder sb, int num);
 	public native void StringBuilderInsertString(StringBuilder sb, int offset, String str);
@@ -12,7 +13,7 @@ public class TestStringBuilder {
 	public static void main(String[] args) {
 		// Create a new StringBuilder instance
 		TestStringBuilder test = new TestStringBuilder();
-		StringBuilder sb = new StringBuilder();
+		StringBuilder sb = test.NewStringBuilder();
 
 		// Test append method
 		test.StringBuilderAppendString(sb, "Hello, ");

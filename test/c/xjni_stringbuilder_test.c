@@ -7,6 +7,11 @@
  * Native test
  * ========================= */
 
+JNIEXPORT jstringBuilder JNICALL
+Java_TestStringBuilder_NewStringBuilder(JNIEnv *env, jobject obj) {
+	return NewStringBuilder(env);
+}
+
 JNIEXPORT void JNICALL
 Java_TestStringBuilder_StringBuilderAppendString(JNIEnv *env, jobject obj,jstringBuilder sb, jstring str) {
 	StringBuilderAppendString(env,sb,str);

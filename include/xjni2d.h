@@ -32,6 +32,22 @@ extern "C" {
 // Byte2D - Access and release functions for Java byte[][]
 
 /**
+ * Creates a new 2D Java byte array (byte[][]) of size [row][col].
+ *
+ * Each row is independently allocated as a byte[col] array and
+ * initialized to zero.
+ *
+ * @param env  JNI environment pointer.
+ * @param row  Number of rows in the 2D array.
+ * @param col  Number of columns in each row.
+ *
+ * @return     A reference to the newly created Java byte[][] array.
+ *             Returns NULL if creation fails (invalid parameters
+ *             or JVM runs out of memory). Exceptions may be pending.
+ */
+JNIEXPORT jobjectArray JNICALL NewByte2DArray(JNIEnv *env, jsize row, jsize col);
+
+/**
  * Retrieves a native 2D pointer view of a Java byte[][]
  *
  * @param env      JNI environment pointer
@@ -78,6 +94,22 @@ JNIEXPORT void JNICALL SetByte2DArrayRegion(JNIEnv *env, jobjectArray array, jsi
 JNIEXPORT void JNICALL GetByte2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,jsize len, jbyte **buf);
 
 // Int2D - Access and release functions for Java int[][]
+
+/**
+ * Creates a new 2D Java int array (int[][]) of size [row][col].
+ *
+ * Each row is independently allocated as a int[col] array and
+ * initialized to zero.
+ *
+ * @param env  JNI environment pointer.
+ * @param row  Number of rows in the 2D array.
+ * @param col  Number of columns in each row.
+ *
+ * @return     A reference to the newly created Java int[][] array.
+ *             Returns NULL if creation fails (invalid parameters
+ *             or JVM runs out of memory). Exceptions may be pending.
+ */
+JNIEXPORT jobjectArray JNICALL NewInt2DArray(JNIEnv *env, jsize row, jsize col);
 
 /**
  * Retrieves a native 2D pointer view of a Java int[][]
@@ -128,6 +160,22 @@ JNIEXPORT void JNICALL GetInt2DArrayRegion(JNIEnv *env, jobjectArray array, jsiz
 // Long2D - Access and release functions for Java long[][]
 
 /**
+ * Creates a new 2D Java long array (long[][]) of size [row][col].
+ *
+ * Each row is independently allocated as a long[col] array and
+ * initialized to zero.
+ *
+ * @param env  JNI environment pointer.
+ * @param row  Number of rows in the 2D array.
+ * @param col  Number of columns in each row.
+ *
+ * @return     A reference to the newly created Java long[][] array.
+ *             Returns NULL if creation fails (invalid parameters
+ *             or JVM runs out of memory). Exceptions may be pending.
+ */
+JNIEXPORT jobjectArray JNICALL NewLong2DArray(JNIEnv *env, jsize row, jsize col);
+
+/**
  * Releases the native 2D pointer view obtained via GetLong2DArrayElements
  *
  * @param env      JNI environment pointer
@@ -172,6 +220,22 @@ JNIEXPORT void JNICALL SetLong2DArrayRegion(JNIEnv *env, jobjectArray array, jsi
 JNIEXPORT void JNICALL GetLong2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,jsize len, jlong **buf);
 
 // Float2D - Access and release functions for Java float[][]
+
+/**
+ * Creates a new 2D Java float array (float[][]) of size [row][col].
+ *
+ * Each row is independently allocated as a float[col] array and
+ * initialized to zero.
+ *
+ * @param env  JNI environment pointer.
+ * @param row  Number of rows in the 2D array.
+ * @param col  Number of columns in each row.
+ *
+ * @return     A reference to the newly created Java float[][] array.
+ *             Returns NULL if creation fails (invalid parameters
+ *             or JVM runs out of memory). Exceptions may be pending.
+ */
+JNIEXPORT jobjectArray JNICALL NewFloat2DArray(JNIEnv *env, jsize row, jsize col);
 
 /**
  * Releases the native 2D pointer view obtained via GetFloat2DArrayElements
@@ -220,6 +284,22 @@ JNIEXPORT void JNICALL GetFloat2DArrayRegion(JNIEnv *env, jobjectArray array, js
 // Double2D - Access and release functions for Java double[][].
 
 /**
+ * Creates a new 2D Java double array (double[][]) of size [row][col].
+ *
+ * Each row is independently allocated as a double[col] array and
+ * initialized to zero.
+ *
+ * @param env  JNI environment pointer.
+ * @param row  Number of rows in the 2D array.
+ * @param col  Number of columns in each row.
+ *
+ * @return     A reference to the newly created Java double[][] array.
+ *             Returns NULL if creation fails (invalid parameters
+ *             or JVM runs out of memory). Exceptions may be pending.
+ */
+JNIEXPORT jobjectArray JNICALL NewDouble2DArray(JNIEnv *env, jsize row, jsize col);
+
+/**
  * Releases the native 2D pointer view obtained via GetDouble2DArrayElements
  *
  * @param env      JNI environment pointer
@@ -264,6 +344,22 @@ JNIEXPORT void JNICALL SetDouble2DArrayRegion(JNIEnv *env, jobjectArray array, j
 JNIEXPORT void JNICALL GetDouble2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start,jsize len, jdouble **buf);
 
 // Short2D - Access and release functions for Java short[][].
+
+/**
+ * Creates a new 2D Java short array (short[][]) of size [row][col].
+ *
+ * Each row is independently allocated as a short[col] array and
+ * initialized to zero.
+ *
+ * @param env  JNI environment pointer.
+ * @param row  Number of rows in the 2D array.
+ * @param col  Number of columns in each row.
+ *
+ * @return     A reference to the newly created Java short[][] array.
+ *             Returns NULL if creation fails (invalid parameters
+ *             or JVM runs out of memory). Exceptions may be pending.
+ */
+JNIEXPORT jobjectArray JNICALL NewShort2DArray(JNIEnv *env, jsize row, jsize col);
 
 /**
  * Releases the native 2D pointer view obtained via GetShort2DArrayElements
@@ -313,6 +409,22 @@ JNIEXPORT void JNICALL GetShort2DArrayRegion(JNIEnv *env, jobjectArray array, js
 // Char2D - Access and release functions for Java char[][].
 
 /**
+ * Creates a new 2D Java char array (char[][]) of size [row][col].
+ *
+ * Each row is independently allocated as a char[col] array and
+ * initialized to zero.
+ *
+ * @param env  JNI environment pointer.
+ * @param row  Number of rows in the 2D array.
+ * @param col  Number of columns in each row.
+ *
+ * @return     A reference to the newly created Java char[][] array.
+ *             Returns NULL if creation fails (invalid parameters
+ *             or JVM runs out of memory). Exceptions may be pending.
+ */
+JNIEXPORT jobjectArray JNICALL NewChar2DArray(JNIEnv *env, jsize row, jsize col);
+
+/**
  * Releases the native 2D pointer view obtained via GetChar2DArrayElements
  *
  * @param env      JNI environment pointer
@@ -360,6 +472,22 @@ JNIEXPORT void JNICALL GetChar2DArrayRegion(JNIEnv *env, jobjectArray array, jsi
 // StringUTF2D - Access and release functions for Java String[][].
 
 /**
+ * Creates a new 2D Java String array (String[][]) of size [row][col].
+ *
+ * Each row is independently allocated as a String[col] array and
+ * initialized to zero.
+ *
+ * @param env  JNI environment pointer.
+ * @param row  Number of rows in the 2D array.
+ * @param col  Number of columns in each row.
+ *
+ * @return     A reference to the newly created Java String[][] array.
+ *             Returns NULL if creation fails (invalid parameters
+ *             or JVM runs out of memory). Exceptions may be pending.
+ */
+JNIEXPORT jobjectArray JNICALL NewStringUTF2DArray(JNIEnv *env,const char ***utf,jsize row,jsize col);
+
+/**
  * Releases the native 2D pointer view obtained via GetStringUTF2DArrayElements
  *
  * @param env      JNI environment pointer
@@ -402,6 +530,22 @@ JNIEXPORT void JNICALL SetStringUTF2DArrayRegion(JNIEnv *env, jobjectArray array
 JNIEXPORT void JNICALL GetStringUTF2DArrayRegion(JNIEnv *env, jobjectArray array, jsize start, jsize len, char ***buf);
 
 // String2D - Access and release functions for Java String[][].
+
+/**
+ * Creates a new 2D Java String array (String[][]) of size [row][col].
+ *
+ * Each row is independently allocated as a String[col] array and
+ * initialized to zero.
+ *
+ * @param env  JNI environment pointer.
+ * @param row  Number of rows in the 2D array.
+ * @param col  Number of columns in each row.
+ *
+ * @return     A reference to the newly created Java String[][] array.
+ *             Returns NULL if creation fails (invalid parameters
+ *             or JVM runs out of memory). Exceptions may be pending.
+ */
+JNIEXPORT jobjectArray JNICALL NewString2DArray(JNIEnv *env,const jchar ***utf, jsize len,jsize row,jsize col);
 
 /**
  * Releases the native 2D pointer view obtained via GetString2DArrayElements

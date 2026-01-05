@@ -17,7 +17,7 @@ JNIEXPORTC jobjectArray JNICALL NewStringUTFArray(JNIEnv *env,const char **utf,j
 
 	jclass strclass = _FindClass(env,"java/lang/String");
 	jobjectArray stringArray = _NewObjectArray(env,count,strclass,NULL);
-	_DeleteGlobalRef(env, strclass);
+	_DeleteGlobalRef(env,strclass);
 	if (stringArray == NULL)
 		return NULL;
 
@@ -111,7 +111,7 @@ JNIEXPORTC jobjectArray JNICALL NewStringArray(JNIEnv *env,const jchar **unicode
 
 	jclass strclass = _FindClass(env,"java/lang/String");
 	jobjectArray stringArray = _NewObjectArray(env,n,strclass,NULL);
-	_DeleteGlobalRef(env, strclass);
+	_DeleteGlobalRef(env,strclass);
 	if (stringArray == NULL)
 		return NULL;
 

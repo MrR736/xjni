@@ -24,6 +24,7 @@
 #define __XJNI_NEW_H__
 
 #include <jni.h>
+#include <stdarg.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,6 +47,12 @@ JNIEXPORT jfloatArray JNICALL xjni_NewFloatArray(JNIEnv* env, const float* data,
 
 /* Create a new double array in Java from the provided C data. */
 JNIEXPORT jdoubleArray JNICALL xjni_NewDoubleArray(JNIEnv* env, const double* data, jsize len);
+
+JNIEXPORT jint JNICALL XJNI_New_OnLoad(JavaVM* vm,void* reserved,jint ver);
+JNIEXPORT void JNICALL XJNI_New_OnUnload(JavaVM* vm,void* reserved,jint ver);
+
+JNIEXPORT jobject JNICALL NewObjectBuilderV(JNIEnv* env,const char* className,const char* sig,va_list ap);
+JNIEXPORT jobject JNICALL NewObjectBuilder(JNIEnv* env,const char* className,const char* sig,...);
 
 #ifdef __cplusplus
 }

@@ -33,6 +33,7 @@
 #include <xjni_arrayfield.h>
 #include <xjni_stringarray.h>
 #include <xjni_stringbuilder.h>
+#include <xjni_stringbuffer.h>
 #include <xjni_stringreader.h>
 #include <xjni_stringwriter.h>
 #include <xjni2d.h>
@@ -63,18 +64,21 @@ JNIEXPORT jboolean JNICALL xjni_fromstring(const char *src,jchar *dst,size_t *ds
 JNIEXPORT jboolean JNICALL xjni_fromjstring(const jchar *src,char *dst,size_t *dstlen);
 
 // JNI Utility
-JNIEXPORT void JNICALL FatalErrorV(JNIEnv *env, const char *msg, va_list __arg);
-JNIEXPORT void JNICALL FatalErrorF(JNIEnv *env, const char *msg, ...);
+JNIEXPORT void JNICALL FatalErrorV(JNIEnv *env,const char *msg,va_list __arg);
+JNIEXPORT void JNICALL FatalErrorF(JNIEnv *env,const char *msg,...);
 
-JNIEXPORT jint JNICALL ThrowNewV(JNIEnv *env, jclass clazz, const char *msg, va_list __arg);
-JNIEXPORT jint JNICALL ThrowNewF(JNIEnv *env, jclass clazz, const char *msg, ...);
+JNIEXPORT jint JNICALL ThrowNewV(JNIEnv *env,jclass clazz,const char *msg,va_list __arg);
+JNIEXPORT jint JNICALL ThrowNewF(JNIEnv *env,jclass clazz,const char *msg,...);
 
 // Log Error Utility
+JNIEXPORT jint JNICALL XJNI_OnLoad(JavaVM* vm,void* reserved,jint ver);
+JNIEXPORT void JNICALL XJNI_OnUnload(JavaVM* vm,void* reserved,jint ver);
+
 JNIEXPORT void JNICALL throwJava(JNIEnv *env,const char* tag,const char* msg,const char* cls_name,jclass* cache,pthread_mutex_t* mutex);
 JNIEXPORT void JNICALL
 throwJavaV(JNIEnv *env,const char* tag,const char* cls_name,jclass* cache,pthread_mutex_t* mutex,const char* msg,va_list ap);
 JNIEXPORT void JNICALL
-throwJavaF(JNIEnv *env,const char* tag,const char* cls_name,jclass* cache,pthread_mutex_t* mutex, const char *msg, ...);
+throwJavaF(JNIEnv *env,const char* tag,const char* cls_name,jclass* cache,pthread_mutex_t* mutex,const char *msg,...);
 
 JNIEXPORT void JNICALL throwIOException(JNIEnv *env,const char* tag,const char* msg);
 JNIEXPORT void JNICALL throwCharConversionException(JNIEnv *env,const char* tag,const char* msg);
@@ -137,23 +141,23 @@ JNIEXPORT jint JNICALL jmemcmp(const void *cs,const void *ct,size_t count);
 JNIEXPORT size_t JNICALL jstrlen(const jchar* __s);
 JNIEXPORT size_t JNICALL jstrnlen(const jchar * s,size_t count);
 JNIEXPORT jchar* JNICALL jstrchr(const jchar *s,jint c);
-JNIEXPORT jchar* JNICALL jstrchrnul(const jchar *__s, jint __c);
+JNIEXPORT jchar* JNICALL jstrchrnul(const jchar *__s,jint __c);
 JNIEXPORT jchar* JNICALL jstrrchr(const jchar *s,jint c);
 JNIEXPORT jint JNICALL jstrcmp(const jchar *cs,const jchar *ct);
-JNIEXPORT jchar* JNICALL jstrcpy(jchar* __dest, const jchar* __src);
+JNIEXPORT jchar* JNICALL jstrcpy(jchar* __dest,const jchar* __src);
 JNIEXPORT size_t JNICALL jstrlcpy(jchar *dest,const jchar *src,size_t size);
-JNIEXPORT jchar* JNICALL jstrcat(jchar* __dest, const jchar* __src);
+JNIEXPORT jchar* JNICALL jstrcat(jchar* __dest,const jchar* __src);
 JNIEXPORT size_t JNICALL jstrlcat(jchar *dest,const jchar *src,size_t size);
 JNIEXPORT jint JNICALL jstrncmp(const jchar *cs,const jchar *ct,size_t count);
 JNIEXPORT jchar* JNICALL jstrpbrk(const jchar * cs,const jchar * ct);
 JNIEXPORT jchar* JNICALL jstrstr(const jchar *s1,const jchar *s2);
-JNIEXPORT size_t JNICALL jstrcspn(const jchar *__s, const jchar *__reject);
+JNIEXPORT size_t JNICALL jstrcspn(const jchar *__s,const jchar *__reject);
 JNIEXPORT size_t JNICALL jstrspn(const jchar *s,const jchar *accept);
 JNIEXPORT jchar* JNICALL jstrdup(const jchar *s);
-JNIEXPORT jchar* JNICALL jstrndup(const jchar *__string, size_t __n);
-JNIEXPORT jint JNICALL jstrcoll(const jchar *__s1, const jchar *__s2);
-JNIEXPORT size_t JNICALL jstrxfrm(jchar* __dest, const jchar* __src, size_t __n);
-JNIEXPORT jchar* JNICALL jstrtok(jchar* __s, const jchar* __delim);
+JNIEXPORT jchar* JNICALL jstrndup(const jchar *__string,size_t __n);
+JNIEXPORT jint JNICALL jstrcoll(const jchar *__s1,const jchar *__s2);
+JNIEXPORT size_t JNICALL jstrxfrm(jchar* __dest,const jchar* __src,size_t __n);
+JNIEXPORT jchar* JNICALL jstrtok(jchar* __s,const jchar* __delim);
 JNIEXPORT void JNICALL jstrreverse(jchar* __str);
 
 #ifdef __cplusplus

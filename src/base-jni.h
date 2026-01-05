@@ -99,8 +99,8 @@
 #define BASE_EXTERN_END   }
 #define JNIEXPORTC extern "C" JNIEXPORT
 
-#define BASEJNIO(__func,env)		env->__func()
-#define BASEJNIC(__func,env,...)	env->__func(__VA_ARGS__)
+#define BASEJNIO(__func,env)		(env->__func())
+#define BASEJNIC(__func,env,...)	(env->__func(__VA_ARGS__))
 #else
 #define BASE_EXTERN_CXX
 #define BASE_EXTERN_C
@@ -108,8 +108,8 @@
 #define BASE_EXTERN_END
 #define JNIEXPORTC JNIEXPORT
 
-#define BASEJNIO(__func,env)		(*env)->__func(env)
-#define BASEJNIC(__func,env,...)	(*env)->__func(env,__VA_ARGS__)
+#define BASEJNIO(__func,env)		((*env)->__func(env))
+#define BASEJNIC(__func,env,...)	((*env)->__func(env,__VA_ARGS__))
 #endif
 
 #define _GetMethodID(env,ex,name,sig) BASEJNIC(GetMethodID,env,ex,name,sig)
@@ -122,16 +122,26 @@
 
 // Char
 #define _NewCharArray(env,len) BASEJNIC(NewCharArray,env,len)
+#define _CallCharMethod(env,ex,methodID) BASEJNIC(CallCharMethod,env,ex,methodID)
+#define _CallCharMethod_l(env,ex,methodID,...) BASEJNIC(CallCharMethod,env,ex,methodID,__VA_ARGS__)
+#define _CallNonvirtualCharMethod(env,ex,clazz,methodID) BASEJNIC(CallNonvirtualCharMethod,env,ex,clazz,methodID)
+#define _CallNonvirtualCharMethod_l(env,ex,clazz,methodID,...) BASEJNIC(CallNonvirtualCharMethod,env,ex,clazz,methodID,__VA_ARGS__)
+#define _CallStaticCharMethod(env,ex,methodID) BASEJNIC(CallStaticCharMethod,env,ex,methodID)
+#define _CallStaticCharMethod_l(env,ex,methodID,...) BASEJNIC(CallStaticCharMethod,env,ex,methodID,__VA_ARGS__)
 
 // Void
 #define _CallVoidMethod(env,ex,methodID) BASEJNIC(CallVoidMethod,env,ex,methodID)
 #define _CallVoidMethod_l(env,ex,methodID,...) BASEJNIC(CallVoidMethod,env,ex,methodID,__VA_ARGS__)
 #define _CallStaticVoidMethod(env,ex,methodID) BASEJNIC(CallStaticVoidMethod,env,ex,methodID)
 #define _CallStaticVoidMethod_l(env,ex,methodID,...) BASEJNIC(CallStaticVoidMethod,env,ex,methodID,__VA_ARGS__)
+#define _CallNonvirtualVoidMethod(env,ex,clazz,methodID) BASEJNIC(CallNonvirtualVoidMethod,env,ex,clazz,methodID)
+#define _CallNonvirtualVoidMethod_l(env,ex,clazz,methodID,...) BASEJNIC(CallNonvirtualVoidMethod,env,ex,clazz,methodID,__VA_ARGS__)
 
 // Object
 #define _GetObjectClass(env,ex) BASEJNIC(GetObjectClass,env,ex)
 #define _NewObject(env,ex,methodID) BASEJNIC(NewObject,env,ex,methodID)
+#define _NewObjectV(env,clazz,methodID,ap) BASEJNIC(NewObject,env,clazz,methodID,ap)
+#define _NewObjectA(env,clazz,methodID,args) BASEJNIC(NewObjectA,env,clazz,methodID,args)
 #define _NewObject_l(env,ex,methodID,...) BASEJNIC(NewObject,env,ex,methodID,__VA_ARGS__)
 #define _CallStaticObjectMethod(env,ex,methodID) BASEJNIC(CallStaticObjectMethod,env,ex,methodID)
 #define _CallStaticObjectMethod_l(env,ex,methodID,...) BASEJNIC(CallStaticObjectMethod,env,ex,methodID,__VA_ARGS__)
@@ -144,8 +154,6 @@
 #define _GetObjectArrayElement(env,array,jindex) BASEJNIC(GetObjectArrayElement,env,array,jindex)
 #define _SetObjectArrayElement(env,array,index,val) BASEJNIC(SetObjectArrayElement,env,array,index,val)
 #define _NewObjectArray(env,len,clazz,init) BASEJNIC(NewObjectArray,env,len,clazz,init)
-#define _CallObjectMethod(env,ex,methodID) BASEJNIC(CallObjectMethod,env,ex,methodID)
-#define _CallObjectMethod_l(env,ex,methodID,...) BASEJNIC(CallObjectMethod,env,ex,methodID,__VA_ARGS__)
 
 // Double
 #define _NewDoubleArray(env,len) BASEJNIC(NewDoubleArray,env,len)
@@ -155,6 +163,7 @@
 #define _SetDoubleArrayRegion(env,array,start,len,buf) BASEJNIC(SetDoubleArrayRegion,env,array,start,len,buf)
 
 // Short
+#define _NewShortArray(env,len) BASEJNIC(NewShortArray,env,len)
 #define _GetShortField(env,clazz,fieldID) BASEJNIC(GetShortField,env,clazz,fieldID)
 #define _SetShortField(env,clazz,fieldID,val) BASEJNIC(SetShortField,env,clazz,fieldID,val)
 #define _GetStaticShortField(env,clazz,fieldID) BASEJNIC(GetStaticShortField,env,clazz,fieldID)
@@ -262,7 +271,7 @@
 # ifdef __ANDROID__
 #define BASE_TAG_LOGE(tag,fmt,...) __android_log_print(ANDROID_LOG_ERROR,tag,fmt,##__VA_ARGS__)
 #else
-#define BASE_TAG_LOGE(tag,fmt,...) fprintf(stderr,"[%s] ERROR: " fmt,tag, ##__VA_ARGS__)
+#define BASE_TAG_LOGE(tag,fmt,...) fprintf(stderr,"[%s] ERROR: " fmt,tag, ##__VA_ARGS__), fprintf(stderr,"\n")
 #endif
 
 #define BASE_LOGE(fmt,...) BASE_TAG_LOGE(LOG_TAG,fmt,##__VA_ARGS__)

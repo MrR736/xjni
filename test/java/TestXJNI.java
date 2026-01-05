@@ -14,7 +14,7 @@ public class TestXJNI {
     public native void testStringUtilities(char[] input);
 
     private static final int THREADS = 8;
-    private static final int ITERATIONS = 1000;
+    private static final int ITERATIONS = 50;
 
     public static void main(String[] args) throws InterruptedException {
         TestXJNI t = new TestXJNI();

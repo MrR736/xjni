@@ -1,7 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "xjni.h"
+#include <xjni.h>
+
+JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm,void* reserved) {
+	return XJNI_OnLoad(vm,reserved,JNI_VERSION_1_6);
+}
+
+JNIEXPORT void JNICALL JNI_OnUnload(JavaVM* vm,void* reserved) {
+	XJNI_OnUnload(vm,reserved,JNI_VERSION_1_6);
+}
 
 JNIEXPORT void JNICALL
 Java_TestXJNI_testStringUtilities(JNIEnv *env, jobject thiz, jcharArray input) {

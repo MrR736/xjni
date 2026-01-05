@@ -10,22 +10,33 @@
 
 // String Reader Utility
 JNIEXPORTC jstringReader JNICALL NewStringReader(JNIEnv *env,jstring s) {
-	jclass stringReaderClass = _FindClass(env,"java/io/StringReader");
-	if (stringReaderClass == NULL) return NULL;
-	jmethodID constructor = _GetMethodID(env,stringReaderClass, "<init>", "(Ljava/lang/String;)V");
-	if (constructor == NULL) {
-		_DeleteLocalRef(env, stringReaderClass);
+	jclass clz = _FindClass(env,"java/io/StringReader");
+	if (!clz) {
+		if (_ExceptionCheck(env)) {
+			_ExceptionClear(env);
+		}
 		return NULL;
 	}
-	jstringReader stringBuilderObject = _NewObject_l(env,stringReaderClass,constructor,s);
-	if (stringBuilderObject == NULL) {
-		_DeleteLocalRef(env, stringReaderClass);
-		return NULL;
-	}
-	_DeleteLocalRef(env, stringReaderClass);
-	return stringBuilderObject;
-}
 
+	jmethodID ctor = _GetMethodID(env,clz,"<init>","(Ljava/lang/String;)V");
+	if (!ctor) {
+		if (_ExceptionCheck(env)) {
+			_ExceptionClear(env);
+		}
+		_DeleteLocalRef(env,clz);
+		return NULL;
+	}
+
+	jobject obj = _NewObject_l(env,clz,ctor,s);
+
+	if (_ExceptionCheck(env)) {
+		_ExceptionClear(env);
+		obj = NULL;
+	}
+
+	_DeleteLocalRef(env,clz);
+	return obj;
+}
 
 JNIEXPORTC jstringReader JNICALL NewStringReaderUTF(JNIEnv *env,const char* str) {
 	if (str == NULL) return NULL;
@@ -35,62 +46,62 @@ JNIEXPORTC jstringReader JNICALL NewStringReaderUTF(JNIEnv *env,const char* str)
 		return NULL;
 	}
 	jstringReader ret = NewStringReader(env,jstr);
-	_DeleteLocalRef(env, jstr);
+	_DeleteLocalRef(env,jstr);
 	return ret;
 }
 
-JNIEXPORTC jstring JNICALL StringReaderToString(JNIEnv *env, jstringReader sr) {
+JNIEXPORTC jstring JNICALL StringReaderToString(JNIEnv *env,jstringReader sr) {
 	if (env == NULL || sr == NULL) return NULL;
 
-	jclass srClass = _GetObjectClass(env, sr);
+	jclass srClass = _GetObjectClass(env,sr);
 	if (srClass == NULL) return NULL;
 
-	jmethodID toStringMID = _GetMethodID(env, srClass, "toString", "()Ljava/lang/String;");
+	jmethodID toStringMID = _GetMethodID(env,srClass,"toString","()Ljava/lang/String;");
 	if (toStringMID == NULL) {
-		_DeleteLocalRef(env, srClass);
+		_DeleteLocalRef(env,srClass);
 		return NULL;
 	}
 
-	jstring result = base_cast(jstring,_CallObjectMethod(env, sr, toStringMID));
+	jstring result = base_cast(jstring,_CallObjectMethod(env,sr,toStringMID));
 	if (result == NULL) {
-		_DeleteLocalRef(env, srClass);
+		_DeleteLocalRef(env,srClass);
 		return NULL;
 	}
 
-	_DeleteLocalRef(env, srClass);
+	_DeleteLocalRef(env,srClass);
 	return result;
 }
 
-JNIEXPORTC char* JNICALL StringReaderToStringUTF(JNIEnv *env, jstringReader sr) {
+JNIEXPORTC char* JNICALL StringReaderToStringUTF(JNIEnv *env,jstringReader sr) {
 	if (!env || !sr) return NULL;
 
-	jstring jstr = StringWriterToString(env, sr);
+	jstring jstr = StringWriterToString(env,sr);
 	if (!jstr) return NULL;
 
-	jsize utfLen = _GetStringUTFLength(env, jstr);
-	const char *utf = _GetStringUTFChars(env, jstr, NULL);
+	jsize utfLen = _GetStringUTFLength(env,jstr);
+	const char *utf = _GetStringUTFChars(env,jstr,NULL);
 	if (!utf) {
-		_DeleteLocalRef(env, jstr);
+		_DeleteLocalRef(env,jstr);
 		return NULL;
 	}
 
 	char *copy = ubase_cast(char*,malloc(base_cast(size_t,utfLen) + 1));
 	if (!copy) {
-		_ReleaseStringUTFChars(env, jstr, utf);
-		_DeleteLocalRef(env, jstr);
+		_ReleaseStringUTFChars(env,jstr,utf);
+		_DeleteLocalRef(env,jstr);
 		return NULL;
 	}
 
-	jmemcpy(copy, utf, base_cast(size_t,utfLen));
+	jmemcpy(copy,utf,base_cast(size_t,utfLen));
 	copy[utfLen] = '\0';
 
-	_ReleaseStringUTFChars(env, jstr, utf);
-	_DeleteLocalRef(env, jstr);
+	_ReleaseStringUTFChars(env,jstr,utf);
+	_DeleteLocalRef(env,jstr);
 
 	return copy;
 }
 
-JNIEXPORTC void JNICALL StringReaderEnsureOpen(JNIEnv *env, jstringReader sr) {
+JNIEXPORTC void JNICALL StringReaderEnsureOpen(JNIEnv *env,jstringReader sr) {
 	jclass clz = _GetObjectClass(env,sr);
 	jmethodID Id = _GetMethodID(env,clz,"ensureOpen","()V");
 	if (Id == NULL) {
@@ -101,7 +112,7 @@ JNIEXPORTC void JNICALL StringReaderEnsureOpen(JNIEnv *env, jstringReader sr) {
 	_DeleteLocalRef(env,clz);
 }
 
-JNIEXPORTC jint JNICALL StringReaderRead(JNIEnv *env, jstringReader sr) {
+JNIEXPORTC jint JNICALL StringReaderRead(JNIEnv *env,jstringReader sr) {
 	jclass clz = _GetObjectClass(env,sr);
 	if (clz == NULL) return JNI_ERR;
 	jmethodID Id = _GetMethodID(env,clz,"read","()I");

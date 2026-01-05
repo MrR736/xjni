@@ -136,7 +136,7 @@ JNIEXPORTC size_t JNICALL jstrlcpy(jchar *dest,const jchar *src,size_t size) {
 	return ret;
 }
 
-JNIEXPORTC jchar* JNICALL jstrcpy(jchar* __dest, const jchar* __src) {
+JNIEXPORTC jchar* JNICALL jstrcpy(jchar* __dest,const jchar* __src) {
 	if (__dest == NULL || __src == NULL) return NULL;
 	jchar* dest = __dest;
 	const jchar* src = __src;
@@ -172,7 +172,7 @@ JNIEXPORTC size_t JNICALL jstrlcat(jchar *dest,const jchar *src,size_t size) {
 	return slen + dlen;
 }
 
-JNIEXPORTC jchar* JNICALL jstrcat(jchar* __dest, const jchar* __src) {
+JNIEXPORTC jchar* JNICALL jstrcat(jchar* __dest,const jchar* __src) {
 	size_t dlen = jstrlen(__dest);
 	jchar* p = __dest + dlen;
 	while (*__src != '\0') { *p++ = *__src++; }
@@ -236,7 +236,7 @@ JNIEXPORTC jchar* JNICALL jstrdup(const jchar *s) {
 	return tmp;
 }
 
-JNIEXPORTC jchar* JNICALL jstrndup(const jchar *__string, size_t __n) {
+JNIEXPORTC jchar* JNICALL jstrndup(const jchar *__string,size_t __n) {
 	jchar *tmp = (jchar*)malloc((__n + 1) * sizeof(jchar));
 	if (tmp == NULL) return NULL;
 	for (size_t i = 0; i < __n; i++) { tmp[i] = __string[i]; }
@@ -244,7 +244,7 @@ JNIEXPORTC jchar* JNICALL jstrndup(const jchar *__string, size_t __n) {
 	return tmp;
 }
 
-JNIEXPORTC size_t JNICALL jstrcspn(const jchar *__s, const jchar *__reject) {
+JNIEXPORTC size_t JNICALL jstrcspn(const jchar *__s,const jchar *__reject) {
 	for (size_t i = 0; __s[i] != '\0'; i++) {
 		for (size_t j = 0; __reject[j] != '\0'; j++) {
 			if (__s[i] == __reject[j]) return i;
@@ -253,7 +253,7 @@ JNIEXPORTC size_t JNICALL jstrcspn(const jchar *__s, const jchar *__reject) {
 	return 0;
 }
 
-JNIEXPORTC jchar* JNICALL jstrchrnul(const jchar *__s, jint __c) {
+JNIEXPORTC jchar* JNICALL jstrchrnul(const jchar *__s,jint __c) {
 	while (*__s != '\0') {
 		if (*__s == (jchar)__c)
 			return (jchar *)__s;
@@ -263,7 +263,7 @@ JNIEXPORTC jchar* JNICALL jstrchrnul(const jchar *__s, jint __c) {
 }
 
 
-JNIEXPORTC jint JNICALL jstrcoll(const jchar *__s1, const jchar *__s2) {
+JNIEXPORTC jint JNICALL jstrcoll(const jchar *__s1,const jchar *__s2) {
 	while (*__s1 && *__s2) {
 		if (*__s1 != *__s2) return (*__s1 < *__s2) ? -1 : 1;
 		__s1++; __s2++;
@@ -272,7 +272,7 @@ JNIEXPORTC jint JNICALL jstrcoll(const jchar *__s1, const jchar *__s2) {
 	return (*__s1 == '\0') ? -1 : 1;
 }
 
-JNIEXPORTC size_t JNICALL jstrxfrm(jchar* __dest, const jchar* __src, size_t __n) {
+JNIEXPORTC size_t JNICALL jstrxfrm(jchar* __dest,const jchar* __src,size_t __n) {
 	if (__src == NULL || __dest == NULL) return 0;
 	size_t src_len = jstrlen(__src);
 	size_t copy_len = (src_len < (__n - 1)) ? src_len : (__n - 1);
@@ -281,14 +281,14 @@ JNIEXPORTC size_t JNICALL jstrxfrm(jchar* __dest, const jchar* __src, size_t __n
 	return copy_len;
 }
 
-JNIEXPORTC jchar* JNICALL jstrtok(jchar* __s, const jchar* __delim) {
+JNIEXPORTC jchar* JNICALL jstrtok(jchar* __s,const jchar* __delim) {
 	static jchar* last = NULL;
 	if (__s != NULL) last = __s;
 	if (last == NULL || *last == '\0') return NULL;
-	while (*last != '\0' && jstrchr(__delim, *last)) last++;
+	while (*last != '\0' && jstrchr(__delim,*last)) last++;
 	if (*last == '\0') return NULL;
 	jchar* start = last;
-	while (*last != '\0' && !jstrchr(__delim, *last)) last++;
+	while (*last != '\0' && !jstrchr(__delim,*last)) last++;
 	if (*last != '\0') { *last = '\0'; last++; }
 	return start;
 }
@@ -514,14 +514,16 @@ JNIEXPORTC jboolean JNICALL xjni_fromjstring(const jchar *src,char *dst,size_t *
 static jclass getExceptionClass(JNIEnv* env,const char* cls_name,jclass* cache,pthread_mutex_t* mutex) {
 	if (*cache != NULL) return *cache;
 	if (mutex != NULL) pthread_mutex_lock(mutex);
-	jclass local = _FindClass(env,cls_name);
-	if (!local) {
-		_ExceptionClear(env);
-		if (mutex != NULL) pthread_mutex_unlock(mutex);
-		return NULL;
+	if (*cache == NULL) {
+		jclass local = _FindClass(env,cls_name);
+		if (!local) {
+			_ExceptionClear(env);
+		} else {
+			if (*cache == NULL && local != NULL)
+				*cache = _NewGlobalRef(env,local);
+			_DeleteLocalRef(env,local);
+		}
 	}
-	*cache = _NewGlobalRef(env,local);
-	_DeleteLocalRef(env,local);
 	if (mutex != NULL) pthread_mutex_unlock(mutex);
 	return *cache;
 }
@@ -539,57 +541,57 @@ JNIEXPORTC void JNICALL throwJava(JNIEnv *env,const char* tag,const char* msg,co
 	_ThrowNew(env,clas,msg);
 }
 
-JNIEXPORTC void JNICALL FatalErrorV(JNIEnv *env, const char *msg, va_list __arg) {
+JNIEXPORTC void JNICALL FatalErrorV(JNIEnv *env,const char *msg,va_list __arg) {
 	va_list aq;
-	va_copy(aq, __arg);
+	va_copy(aq,__arg);
 #ifdef _MSC_VER
-	int len = _vscprintf(msg, aq);
+	int len = _vscprintf(msg,aq);
 #else
-	int len = vsnprintf(NULL, 0, msg, aq);
+	int len = vsnprintf(NULL,0,msg,aq);
 #endif
 	va_end(aq);
 	if (len < 0) return;
 	size_t clen = (size_t)len + 1;
 	char *formattedMsg = (char*)malloc(clen);
 	if (!formattedMsg) return;
-	va_copy(aq, __arg);
-	int ret = vsnprintf(formattedMsg, clen, msg, aq);
+	va_copy(aq,__arg);
+	int ret = vsnprintf(formattedMsg,clen,msg,aq);
 	va_end(aq);
 	if (ret < 0) {
 		free(formattedMsg);
 	}
-	_FatalError(env, formattedMsg);
+	_FatalError(env,formattedMsg);
 	free(formattedMsg);
 }
 
-JNIEXPORTC void JNICALL FatalErrorF(JNIEnv *env, const char *msg, ...) {
+JNIEXPORTC void JNICALL FatalErrorF(JNIEnv *env,const char *msg,...) {
 	va_list args;
-	va_start(args, msg);
+	va_start(args,msg);
 	FatalErrorV(env,msg,args);
 	va_end(args);
 }
 
-JNIEXPORTC jint JNICALL ThrowNewV(JNIEnv *env, jclass clazz, const char *msg, va_list __arg) {
+JNIEXPORTC jint JNICALL ThrowNewV(JNIEnv *env,jclass clazz,const char *msg,va_list __arg) {
 	va_list aq;
-	va_copy(aq, __arg);
+	va_copy(aq,__arg);
 #ifdef _MSC_VER
-	int len = _vscprintf(msg, aq);
+	int len = _vscprintf(msg,aq);
 #else
-	int len = vsnprintf(NULL, 0, msg, aq);
+	int len = vsnprintf(NULL,0,msg,aq);
 #endif
 	va_end(aq);
 	if (len < 0) return JNI_ERR;
 	size_t clen = (size_t)len + 1;
 	char *formattedMsg = (char*)malloc(clen);
 	if (!formattedMsg) return JNI_ERR;
-	va_copy(aq, __arg);
-	int ret = vsnprintf(formattedMsg, clen, msg, aq);
+	va_copy(aq,__arg);
+	int ret = vsnprintf(formattedMsg,clen,msg,aq);
 	va_end(aq);
 	if (ret < 0) {
 		free(formattedMsg);
 		return JNI_ERR;
 	}
-	if (_ThrowNew(env, clazz, formattedMsg) != JNI_OK) {
+	if (_ThrowNew(env,clazz,formattedMsg) != JNI_OK) {
 		free(formattedMsg);
 		return JNI_EDETACHED;
 	}
@@ -597,9 +599,9 @@ JNIEXPORTC jint JNICALL ThrowNewV(JNIEnv *env, jclass clazz, const char *msg, va
 	return JNI_OK;
 }
 
-JNIEXPORTC jint JNICALL ThrowNewF(JNIEnv *env, jclass clazz, const char *msg, ...) {
+JNIEXPORTC jint JNICALL ThrowNewF(JNIEnv *env,jclass clazz,const char *msg,...) {
 	va_list args;
-	va_start(args, msg);
+	va_start(args,msg);
 	jint result = ThrowNewV(env,clazz,msg,args);
 	va_end(args);
 	return result;
@@ -620,26 +622,86 @@ throwJavaV(JNIEnv *env,const char* tag,const char* cls_name,jclass* cache,pthrea
 }
 
 JNIEXPORTC void JNICALL
-throwJavaF(JNIEnv *env,const char* tag,const char* cls_name,jclass* cache,pthread_mutex_t* mutex, const char *msg, ...) {
+throwJavaF(JNIEnv *env,const char* tag,const char* cls_name,jclass* cache,pthread_mutex_t* mutex,const char *msg,...) {
 	va_list args;
-	va_start(args, msg);
+	va_start(args,msg);
 	throwJavaV(env,tag,cls_name,cache,mutex,msg,args);
 	va_end(args);
 }
 
-#define class_free(env,cls,tex)\
+JNIEXPORTC jint JNICALL XJNI_OnLoad(JavaVM* vm,void* reserved,jint ver) {
+	JNIEnv* env = NULL;
+
+	if (_GetEnv(vm,(void**)&env,ver) != JNI_OK)
+		return JNI_ERR;
+
+	if (XJNI_New_OnLoad(vm,reserved,ver) != ver)
+		return JNI_ERR;
+
+	struct {
+		const char* name;
+		jclass* cache;
+	} exceptions[] = {
+		{ "java/io/IOException",&ioExceptionCls },
+		{ "java/io/CharConversionException",&charConversionExceptionCls },
+		{ "java/io/EOFException",&eofExceptionCls },
+		{ "java/io/FileNotFoundException",&fileNotFoundExceptionCls },
+		{ "java/io/InterruptedIOException",&interruptedIOExceptionCls },
+		{ "java/io/InvalidClassException",&invalidClassExceptionCls },
+		{ "java/io/InvalidObjectException",&invalidObjectExceptionCls },
+		{ "java/io/NotActiveException",&notActiveExceptionCls },
+		{ "java/io/NotSerializableException",&notSerializableExceptionCls },
+		{ "java/io/OptionalDataException",&optionalDataExceptionCls },
+		{ "java/io/StreamCorruptedException",&streamCorruptedExceptionCls },
+		{ "java/io/SyncFailedException",&syncFailedExceptionCls },
+		{ "java/io/UTFDataFormatException",&utfDataFormatExceptionCls },
+		{ "java/io/UnsupportedEncodingException",&unsupportedEncodingExceptionCls },
+		{ "java/io/WriteAbortedException",&writeAbortedExceptionCls },
+		{ "java/lang/OutOfMemoryError",&outOfMemoryErrorCls },
+	};
+	size_t count = sizeof(exceptions) / sizeof(exceptions[0]);
+	size_t i;
+
+	for (i = 0; i < count; i++) {
+		jclass local = _FindClass(env, exceptions[i].name);
+		if (!local) {
+			_ExceptionClear(env);
+			goto fail;
+		}
+
+		*exceptions[i].cache = _NewGlobalRef(env, local);
+		_DeleteLocalRef(env, local);
+
+		if (!*exceptions[i].cache)
+			goto fail;
+	}
+
+	return ver;
+
+	fail:
+	while (i-- > 0) {
+		if (*exceptions[i].cache) {
+			_DeleteGlobalRef(env, *exceptions[i].cache);
+			*exceptions[i].cache = NULL;
+		}
+	}
+	return JNI_ERR;
+}
+
+#define class_free(env, cls, mtx)\
 	do {\
-		pthread_mutex_lock(&tex);\
-		if (cls) { _DeleteGlobalRef(env,cls); }\
-		cls = NULL;\
-		pthread_mutex_unlock(&tex);\
-		pthread_mutex_destroy(&tex);\
+		pthread_mutex_lock(&(mtx));\
+		if (cls) { _DeleteGlobalRef(env, cls); cls = NULL; }\
+		pthread_mutex_unlock(&(mtx));\
+		pthread_mutex_destroy(&(mtx));\
 	} while (0)
 
 
-JNIEXPORTC void JNICALL JNI_OnUnload(JavaVM* vm,void* reserved) {
-	JNIEnv* env;
-	_GetEnv(vm,(void**)&env,JNI_VERSION_1_6);
+JNIEXPORTC void JNICALL XJNI_OnUnload(JavaVM* vm,void* reserved,jint ver) {
+	JNIEnv* env = NULL;
+	if (_GetEnv(vm, (void**)&env, ver) != JNI_OK)
+		return;
+	XJNI_New_OnUnload(vm,reserved,ver);
 	class_free(env,ioExceptionCls,ioExceptionMutex);
 	class_free(env,charConversionExceptionCls,charConversionExceptionMutex);
 	class_free(env,eofExceptionCls,eofExceptionMutex);
@@ -655,6 +717,7 @@ JNIEXPORTC void JNICALL JNI_OnUnload(JavaVM* vm,void* reserved) {
 	class_free(env,utfDataFormatExceptionCls,utfDataFormatExceptionMutex);
 	class_free(env,unsupportedEncodingExceptionCls,unsupportedEncodingExceptionMutex);
 	class_free(env,writeAbortedExceptionCls,writeAbortedExceptionMutex);
+	class_free(env,outOfMemoryErrorCls,outOfMemoryErrorMutex);
 }
 
 JNIEXPORTC void JNICALL throwIOException(JNIEnv *env,const char* tag,const char* msg) {
@@ -718,7 +781,7 @@ JNIEXPORTC void JNICALL throwWriteAbortedException(JNIEnv *env,const char* tag,c
 }
 
 JNIEXPORTC void JNICALL throwOutOfMemoryError(JNIEnv *env,const char* tag,const char* msg) {
-	throwJava(env,tag,msg,"java/io/OutOfMemoryError",&outOfMemoryErrorCls,&outOfMemoryErrorMutex);
+	throwJava(env,tag,msg,"java/lang/OutOfMemoryError",&outOfMemoryErrorCls,&outOfMemoryErrorMutex);
 }
 
 
@@ -784,13 +847,13 @@ JNIEXPORTC void JNICALL throwWriteAbortedExceptionV(JNIEnv *env,const char* tag,
 }
 
 JNIEXPORTC void JNICALL throwOutOfMemoryErrorV(JNIEnv *env,const char* tag,const char* msg,va_list ap) {
-	throwJavaV(env,tag,"java/io/OutOfMemoryError",&outOfMemoryErrorCls,&outOfMemoryErrorMutex,msg,ap);
+	throwJavaV(env,tag,"java/lang/OutOfMemoryError",&outOfMemoryErrorCls,&outOfMemoryErrorMutex,msg,ap);
 }
 
 #define makeThrowF(name) \
-JNIEXPORTC void JNICALL name##F(JNIEnv *env,const char* tag,const char* msg, ...) {\
+JNIEXPORTC void JNICALL name##F(JNIEnv *env,const char* tag,const char* msg,...) {\
 	va_list args;\
-	va_start(args, msg);\
+	va_start(args,msg);\
 	name##V(env,tag,msg,args);\
 	va_end(args);\
 }
