@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(xjni VERSION 1.0.5 LANGUAGES C CXX)
+project(xjni VERSION 1.0.6 LANGUAGES C CXX)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -21,6 +21,10 @@ find_package(Java REQUIRED)
 find_package(JNI REQUIRED)
 include(UseJava)
 
+if(ANDROID)
+	find_library(ANDROID_LOG_LIB log)
+endif()
+
 # ------------------------------
 # Compiler standards
 # ------------------------------
@@ -34,6 +38,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # ------------------------------
 set(XJNI_SOURCES
 	${CMAKE_SOURCE_DIR}/src/xjni_arrayfield.c
+	${CMAKE_SOURCE_DIR}/src/xjni_log.c
 	${CMAKE_SOURCE_DIR}/src/xjni_new.c
 	${CMAKE_SOURCE_DIR}/src/xjni_printf.c
 	${CMAKE_SOURCE_DIR}/src/xjni_stringarray.c
@@ -41,6 +46,7 @@ set(XJNI_SOURCES
 	${CMAKE_SOURCE_DIR}/src/xjni_stringbuilder.c
 	${CMAKE_SOURCE_DIR}/src/xjni_stringreader.c
 	${CMAKE_SOURCE_DIR}/src/xjni_stringwriter.c
+	${CMAKE_SOURCE_DIR}/src/xjni_va_list.c
 	${CMAKE_SOURCE_DIR}/src/xjni2d.c
 	${CMAKE_SOURCE_DIR}/src/xjni.c
 )
@@ -53,9 +59,15 @@ target_link_libraries(xjni PUBLIC JNI::JNI)
 target_include_directories(xjni
 	PUBLIC
 		$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+		$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include/xjni>
 		$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+		$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/xjni>
 		${JNI_INCLUDE_DIRS}
 )
+
+if(ANDROID)
+	target_link_libraries(xjni PUBLIC ${ANDROID_LOG_LIB})
+endif()
 
 if(NOT WIN32)
 	set_target_properties(xjni PROPERTIES
@@ -74,9 +86,14 @@ if(XJNI_BUILD_STATIC)
 	target_include_directories(xjni_static
 		PUBLIC
 			$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+			$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include/xjni>
 			$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+			$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/xjni>
 			${JNI_INCLUDE_DIRS}
 	)
+	if(ANDROID)
+		target_link_libraries(xjni_static PUBLIC ${ANDROID_LOG_LIB})
+	endif()
 endif()
 
 # ------------------------------
@@ -98,8 +115,8 @@ if(XJNI_BUILD_STATIC)
 	)
 endif()
 
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/
-	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/xjni/
+	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/xjni
 	FILES_MATCHING PATTERN "*.h"
 )
 
@@ -150,6 +167,8 @@ if(XJNI_BUILD_TESTS)
 		${CMAKE_SOURCE_DIR}/test/java/TestStringReader.java
 		${CMAKE_SOURCE_DIR}/test/java/TestStringWriter.java
 		${CMAKE_SOURCE_DIR}/test/java/TestXJNI.java
+		${CMAKE_SOURCE_DIR}/test/java/TestXJNILOG.java
+		${CMAKE_SOURCE_DIR}/test/java/TestXJNIPrintf.java
 		VERSION ${PROJECT_VERSION}
 		OUTPUT_NAME "xjni-test"
 		OUTPUT_DIR "${JAR_OUTPUT_DIR}"
@@ -166,6 +185,9 @@ if(XJNI_BUILD_TESTS)
 		${CMAKE_SOURCE_DIR}/test/c/xjni_stringwriter_test.c
 		${CMAKE_SOURCE_DIR}/test/c/xjni_stringreader_test.c
 		${CMAKE_SOURCE_DIR}/test/c/xjni2d_test.c
+		${CMAKE_SOURCE_DIR}/test/c/xjni_va_list_test.c
+		${CMAKE_SOURCE_DIR}/test/c/xjni_va_list_test.c
+		${CMAKE_SOURCE_DIR}/test/c/xjni_log_test.c
 		${CMAKE_SOURCE_DIR}/test/c/xjni_test.c
 	)
 	target_include_directories(xjni_test PRIVATE ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/include)
@@ -181,7 +203,8 @@ if(XJNI_BUILD_TESTS)
 
 	# Java test targets
 	foreach(TESTCLASS TestStringArray ArrayFieldTest Array2DTest
-		TestXJNI TestStringBuilder TestStringWriter TestStringReader TestStringBuffer)
+		TestXJNI TestStringBuilder TestStringWriter TestStringReader TestStringBuffer TestXJNIPrintf
+		TestXJNILOG)
 		add_custom_target(run_${TESTCLASS}
 			COMMAND ${Java_JAVA_EXECUTABLE} -Djava.library.path=${LIBS_TEST_OUTPUT_DIR} -cp ${JAR_OUTPUT_DIR}/xjni-test.jar ${TESTCLASS}
 			WORKING_DIRECTORY "${JAR_OUTPUT_DIR}"

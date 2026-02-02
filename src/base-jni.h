@@ -120,6 +120,8 @@
 #define _GetArrayLength(env,ex) BASEJNIC(GetArrayLength,env,ex)
 #define _ThrowNew(env,ex,msg) BASEJNIC(ThrowNew,env,ex,msg)
 
+#define _IsInstanceOf(env,obj,clazz) BASEJNIC(IsInstanceOf,env,obj,clazz)
+
 // Char
 #define _NewCharArray(env,len) BASEJNIC(NewCharArray,env,len)
 #define _CallCharMethod(env,ex,methodID) BASEJNIC(CallCharMethod,env,ex,methodID)
@@ -156,6 +158,8 @@
 #define _NewObjectArray(env,len,clazz,init) BASEJNIC(NewObjectArray,env,len,clazz,init)
 
 // Double
+#define _CallDoubleMethod(env,ex,methodID) BASEJNIC(CallDoubleMethod,env,ex,methodID)
+#define _CallDoubleMethod_l(env,ex,methodID,...) BASEJNIC(CallDoubleMethod,env,ex,methodID,__VA_ARGS__)
 #define _NewDoubleArray(env,len) BASEJNIC(NewDoubleArray,env,len)
 #define _GetDoubleField(env,clazz,fieldID) BASEJNIC(GetDoubleField,env,clazz,fieldID)
 #define _GetStaticDoubleField(env,clazz,fieldID) BASEJNIC(GetStaticDoubleField,env,clazz,fieldID)
@@ -163,6 +167,8 @@
 #define _SetDoubleArrayRegion(env,array,start,len,buf) BASEJNIC(SetDoubleArrayRegion,env,array,start,len,buf)
 
 // Short
+#define _CallShortMethod(env,ex,methodID) BASEJNIC(CallShortMethod,env,ex,methodID)
+#define _CallShortMethod_l(env,ex,methodID,...) BASEJNIC(CallShortMethod,env,ex,methodID,__VA_ARGS__)
 #define _NewShortArray(env,len) BASEJNIC(NewShortArray,env,len)
 #define _GetShortField(env,clazz,fieldID) BASEJNIC(GetShortField,env,clazz,fieldID)
 #define _SetShortField(env,clazz,fieldID,val) BASEJNIC(SetShortField,env,clazz,fieldID,val)
@@ -224,6 +230,8 @@
 #define _ReleaseStringUTFChars(env,src,out) BASEJNIC(ReleaseStringUTFChars,env,src,out)
 
 // Byte
+#define _CallByteMethod(env,ex,methodID) BASEJNIC(CallByteMethod,env,ex,methodID)
+#define _CallByteMethod_l(env,ex,methodID,...) BASEJNIC(CallByteMethod,env,ex,methodID,__VA_ARGS__)
 #define _GetByteField(env,clazz,fieldID) BASEJNIC(GetByteField,env,clazz,fieldID)
 #define _GetStaticByteField(env,clazz,fieldID) BASEJNIC(GetStaticByteField,env,clazz,fieldID)
 #define _NewByteArray(env,len) BASEJNIC(NewByteArray,env,len)

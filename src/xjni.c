@@ -302,12 +302,52 @@ JNIEXPORTC void JNICALL jstrreverse(jchar* __str) {
 	}
 }
 
-JNIEXPORTC char JNICALL xjni_tochar(jchar c) {
-	return (c <= 0x7F) ? (char)c : '?';
+JNIEXPORT jint JNICALL xjni_tochar(const jchar c, char* out, size_t out_size) {
+	 if (!out || out_size == 0) return 0;
+
+	 if (c <= 0x7F) {
+		out[0] = (char)c;
+		return 1;
+	 } else if (c <= 0x7FF) {
+		if (out_size < 2) return 0;
+		out[0] = (char)(0xC0 | ((c >> 6) & 0x1F));
+		out[1] = (char)(0x80 | (c & 0x3F));
+		return 2;
+	 } else {
+		if (out_size < 3) return 0;
+		out[0] = (char)(0xE0 | ((c >> 12) & 0x0F));
+		out[1] = (char)(0x80 | ((c >> 6) & 0x3F));
+		out[2] = (char)(0x80 | (c & 0x3F));
+		return 3;
+	 }
 }
 
-JNIEXPORTC jchar JNICALL xjni_tojchar(const char c) {
-	return (jchar)(unsigned char)c;
+JNIEXPORT jint JNICALL xjni_tojchar(const char* utf8, size_t utf8_len, jchar* out) {
+	 if (!utf8 || !out || utf8_len == 0) return 0;
+
+	 unsigned char c0 = (unsigned char)utf8[0];
+
+	 if (c0 <= 0x7F) {
+		  // 1-byte ASCII
+		  *out = (jchar)c0;
+		  return 1;
+	 } else if ((c0 & 0xE0) == 0xC0 && utf8_len >= 2) {
+		  // 2-byte UTF-8
+		  unsigned char c1 = (unsigned char)utf8[1];
+		  if ((c1 & 0xC0) != 0x80) return 0; // invalid
+		  *out = (jchar)(((c0 & 0x1F) << 6) | (c1 & 0x3F));
+		  return 2;
+	 } else if ((c0 & 0xF0) == 0xE0 && utf8_len >= 3) {
+		  // 3-byte UTF-8
+		  unsigned char c1 = (unsigned char)utf8[1];
+		  unsigned char c2 = (unsigned char)utf8[2];
+		  if ((c1 & 0xC0) != 0x80 || (c2 & 0xC0) != 0x80) return 0; // invalid
+		  *out = (jchar)(((c0 & 0x0F) << 12) | ((c1 & 0x3F) << 6) | (c2 & 0x3F));
+		  return 3;
+	 }
+
+	 // characters beyond U+FFFF (surrogate pairs) not supported here
+	 return 0;
 }
 
 JNIEXPORTC char* JNICALL xjni_tostring(const jchar* c) {
