@@ -14,7 +14,7 @@ JNIEXPORTC void JNICALL name(JNIEnv *env,jstringBuffer sb,type obj) {\
 	if (clz == NULL) return;\
 	jmethodID appendMethod = _GetMethodID(env,clz,"append",sig);\
 	if (appendMethod == NULL) { _DeleteLocalRef(env,clz); return; }\
-	sb = _CallObjectMethod_l(env,sb,appendMethod,obj);\
+	sb = _CallObjectMethod(env,sb,appendMethod,obj);\
 	_DeleteLocalRef(env,clz);\
 }
 
@@ -24,7 +24,7 @@ JNIEXPORTC void JNICALL name(JNIEnv *env,jstringBuffer sb,jint offset,type obj) 
 	if (clz == NULL) return;\
 	jmethodID appendMethod = _GetMethodID(env,clz,"insert",sig);\
 	if (appendMethod == NULL) { _DeleteLocalRef(env,clz); return; }\
-	sb = _CallObjectMethod_l(env,sb,appendMethod,offset,obj);\
+	sb = _CallObjectMethod(env,sb,appendMethod,offset,obj);\
 	_DeleteLocalRef(env,clz);\
 }
 
@@ -76,7 +76,7 @@ JNIEXPORTC jstringBuffer JNICALL NewStringBufferCapacity(JNIEnv *env,jint capaci
 		return NULL;
 	}
 
-	jobject obj = _NewObject_l(env,clz,ctor,capacity);
+	jobject obj = _NewObject(env,clz,ctor,capacity);
 
 	if (_ExceptionCheck(env)) {
 		_ExceptionClear(env);
@@ -105,7 +105,7 @@ JNIEXPORT jobject JNICALL NewStringBufferString(JNIEnv *env,jstring str) {
 		return NULL;
 	}
 
-	jobject obj = _NewObject_l(env,clz,ctor,str);
+	jobject obj = _NewObject(env,clz,ctor,str);
 
 	if (_ExceptionCheck(env)) {
 		_ExceptionClear(env);
@@ -205,7 +205,7 @@ JNIEXPORTC void JNICALL StringBufferAppendCharArrayIntInt(JNIEnv *env,jstringBuf
 		_DeleteLocalRef(env,clz);
 		return;
 	}
-	sb = _CallObjectMethod_l(env,sb,appendMethod,obj,offset,len);
+	sb = _CallObjectMethod(env,sb,appendMethod,obj,offset,len);
 	_DeleteLocalRef(env,clz);
 }
 
@@ -217,7 +217,7 @@ JNIEXPORTC void JNICALL StringBufferAppendCodePoint(JNIEnv *env,jstringBuffer sb
 		_DeleteLocalRef(env,clz);
 		return;
 	}
-	sb = _CallObjectMethod_l(env,sb,appendMethod,codePoint);
+	sb = _CallObjectMethod(env,sb,appendMethod,codePoint);
 	_DeleteLocalRef(env,clz);
 }
 
@@ -229,7 +229,7 @@ JNIEXPORTC void JNICALL StringBufferDelete(JNIEnv *env,jstringBuffer sb,jint sta
 		_DeleteLocalRef(env,clz);
 		return;
 	}
-	sb = _CallObjectMethod_l(env,sb,appendMethod,start,end);
+	sb = _CallObjectMethod(env,sb,appendMethod,start,end);
 	_DeleteLocalRef(env,clz);
 }
 
@@ -240,7 +240,7 @@ JNIEXPORTC void JNICALL StringBufferDeleteCharAt(JNIEnv *env,jstringBuffer sb,ji
 		_DeleteLocalRef(env,clz);
 		return;
 	}
-	sb = _CallObjectMethod_l(env,sb,appendMethod,index);
+	sb = _CallObjectMethod(env,sb,appendMethod,index);
 	_DeleteLocalRef(env,clz);
 }
 
@@ -252,7 +252,7 @@ JNIEXPORTC void JNICALL StringBufferReplace(JNIEnv *env,jstringBuffer sb,jint st
 		_DeleteLocalRef(env,clz);
 		return;
 	}
-	sb = _CallObjectMethod_l(env,sb,appendMethod,start,end,str);
+	sb = _CallObjectMethod(env,sb,appendMethod,start,end,str);
 	_DeleteLocalRef(env,clz);
 }
 
@@ -275,7 +275,7 @@ JNIEXPORTC void JNICALL StringBufferInsertCharArrayIntInt(JNIEnv *env,jstringBuf
 		_DeleteLocalRef(env,clz);
 		return;
 	}
-	sb = _CallObjectMethod_l(env,sb,appendMethod,index,str,offset,len);
+	sb = _CallObjectMethod(env,sb,appendMethod,index,str,offset,len);
 	_DeleteLocalRef(env,clz);
 }
 
@@ -297,7 +297,7 @@ JNIEXPORTC void JNICALL StringBufferEnsureCapacity(JNIEnv *env,jstringBuffer sb,
 		_DeleteLocalRef(env,clz);
 		return;
 	}
-	_CallVoidMethod_l(env,sb,Id,minimumCapacity);
+	_CallVoidMethod(env,sb,Id,minimumCapacity);
 	_DeleteLocalRef(env,clz);
 }
 
@@ -309,7 +309,7 @@ JNIEXPORTC void JNICALL StringBufferSetLength(JNIEnv *env,jstringBuffer sb,jint 
 		_DeleteLocalRef(env,clz);
 		return;
 	}
-	_CallVoidMethod_l(env,sb,Id,newLength);
+	_CallVoidMethod(env,sb,Id,newLength);
 	_DeleteLocalRef(env,clz);
 }
 
@@ -321,7 +321,7 @@ JNIEXPORTC void JNICALL StringBufferSetCharAt(JNIEnv *env,jstringBuffer sb,jint 
 		_DeleteLocalRef(env,clz);
 		return;
 	}
-	_CallVoidMethod_l(env,sb,Id,index,ch);
+	_CallVoidMethod(env,sb,Id,index,ch);
 	_DeleteLocalRef(env,clz);
 }
 
@@ -333,7 +333,7 @@ JNIEXPORTC jchar JNICALL StringBufferCharAt(JNIEnv *env,jstringBuffer sb,jint in
 		_DeleteLocalRef(env,clz);
 		return '\0';
 	}
-	jchar ret = _CallCharMethod_l(env,sb,Id,index);
+	jchar ret = _CallCharMethod(env,sb,Id,index);
 	_DeleteLocalRef(env,clz);
 	return ret;
 }
@@ -346,7 +346,7 @@ JNIEXPORTC jint JNICALL StringBufferCodePointAt(JNIEnv *env,jstringBuffer sb,jin
 		_DeleteLocalRef(env,clz);
 		return JNI_ERR;
 	}
-	jint ret = _CallIntMethod_l(env,sb,Id,index);
+	jint ret = _CallIntMethod(env,sb,Id,index);
 	_DeleteLocalRef(env,clz);
 	return ret;
 }
@@ -359,7 +359,7 @@ JNIEXPORTC jint JNICALL StringBufferCodePointBefore(JNIEnv *env,jstringBuffer sb
 		_DeleteLocalRef(env,clz);
 		return JNI_ERR;
 	}
-	jint ret = _CallIntMethod_l(env,sb,Id,index);
+	jint ret = _CallIntMethod(env,sb,Id,index);
 	_DeleteLocalRef(env,clz);
 	return ret;
 }
@@ -372,7 +372,7 @@ JNIEXPORTC jint JNICALL StringBufferCodePointCount(JNIEnv *env,jstringBuffer sb,
 		_DeleteLocalRef(env,clz);
 		return JNI_ERR;
 	}
-	jint ret = _CallIntMethod_l(env,sb,Id,beginIndex,endIndex);
+	jint ret = _CallIntMethod(env,sb,Id,beginIndex,endIndex);
 	_DeleteLocalRef(env,clz);
 	return ret;
 }
@@ -385,7 +385,7 @@ JNIEXPORTC jint JNICALL StringBufferOffsetByCodePoints(JNIEnv *env,jstringBuffer
 		_DeleteLocalRef(env,clz);
 		return JNI_ERR;
 	}
-	jint ret = _CallIntMethod_l(env,sb,Id,index,codePointOffset);
+	jint ret = _CallIntMethod(env,sb,Id,index,codePointOffset);
 	_DeleteLocalRef(env,clz);
 	return ret;
 }
@@ -410,7 +410,7 @@ JNIEXPORTC void JNICALL StringBufferGetChars(JNIEnv *env,jstringBuffer sb,jint s
 		_DeleteLocalRef(env,clz);
 		return;
 	}
-	_CallVoidMethod_l(env,sb,Id,srcBegin,srcEnd,dst,dstBegin);
+	_CallVoidMethod(env,sb,Id,srcBegin,srcEnd,dst,dstBegin);
 	_DeleteLocalRef(env,clz);
 }
 
@@ -433,7 +433,7 @@ JNIEXPORTC jstring JNICALL StringBufferSubString(JNIEnv *env,jstringBuffer sb,ji
 		_DeleteLocalRef(env,clz);
 		return NULL;
 	}
-	jstring ret = ubase_cast(jstring,_CallObjectMethod_l(env,sb,appendMethod,start));
+	jstring ret = ubase_cast(jstring,_CallObjectMethod(env,sb,appendMethod,start));
 	_DeleteLocalRef(env,clz);
 	return ret;
 }
@@ -446,7 +446,7 @@ JNIEXPORTC jstring JNICALL StringBufferSubStringIntInt(JNIEnv *env,jstringBuffer
 		_DeleteLocalRef(env,clz);
 		return NULL;
 	}
-	jstring ret = ubase_cast(jstring,_CallObjectMethod_l(env,sb,appendMethod,start,end));
+	jstring ret = ubase_cast(jstring,_CallObjectMethod(env,sb,appendMethod,start,end));
 	_DeleteLocalRef(env,clz);
 	return ret;
 }
@@ -459,7 +459,7 @@ JNIEXPORTC jobject JNICALL StringBufferSubSequence(JNIEnv *env,jstringBuffer sb,
 		_DeleteLocalRef(env,clz);
 		return NULL;
 	}
-	jobject ret = _CallObjectMethod_l(env,sb,appendMethod,start,end);
+	jobject ret = _CallObjectMethod(env,sb,appendMethod,start,end);
 	_DeleteLocalRef(env,clz);
 	return ret;
 }
@@ -472,7 +472,7 @@ JNIEXPORTC jint JNICALL StringBufferIndexOf(JNIEnv *env,jstringBuffer sb,jstring
 		_DeleteLocalRef(env,clz);
 		return JNI_ERR;
 	}
-	jint ret = _CallIntMethod_l(env,sb,appendMethod,str);
+	jint ret = _CallIntMethod(env,sb,appendMethod,str);
 	_DeleteLocalRef(env,clz);
 	return ret;
 }
@@ -485,7 +485,7 @@ JNIEXPORTC jint JNICALL StringBufferIndexOfI(JNIEnv *env,jstringBuffer sb,jstrin
 		_DeleteLocalRef(env,clz);
 		return JNI_ERR;
 	}
-	jint ret = _CallIntMethod_l(env,sb,appendMethod,str,fromIndex);
+	jint ret = _CallIntMethod(env,sb,appendMethod,str,fromIndex);
 	_DeleteLocalRef(env,clz);
 	return ret;
 }
@@ -522,7 +522,7 @@ JNIEXPORTC jint JNICALL StringBufferLastIndexOf(JNIEnv *env,jstringBuffer sb,jst
 		_DeleteLocalRef(env,clz);
 		return JNI_ERR;
 	}
-	jint ret = _CallIntMethod_l(env,sb,appendMethod,str);
+	jint ret = _CallIntMethod(env,sb,appendMethod,str);
 	_DeleteLocalRef(env,clz);
 	return ret;
 }
@@ -535,7 +535,7 @@ JNIEXPORTC jint JNICALL StringBufferLastIndexOfI(JNIEnv *env,jstringBuffer sb,js
 		_DeleteLocalRef(env,clz);
 		return JNI_ERR;
 	}
-	jint ret = _CallIntMethod_l(env,sb,appendMethod,str,fromIndex);
+	jint ret = _CallIntMethod(env,sb,appendMethod,str,fromIndex);
 	_DeleteLocalRef(env,clz);
 	return ret;
 }

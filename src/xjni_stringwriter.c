@@ -56,7 +56,7 @@ JNIEXPORTC jstringWriter JNICALL NewStringWriterInitialSize(JNIEnv *env,jint ini
 		return NULL;
 	}
 
-	jobject obj = _NewObject_l(env,clz,ctor,initialSize);
+	jobject obj = _NewObject(env,clz,ctor,initialSize);
 
 	if (_ExceptionCheck(env)) {
 		_ExceptionClear(env);
@@ -126,7 +126,7 @@ JNIEXPORTC void JNICALL StringWriterWriteCharArrayIntInt(JNIEnv *env,jstringWrit
 		_DeleteLocalRef(env,clz);
 		return;
 	}
-	_CallVoidMethod_l(env,sw,Id,obj,offset,len);
+	_CallVoidMethod(env,sw,Id,obj,offset,len);
 	_DeleteLocalRef(env,clz);
 }
 
@@ -138,7 +138,7 @@ JNIEXPORTC void JNICALL StringWriterWriteInt(JNIEnv *env,jstringWriter sw,jint l
 		_DeleteLocalRef(env,clz);
 		return;
 	}
-	_CallVoidMethod_l(env,sw,Id,len);
+	_CallVoidMethod(env,sw,Id,len);
 	_DeleteLocalRef(env,clz);
 }
 
@@ -150,7 +150,7 @@ JNIEXPORTC void JNICALL StringWriterWriteString(JNIEnv *env,jstringWriter sw,jst
 		_DeleteLocalRef(env,clz);
 		return;
 	}
-	_CallVoidMethod_l(env,sw,Id,str);
+	_CallVoidMethod(env,sw,Id,str);
 	_DeleteLocalRef(env,clz);
 }
 
@@ -162,7 +162,7 @@ JNIEXPORTC void JNICALL StringWriterWriteStringIntInt(JNIEnv *env,jstringWriter 
 		_DeleteLocalRef(env,clz);
 		return;
 	}
-	_CallVoidMethod_l(env,sw,Id,str,offset,len);
+	_CallVoidMethod(env,sw,Id,str,offset,len);
 	_DeleteLocalRef(env,clz);
 }
 
@@ -186,6 +186,6 @@ JNIEXPORTC void JNICALL StringWriterAppendChar(JNIEnv *env,jstringWriter sb,jcha
 		_DeleteLocalRef(env,clz);
 		return;
 	}
-	sb = _CallObjectMethod_l(env,sb,Id,obj);
+	sb = _CallObjectMethod(env,sb,Id,obj);
 	_DeleteLocalRef(env,clz);
 }

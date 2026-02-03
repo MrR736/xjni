@@ -1,4 +1,5 @@
-#include <xjni.h>
+#include <xjni_log.h>
+#include <xjni_va_list.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -8,131 +9,78 @@
 #define LOG_TAG "xjni"
 #include "base-jni.h"
 
-JNIEXPORTC void JNICALL JSnPrintf(JNIEnv *env, char* s, size_t maxlen, jstring format, jargs_t args) {
-	if (!s || maxlen == 0 || !format) return;
+static jclass gStringCls = NULL;
+static jmethodID gFormatMid = NULL;
 
-	const char *fmt = _GetStringUTFChars(env, format, NULL);
-	size_t pos = 0;
-	int argIndex = 0;
-	jsize argc = args ? _GetArrayLength(env, args) : 0;
-	const char *p = fmt;
+static jboolean ensureStringFormat(JNIEnv *env) {
+	if (gStringCls && gFormatMid) return JNI_TRUE;
 
-	while (*p && pos < maxlen - 1) {
-		if (*p == '%' && *(p+1) != '\0') {
-			p++; // skip '%'
+	jclass local = _FindClass(env, "java/lang/String");
+	if (!local) return JNI_FALSE;
 
-			// Handle literal %%
-			if (*p == '%') { s[pos++] = '%'; p++; continue; }
+	jclass global = _NewGlobalRef(env, local);
+	_DeleteLocalRef(env, local);
+	if (!global) return JNI_FALSE;
 
-			// --- Flags ---
-			int left_align = 0, force_sign = 0, zero_pad = 0;
-			while (*p == '-' || *p == '+' || *p == '0') {
-				if (*p == '-') left_align = 1;
-				else if (*p == '+') force_sign = 1;
-				else if (*p == '0') zero_pad = 1;
-				p++;
-			}
-
-			// --- Width ---
-			int width = 0;
-			if (*p >= '0' && *p <= '9') width = strtol(p, (char**)&p, 10);
-
-			// --- Precision ---
-			int precision = -1;
-			if (*p == '.') { p++; precision = strtol(p, (char**)&p, 10); }
-
-			char spec = *p++;
-
-			// No more arguments
-			if (argIndex >= argc) { s[pos++] = '?'; continue; }
-
-			jobject obj = _GetObjectArrayElement(env, args, argIndex++);
-			jclass cls = _GetObjectClass(env, obj);
-
-			char temp[256]; // sufficient for most cases
-			temp[0] = '\0';
-
-			// --- Integer types ---
-			if (_IsInstanceOf(env, obj, _FindClass(env, "java/lang/Integer"))) {
-				jint val = _CallIntMethod(env, obj, _GetMethodID(env, cls, "intValue", "()I"));
-				char fmtstr[32];
-				snprintf(fmtstr, sizeof(fmtstr), "%%%s%s%s%d%c",
-						 left_align ? "-" : "",
-						 force_sign ? "+" : "",
-						 zero_pad && !left_align ? "0" : "",
-						 width, spec);
-				snprintf(temp, sizeof(temp), fmtstr, val);
-
-			} else if (_IsInstanceOf(env, obj, _FindClass(env, "java/lang/Long"))) {
-				jlong val = _CallLongMethod(env, obj, _GetMethodID(env, cls, "longValue", "()J"));
-				if (spec == 'd' || spec == 'i') snprintf(temp, sizeof(temp), "%*s%" PRId64,width, "", (int64_t)val);
-				else if (spec == 'x') snprintf(temp, sizeof(temp), "%0*"PRIx64, width ? width : 0, (uint64_t)val);
-				else if (spec == 'X') snprintf(temp, sizeof(temp), "%0*"PRIX64, width ? width : 0, (uint64_t)val);
-				else snprintf(temp, sizeof(temp), "%" PRId64, (int64_t)val);
-			} else if (_IsInstanceOf(env, obj, _FindClass(env, "java/lang/Short"))) {
-				jshort val = _CallShortMethod(env, obj, _GetMethodID(env, cls, "shortValue", "()S"));
-				snprintf(temp, sizeof(temp), "%hd", val);
-			} else if (_IsInstanceOf(env, obj, _FindClass(env, "java/lang/Byte"))) {
-				jbyte val = _CallByteMethod(env, obj, _GetMethodID(env, cls, "byteValue", "()B"));
-				snprintf(temp, sizeof(temp), "%hhd", val);
-			} else if (_IsInstanceOf(env, obj, _FindClass(env, "java/lang/Float"))) {
-				jfloat val = _CallFloatMethod(env, obj, _GetMethodID(env, cls, "floatValue", "()F"));
-				if (precision >= 0) snprintf(temp, sizeof(temp), "%*.*f", width, precision, val);
-				else snprintf(temp, sizeof(temp), "%*f", width, val);
-			} else if (_IsInstanceOf(env, obj, _FindClass(env, "java/lang/Double"))) {
-				jdouble val = _CallDoubleMethod(env, obj, _GetMethodID(env, cls, "doubleValue", "()D"));
-				if (precision >= 0) snprintf(temp, sizeof(temp), "%*.*f", width, precision, val);
-				else snprintf(temp, sizeof(temp), "%*f", width, val);
-			} else if (_IsInstanceOf(env, obj, _FindClass(env, "java/lang/Boolean"))) {
-				jboolean val = _CallBooleanMethod(env, obj, _GetMethodID(env, cls, "booleanValue", "()Z"));
-				snprintf(temp, sizeof(temp), "%s", val ? "true" : "false");
-			} else if (_IsInstanceOf(env, obj, _FindClass(env, "java/lang/Character"))) {
-				jchar val = _CallCharMethod(env, obj, _GetMethodID(env, cls, "charValue", "()C"));
-				char buf[4];
-				int len = xjni_tochar(val,buf,sizeof(buf));
-				if (len > 0 && len < sizeof(buf)) buf[len] = '\0';
-				else buf[0] = '\0';
-				snprintf(temp, sizeof(temp), "%s", buf);
-			} else if (_IsInstanceOf(env, obj, _FindClass(env, "java/lang/String"))) {
-				const char *str = _GetStringUTFChars(env, (jstring)obj, NULL);
-				snprintf(temp, sizeof(temp), "%s", str);
-				_ReleaseStringUTFChars(env, (jstring)obj, str);
-
-			} else if (_IsInstanceOf(env, obj, _FindClass(env, "java/math/BigInteger"))) {
-				jstring strObj = (jstring)_CallObjectMethod(env, obj, _GetMethodID(env, cls, "toString", "()Ljava/lang/String;"));
-				const char *str = _GetStringUTFChars(env, strObj, NULL);
-				snprintf(temp, sizeof(temp), "%s", str);
-				_ReleaseStringUTFChars(env, strObj, str);
-				_DeleteLocalRef(env, strObj);
-
-			} else if (_IsInstanceOf(env, obj, _FindClass(env, "java/math/BigDecimal"))) {
-				jstring strObj = (jstring)_CallObjectMethod(env, obj, _GetMethodID(env, cls, "toPlainString", "()Ljava/lang/String;"));
-				const char *str = _GetStringUTFChars(env, strObj, NULL);
-				snprintf(temp, sizeof(temp), "%s", str);
-				_ReleaseStringUTFChars(env, strObj, str);
-				_DeleteLocalRef(env, strObj);
-
-			} else snprintf(temp, sizeof(temp), "<?>");
-
-			// Copy to output buffer safely
-			size_t len = strlen(temp);
-			if (pos + len >= maxlen - 1) len = maxlen - 1 - pos;
-			jmemcpy(s + pos, temp, len);
-			pos += len;
-
-			_DeleteLocalRef(env, obj);
-
-		} else {
-			s[pos++] = *p++;
-		}
+	jmethodID mid = _GetStaticMethodID(env, global,"format","(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;");
+	if (!mid) {
+		_DeleteGlobalRef(env, global);
+		return JNI_FALSE;
 	}
+	/* publish atomically */
+	gStringCls = global;
+	gFormatMid = mid;
+	return JNI_TRUE;
+}
 
-	s[pos] = '\0';
-	_ReleaseStringUTFChars(env, format, fmt);
+JNIEXPORTC void JNICALL JSnPrintf(JNIEnv *env, char *s, size_t maxlen,jstring format, jargs_t args) {
+	jstring result = NULL;
+	const char *utf = NULL;
+	if (!ensureStringFormat(env)) {
+		XJNI_LOGE("XJniVaList", "String.format init failed");
+		return;
+	}
+	if (args) result = (jstring)_CallStaticObjectMethod(env, gStringCls, gFormatMid, format, args);
+	else result = (jstring)_CallStaticObjectMethod(env, gStringCls, gFormatMid, format);
+	if (_ExceptionCheck(env) || !result) {
+		XJNI_LOGE("XJniVaList", "String.format threw");
+		_ExceptionClear(env);
+		goto cleanup;
+	}
+	utf = _GetStringUTFChars(env, result, NULL);
+	if (!utf) {
+		XJNI_LOGE("XJniVaList", "GetStringUTFChars failed");
+		goto cleanup;
+	}
+	snprintf(s,maxlen,"%s",utf);
+cleanup:
+	if (utf) _ReleaseStringUTFChars(env, result, utf);
+	if (result) _DeleteLocalRef(env, result);
 }
 
 JNIEXPORTC void JNICALL JSPrintf(JNIEnv *env,char* s,jstring format,jargs_t args) {
-	JSnPrintf(env,s,SIZE_MAX,format,args);
+	jstring result = NULL;
+	const char *utf = NULL;
+	if (!ensureStringFormat(env)) {
+		XJNI_LOGE("XJniVaList", "String.format init failed");
+		return;
+	}
+	if (args) result = (jstring)_CallStaticObjectMethod(env, gStringCls, gFormatMid, format, args);
+	else result = (jstring)_CallStaticObjectMethod(env, gStringCls, gFormatMid, format);
+	if (_ExceptionCheck(env) || !result) {
+		XJNI_LOGE("XJniVaList", "String.format threw");
+		_ExceptionClear(env);
+		goto cleanup;
+	}
+	utf = _GetStringUTFChars(env, result, NULL);
+	if (!utf) {
+		XJNI_LOGE("XJniVaList", "GetStringUTFChars failed");
+		goto cleanup;
+	}
+	sprintf(s,"%s",utf);
+cleanup:
+	if (utf) _ReleaseStringUTFChars(env, result, utf);
+	if (result) _DeleteLocalRef(env, result);
 }
 
 JNIEXPORTC void JNICALL JSnPrintfUTF(JNIEnv *env,char* s,size_t maxlen,const char* format,jargs_t args) {
@@ -148,4 +96,85 @@ JNIEXPORTC void JNICALL JSnPrintfUTF(JNIEnv *env,char* s,size_t maxlen,const cha
 
 JNIEXPORTC void JNICALL JSPrintfUTF(JNIEnv *env,char* s,const char* format,jargs_t args) {
 	JSnPrintfUTF(env,s,SIZE_MAX,format,args);
+}
+
+JNIEXPORTC void JNICALL JFPrintf(JNIEnv *env,FILE* fp,jstring format, jargs_t args) {
+	jstring result = NULL;
+	const char *utf = NULL;
+	if (!ensureStringFormat(env)) {
+		XJNI_LOGE("XJniVaList", "String.format init failed");
+		return;
+	}
+	if (args) result = (jstring)_CallStaticObjectMethod(env, gStringCls, gFormatMid, format, args);
+	else result = (jstring)_CallStaticObjectMethod(env, gStringCls, gFormatMid, format);
+	if (_ExceptionCheck(env) || !result) {
+		XJNI_LOGE("XJniVaList", "String.format threw");
+		_ExceptionClear(env);
+		goto cleanup;
+	}
+	utf = _GetStringUTFChars(env, result, NULL);
+	if (!utf) {
+		XJNI_LOGE("XJniVaList", "GetStringUTFChars failed");
+		goto cleanup;
+	}
+	fprintf(fp,"%s",utf);
+cleanup:
+	if (utf) _ReleaseStringUTFChars(env, result, utf);
+	if (result) _DeleteLocalRef(env, result);
+}
+
+JNIEXPORTC void JNICALL JFPrintfUTF(JNIEnv *env,FILE* fp,const char* format,jargs_t args) {
+	if (format == NULL) return;
+	jstring jstr = _NewStringUTF(env,format);
+	if (jstr == NULL || _ExceptionCheck(env)) {
+		_ExceptionClear(env);
+		return;
+	}
+	JFPrintf(env,fp,jstr,args);
+	_DeleteLocalRef(env,jstr);
+}
+
+
+JNIEXPORTC void JNICALL JPrintf(JNIEnv *env,jstring format, jargs_t args) {
+	JFPrintf(env,stdout,format,args);
+}
+
+JNIEXPORTC void JNICALL JPrintfUTF(JNIEnv *env,const char* format, jargs_t args) {
+	JFPrintfUTF(env,stdout,format,args);
+}
+
+JNIEXPORTC void JNICALL JDPrintf(JNIEnv *env,int fd,jstring format, jargs_t args) {
+	jstring result = NULL;
+	const char *utf = NULL;
+	if (!ensureStringFormat(env)) {
+		XJNI_LOGE("XJniVaList", "String.format init failed");
+		return;
+	}
+	if (args) result = (jstring)_CallStaticObjectMethod(env, gStringCls, gFormatMid, format, args);
+	else result = (jstring)_CallStaticObjectMethod(env, gStringCls, gFormatMid, format);
+	if (_ExceptionCheck(env) || !result) {
+		XJNI_LOGE("XJniVaList", "String.format threw");
+		_ExceptionClear(env);
+		goto cleanup;
+	}
+	utf = _GetStringUTFChars(env, result, NULL);
+	if (!utf) {
+		XJNI_LOGE("XJniVaList", "GetStringUTFChars failed");
+		goto cleanup;
+	}
+	dprintf(fd,"%s",utf);
+cleanup:
+	if (utf) _ReleaseStringUTFChars(env, result, utf);
+	if (result) _DeleteLocalRef(env, result);
+}
+
+JNIEXPORTC void JNICALL JDPrintfUTF(JNIEnv *env,int fd,const char* format,jargs_t args) {
+	if (format == NULL) return;
+	jstring jstr = _NewStringUTF(env,format);
+	if (jstr == NULL || _ExceptionCheck(env)) {
+		_ExceptionClear(env);
+		return;
+	}
+	JDPrintf(env,fd,jstr,args);
+	_DeleteLocalRef(env,jstr);
 }

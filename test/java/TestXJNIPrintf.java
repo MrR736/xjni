@@ -8,6 +8,7 @@ public class TestXJNIPrintf {
 	}
 
 	private native String formatWithJNI(String format, Object... args);
+	private native String formatWithJNINoArgs();
 
 	public static void main(String[] args) {
 		TestXJNIPrintf t = new TestXJNIPrintf();
@@ -28,6 +29,9 @@ public class TestXJNIPrintf {
 			new BigDecimal("3.141592653589793238462643383279")
 		);
 
+		System.out.println(result);
+
+		result = t.formatWithJNINoArgs();
 		System.out.println(result);
 	}
 }

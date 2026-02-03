@@ -27,7 +27,7 @@ JNIEXPORTC jstringReader JNICALL NewStringReader(JNIEnv *env,jstring s) {
 		return NULL;
 	}
 
-	jobject obj = _NewObject_l(env,clz,ctor,s);
+	jobject obj = _NewObject(env,clz,ctor,s);
 
 	if (_ExceptionCheck(env)) {
 		_ExceptionClear(env);
@@ -133,7 +133,7 @@ JNIEXPORTC jint JNICALL StringReaderReadCharArrayIntInt(JNIEnv *env,jstringReade
 		_DeleteLocalRef(env,clz);
 		return JNI_ERR;
 	}
-	jint ret = _CallIntMethod_l(env,sr,Id,obj,offset,len);
+	jint ret = _CallIntMethod(env,sr,Id,obj,offset,len);
 	_DeleteLocalRef(env,clz);
 	return ret;
 }
@@ -146,7 +146,7 @@ JNIEXPORTC jlong JNICALL StringReaderReadSkip(JNIEnv *env,jstringReader sr,jlong
 		_DeleteLocalRef(env,clz);
 		return JNI_ERR;
 	}
-	jlong ret = _CallLongMethod_l(env,sr,Id,ns);
+	jlong ret = _CallLongMethod(env,sr,Id,ns);
 	_DeleteLocalRef(env,clz);
 	return ret;
 }
@@ -185,7 +185,7 @@ JNIEXPORTC void JNICALL StringReaderMark(JNIEnv *env,jstringReader sr,jint readA
 		_DeleteLocalRef(env,clz);
 		return;
 	}
-	_CallVoidMethod_l(env,sr,Id,readAheadLimit);
+	_CallVoidMethod(env,sr,Id,readAheadLimit);
 	_DeleteLocalRef(env,clz);
 }
 

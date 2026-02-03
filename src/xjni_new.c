@@ -109,7 +109,7 @@ static jclass FindClassSafe(JNIEnv* env,const char* name) {
 	_ExceptionClear(env);
 
 	jstring jname = _NewStringUTF(env,name);
-	cls = (jclass)_CallObjectMethod_l(env,g_classLoader,g_loadClass,jname);
+	cls = (jclass)_CallObjectMethod(env,g_classLoader,g_loadClass,jname);
 
 	_DeleteLocalRef(env,jname);
 	return cls;

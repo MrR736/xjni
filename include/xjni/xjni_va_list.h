@@ -1,7 +1,7 @@
 /**
  * xjni_va_list.h: Extern JNI VA LIST Utility
  *
- * Copyright (C) 2025 MrR736 <MrR736@users.github.com>
+ * Copyright (C) 2026 MrR736 <MrR736@users.github.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,19 +24,27 @@
 #define __XJNI_VA_LIST_H__
 
 #include <stdio.h>
-#include <stdarg.h>
 #include <jni.h>
-
-typedef jobjectArray jargs_t;
+#include <xjni_args.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 JNIEXPORT void JNICALL JSnPrintf(JNIEnv *env,char* s,size_t maxlen,jstring format,jargs_t args);
-JNIEXPORT void JNICALL JSPrintf(JNIEnv *env,char* s,jstring format,jargs_t args);
 JNIEXPORT void JNICALL JSnPrintfUTF(JNIEnv *env,char* s,size_t maxlen,const char* format,jargs_t args);
+
+JNIEXPORT void JNICALL JSPrintf(JNIEnv *env,char* s,jstring format,jargs_t args);
 JNIEXPORT void JNICALL JSPrintfUTF(JNIEnv *env,char* s,const char* format,jargs_t args);
+
+JNIEXPORT void JNICALL JFPrintf(JNIEnv *env,FILE* fp,jstring format, jargs_t args);
+JNIEXPORT void JNICALL JFPrintfUTF(JNIEnv *env,FILE* fp,const char* format,jargs_t args);
+
+JNIEXPORT void JNICALL JDPrintf(JNIEnv *env,int fd,jstring format, jargs_t args);
+JNIEXPORT void JNICALL JDPrintfUTF(JNIEnv *env,int fd,const char* format,jargs_t args);
+
+JNIEXPORT void JNICALL JPrintf(JNIEnv *env,jstring format, jargs_t args);
+JNIEXPORT void JNICALL JPrintfUTF(JNIEnv *env,const char* format, jargs_t args);
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(xjni VERSION 1.0.6 LANGUAGES C CXX)
+project(xjni VERSION 1.0.7 LANGUAGES C CXX)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -37,6 +37,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Source files
 # ------------------------------
 set(XJNI_SOURCES
+	${CMAKE_SOURCE_DIR}/src/xjni_args.c
 	${CMAKE_SOURCE_DIR}/src/xjni_arrayfield.c
 	${CMAKE_SOURCE_DIR}/src/xjni_log.c
 	${CMAKE_SOURCE_DIR}/src/xjni_new.c

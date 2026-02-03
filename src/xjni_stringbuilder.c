@@ -14,7 +14,7 @@ JNIEXPORTC void JNICALL name(JNIEnv *env,jstringBuilder sb,type obj) {\
 	if (clz == NULL) return;\
 	jmethodID appendMethod = _GetMethodID(env,clz,"append",sig);\
 	if (appendMethod == NULL) { _DeleteLocalRef(env,clz); return; }\
-	sb = _CallObjectMethod_l(env,sb,appendMethod,obj);\
+	sb = _CallObjectMethod(env,sb,appendMethod,obj);\
 	_DeleteLocalRef(env,clz);\
 }
 
@@ -24,7 +24,7 @@ JNIEXPORTC void JNICALL name(JNIEnv *env,jstringBuilder sb,jint offset,type obj)
 	if (clz == NULL) return;\
 	jmethodID appendMethod = _GetMethodID(env,clz,"insert",sig);\
 	if (appendMethod == NULL) { _DeleteLocalRef(env,clz); return; }\
-	sb = _CallObjectMethod_l(env,sb,appendMethod,offset,obj);\
+	sb = _CallObjectMethod(env,sb,appendMethod,offset,obj);\
 	_DeleteLocalRef(env,clz);\
 }
 
@@ -76,7 +76,7 @@ JNIEXPORTC jstringBuilder JNICALL NewStringBuilderCapacity(JNIEnv *env,jint capa
 		return NULL;
 	}
 
-	jobject obj = _NewObject_l(env,clz,ctor,capacity);
+	jobject obj = _NewObject(env,clz,ctor,capacity);
 
 	if (_ExceptionCheck(env)) {
 		_ExceptionClear(env);
@@ -105,7 +105,7 @@ JNIEXPORTC jstringBuilder JNICALL NewStringBuilderString(JNIEnv *env,jstring str
 		return NULL;
 	}
 
-	jobject obj = _NewObject_l(env,clz,ctor,str);
+	jobject obj = _NewObject(env,clz,ctor,str);
 
 	if (_ExceptionCheck(env)) {
 		_ExceptionClear(env);
@@ -204,7 +204,7 @@ JNIEXPORTC void JNICALL StringBuilderAppendCharArrayIntInt(JNIEnv *env,jstringBu
 		_DeleteLocalRef(env,clz);
 		return;
 	}
-	sb = _CallObjectMethod_l(env,sb,appendMethod,obj,offset,len);
+	sb = _CallObjectMethod(env,sb,appendMethod,obj,offset,len);
 	_DeleteLocalRef(env,clz);
 }
 
@@ -216,7 +216,7 @@ JNIEXPORTC void JNICALL StringBuilderAppendCodePoint(JNIEnv *env,jstringBuilder 
 		_DeleteLocalRef(env,clz);
 		return;
 	}
-	sb = _CallObjectMethod_l(env,sb,appendMethod,codePoint);
+	sb = _CallObjectMethod(env,sb,appendMethod,codePoint);
 	_DeleteLocalRef(env,clz);
 }
 
@@ -228,7 +228,7 @@ JNIEXPORTC void JNICALL StringBuilderDelete(JNIEnv *env,jstringBuilder sb,jint s
 		_DeleteLocalRef(env,clz);
 		return;
 	}
-	sb = _CallObjectMethod_l(env,sb,appendMethod,start,end);
+	sb = _CallObjectMethod(env,sb,appendMethod,start,end);
 	_DeleteLocalRef(env,clz);
 }
 
@@ -239,7 +239,7 @@ JNIEXPORTC void JNICALL StringBuilderDeleteCharAt(JNIEnv *env,jstringBuilder sb,
 		_DeleteLocalRef(env,clz);
 		return;
 	}
-	sb = _CallObjectMethod_l(env,sb,appendMethod,index);
+	sb = _CallObjectMethod(env,sb,appendMethod,index);
 	_DeleteLocalRef(env,clz);
 }
 
@@ -251,7 +251,7 @@ JNIEXPORTC void JNICALL StringBuilderReplace(JNIEnv *env,jstringBuilder sb,jint 
 		_DeleteLocalRef(env,clz);
 		return;
 	}
-	sb = _CallObjectMethod_l(env,sb,appendMethod,start,end,str);
+	sb = _CallObjectMethod(env,sb,appendMethod,start,end,str);
 	_DeleteLocalRef(env,clz);
 }
 
@@ -274,7 +274,7 @@ JNIEXPORTC void JNICALL StringBuilderInsertCharArrayIntInt(JNIEnv *env,jstringBu
 		_DeleteLocalRef(env,clz);
 		return;
 	}
-	sb = _CallObjectMethod_l(env,sb,appendMethod,index,str,offset,len);
+	sb = _CallObjectMethod(env,sb,appendMethod,index,str,offset,len);
 	_DeleteLocalRef(env,clz);
 }
 
@@ -307,7 +307,7 @@ JNIEXPORTC jint JNICALL StringBuilderIndexOf(JNIEnv *env,jstringBuilder sb,jstri
 		_DeleteLocalRef(env,clz);
 		return JNI_ERR;
 	}
-	jint ret = _CallIntMethod_l(env,sb,appendMethod,str);
+	jint ret = _CallIntMethod(env,sb,appendMethod,str);
 	_DeleteLocalRef(env,clz);
 	return ret;
 }
@@ -320,7 +320,7 @@ JNIEXPORTC jint JNICALL StringBuilderIndexOfI(JNIEnv *env,jstringBuilder sb,jstr
 		_DeleteLocalRef(env,clz);
 		return JNI_ERR;
 	}
-	jint ret = _CallIntMethod_l(env,sb,appendMethod,str,fromIndex);
+	jint ret = _CallIntMethod(env,sb,appendMethod,str,fromIndex);
 	_DeleteLocalRef(env,clz);
 	return ret;
 }
@@ -357,7 +357,7 @@ JNIEXPORTC jint JNICALL StringBuilderLastIndexOf(JNIEnv *env,jstringBuilder sb,j
 		_DeleteLocalRef(env,clz);
 		return JNI_ERR;
 	}
-	return _CallIntMethod_l(env,sb,appendMethod,str);
+	return _CallIntMethod(env,sb,appendMethod,str);
 }
 
 JNIEXPORTC jint JNICALL StringBuilderLastIndexOfI(JNIEnv *env,jstringBuilder sb,jstring str,jint fromIndex) {
@@ -368,7 +368,7 @@ JNIEXPORTC jint JNICALL StringBuilderLastIndexOfI(JNIEnv *env,jstringBuilder sb,
 		_DeleteLocalRef(env,clz);
 		return JNI_ERR;
 	}
-	return _CallIntMethod_l(env,sb,appendMethod,str,fromIndex);
+	return _CallIntMethod(env,sb,appendMethod,str,fromIndex);
 }
 
 JNIEXPORTC jint JNICALL StringBuilderLastIndexOfUTF(JNIEnv *env,jstringBuilder sb,const char* str) {

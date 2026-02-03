@@ -87,7 +87,7 @@ JNIEXPORT void JNICALL StringBufferDeleteCharAt(JNIEnv *env, jstringBuffer sb,ji
 JNIEXPORT void JNICALL StringBufferReplace(JNIEnv *env, jstringBuffer sb,jint start,jint end,jstring str);
 JNIEXPORT void JNICALL StringBufferReplaceUTF(JNIEnv *env, jstringBuffer sb,jint start,jint end,const char* str);
 
-JNIEXPORT void JNICALL StringBufferInsertCharArrayIntInt(JNIEnv *env, jstringBuffer sb,jint index,jcharArray str,jint offset,jint len);
+JNIEXPORT void JNICALL StringBufferInsertCharArrayIntInt(JNIEnv *env,jstringBuffer sb,jint index,jcharArray str,jint offset,jint len);
 JNIEXPORT void JNICALL StringBufferInsertString(JNIEnv *env,jstringBuffer sb,jint offset,jstring obj);
 JNIEXPORT void JNICALL StringBufferInsertStringUTF(JNIEnv *env, jstringBuffer sb, jint offset,const char* str);
 JNIEXPORT void JNICALL StringBufferInsertObject(JNIEnv *env, jstringBuffer sb, jint offset,jobject obj);

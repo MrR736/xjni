@@ -37,9 +37,9 @@
 
 #define BASE_JNI_VERSION_MAJOR	1
 #define BASE_JNI_VERSION_MINOR	0
-#define BASE_JNI_VERSION_PATCH	1
+#define BASE_JNI_VERSION_PATCH	2
 #define BASE_JNI_VERSION	((BASE_JNI_VERSION_MAJOR * 1000) + (BASE_JNI_VERSION_MINOR * 100) + BASE_JNI_VERSION_PATCH)
-#define BASE_JNI_STRVERSION	"1.0.1"
+#define BASE_JNI_STRVERSION	"1.0.2"
 
 #if defined(_MSC_VER) && _MSC_VER < 1900 && !defined(inline)
 #define inline __inline
@@ -124,33 +124,24 @@
 
 // Char
 #define _NewCharArray(env,len) BASEJNIC(NewCharArray,env,len)
-#define _CallCharMethod(env,ex,methodID) BASEJNIC(CallCharMethod,env,ex,methodID)
-#define _CallCharMethod_l(env,ex,methodID,...) BASEJNIC(CallCharMethod,env,ex,methodID,__VA_ARGS__)
-#define _CallNonvirtualCharMethod(env,ex,clazz,methodID) BASEJNIC(CallNonvirtualCharMethod,env,ex,clazz,methodID)
-#define _CallNonvirtualCharMethod_l(env,ex,clazz,methodID,...) BASEJNIC(CallNonvirtualCharMethod,env,ex,clazz,methodID,__VA_ARGS__)
-#define _CallStaticCharMethod(env,ex,methodID) BASEJNIC(CallStaticCharMethod,env,ex,methodID)
-#define _CallStaticCharMethod_l(env,ex,methodID,...) BASEJNIC(CallStaticCharMethod,env,ex,methodID,__VA_ARGS__)
+#define _CallCharMethod(env,ex,...) BASEJNIC(CallCharMethod,env,ex,__VA_ARGS__)
+#define _CallNonvirtualCharMethod(env,ex,clazz,...) BASEJNIC(CallNonvirtualCharMethod,env,ex,clazz,__VA_ARGS__)
+#define _CallStaticCharMethod(env,ex,...) BASEJNIC(CallStaticCharMethod,env,ex,__VA_ARGS__)
 
 // Void
-#define _CallVoidMethod(env,ex,methodID) BASEJNIC(CallVoidMethod,env,ex,methodID)
-#define _CallVoidMethod_l(env,ex,methodID,...) BASEJNIC(CallVoidMethod,env,ex,methodID,__VA_ARGS__)
-#define _CallStaticVoidMethod(env,ex,methodID) BASEJNIC(CallStaticVoidMethod,env,ex,methodID)
-#define _CallStaticVoidMethod_l(env,ex,methodID,...) BASEJNIC(CallStaticVoidMethod,env,ex,methodID,__VA_ARGS__)
-#define _CallNonvirtualVoidMethod(env,ex,clazz,methodID) BASEJNIC(CallNonvirtualVoidMethod,env,ex,clazz,methodID)
-#define _CallNonvirtualVoidMethod_l(env,ex,clazz,methodID,...) BASEJNIC(CallNonvirtualVoidMethod,env,ex,clazz,methodID,__VA_ARGS__)
+#define _CallVoidMethod(env,ex,...) BASEJNIC(CallVoidMethod,env,ex,__VA_ARGS__)
+#define _CallStaticVoidMethod(env,ex,...) BASEJNIC(CallStaticVoidMethod,env,ex,__VA_ARGS__)
+#define _CallNonvirtualVoidMethod(env,ex,clazz,...) BASEJNIC(CallNonvirtualVoidMethod,env,ex,clazz,__VA_ARGS__)
 
 // Object
 #define _GetObjectClass(env,ex) BASEJNIC(GetObjectClass,env,ex)
-#define _NewObject(env,ex,methodID) BASEJNIC(NewObject,env,ex,methodID)
+#define _NewObject(env,ex,...) BASEJNIC(NewObject,env,ex,__VA_ARGS__)
 #define _NewObjectV(env,clazz,methodID,ap) BASEJNIC(NewObject,env,clazz,methodID,ap)
 #define _NewObjectA(env,clazz,methodID,args) BASEJNIC(NewObjectA,env,clazz,methodID,args)
-#define _NewObject_l(env,ex,methodID,...) BASEJNIC(NewObject,env,ex,methodID,__VA_ARGS__)
-#define _CallStaticObjectMethod(env,ex,methodID) BASEJNIC(CallStaticObjectMethod,env,ex,methodID)
-#define _CallStaticObjectMethod_l(env,ex,methodID,...) BASEJNIC(CallStaticObjectMethod,env,ex,methodID,__VA_ARGS__)
+#define _CallStaticObjectMethod(env,ex,...) BASEJNIC(CallStaticObjectMethod,env,ex,__VA_ARGS__)
 #define _GetObjectField(env,ex,methodID) BASEJNIC(GetObjectField,env,ex,methodID)
 #define _GetStaticObjectField(env,ex,methodID) BASEJNIC(GetStaticObjectField,env,ex,methodID)
-#define _CallObjectMethod(env,ex,methodID) BASEJNIC(CallObjectMethod,env,ex,methodID)
-#define _CallObjectMethod_l(env,ex,methodID,...) BASEJNIC(CallObjectMethod,env,ex,methodID,__VA_ARGS__)
+#define _CallObjectMethod(env,ex,...) BASEJNIC(CallObjectMethod,env,ex,__VA_ARGS__)
 #define _SetObjectField(env,ex,methodID,val) BASEJNIC(SetObjectField,env,ex,methodID,val)
 #define _SetStaticObjectField(env,ex,methodID,val) BASEJNIC(SetStaticObjectField,env,ex,methodID,val)
 #define _GetObjectArrayElement(env,array,jindex) BASEJNIC(GetObjectArrayElement,env,array,jindex)
@@ -158,8 +149,7 @@
 #define _NewObjectArray(env,len,clazz,init) BASEJNIC(NewObjectArray,env,len,clazz,init)
 
 // Double
-#define _CallDoubleMethod(env,ex,methodID) BASEJNIC(CallDoubleMethod,env,ex,methodID)
-#define _CallDoubleMethod_l(env,ex,methodID,...) BASEJNIC(CallDoubleMethod,env,ex,methodID,__VA_ARGS__)
+#define _CallDoubleMethod(env,ex,...) BASEJNIC(CallDoubleMethod,env,ex,__VA_ARGS__)
 #define _NewDoubleArray(env,len) BASEJNIC(NewDoubleArray,env,len)
 #define _GetDoubleField(env,clazz,fieldID) BASEJNIC(GetDoubleField,env,clazz,fieldID)
 #define _GetStaticDoubleField(env,clazz,fieldID) BASEJNIC(GetStaticDoubleField,env,clazz,fieldID)
@@ -167,8 +157,7 @@
 #define _SetDoubleArrayRegion(env,array,start,len,buf) BASEJNIC(SetDoubleArrayRegion,env,array,start,len,buf)
 
 // Short
-#define _CallShortMethod(env,ex,methodID) BASEJNIC(CallShortMethod,env,ex,methodID)
-#define _CallShortMethod_l(env,ex,methodID,...) BASEJNIC(CallShortMethod,env,ex,methodID,__VA_ARGS__)
+#define _CallShortMethod(env,ex,...) BASEJNIC(CallShortMethod,env,ex,__VA_ARGS__)
 #define _NewShortArray(env,len) BASEJNIC(NewShortArray,env,len)
 #define _GetShortField(env,clazz,fieldID) BASEJNIC(GetShortField,env,clazz,fieldID)
 #define _SetShortField(env,clazz,fieldID,val) BASEJNIC(SetShortField,env,clazz,fieldID,val)
@@ -181,20 +170,16 @@
 // Float
 #define _NewFloatArray(env,len) BASEJNIC(NewFloatArray,env,len)
 #define _SetFloatField(env,clazz,fieldID) BASEJNIC(SetFloatField,env,clazz,fieldID)
-#define _CallFloatMethod(env,ex,methodID) BASEJNIC(CallFloatMethod,env,ex,methodID)
-#define _CallFloatMethod_l(env,ex,methodID,...) BASEJNIC(CallFloatMethod,env,ex,methodID,__VA_ARGS__)
+#define _CallFloatMethod(env,ex,...) BASEJNIC(CallFloatMethod,env,ex,__VA_ARGS__)
 #define _ReleaseFloatArrayElements(env,array,jin,mode) BASEJNIC(ReleaseFloatArrayElements,env,array,jin,mode)
 #define _GetFloatArrayRegion(env,array,start,len,buf) BASEJNIC(GetFloatArrayRegion,env,array,start,len,buf)
 #define _SetFloatArrayRegion(env,array,start,len,buf) BASEJNIC(SetFloatArrayRegion,env,array,start,len,buf)
 
 // Boolean
 #define _NewBooleanArray(env,len) BASEJNIC(NewBooleanArray,env,len)
-#define _CallBooleanMethod(env,ex,methodID) BASEJNIC(CallBooleanMethod,env,ex,methodID)
-#define _CallBooleanMethod_l(env,ex,methodID,...) BASEJNIC(CallBooleanMethod,env,ex,methodID,__VA_ARGS__)
-#define _CallStaticBooleanMethod(env,ex,methodID) BASEJNIC(CallStaticBooleanMethod,env,ex,methodID)
-#define _CallStaticBooleanMethod_l(env,ex,methodID,...) BASEJNIC(CallStaticBooleanMethod,env,ex,methodID,__VA_ARGS__)
-#define _CallNonvirtualBooleanMethod(env,ex,methodID) BASEJNIC(CallNonvirtualBooleanMethod,env,ex,methodID)
-#define _CallNonvirtualBooleanMethod_l(env,ex,methodID,...) BASEJNIC(CallNonvirtualBooleanMethod,env,ex,methodID,__VA_ARGS__)
+#define _CallBooleanMethod(env,ex,...) BASEJNIC(CallBooleanMethod,env,ex,__VA_ARGS__)
+#define _CallStaticBooleanMethod(env,ex,...) BASEJNIC(CallStaticBooleanMethod,env,ex,__VA_ARGS__)
+#define _CallNonvirtualBooleanMethod(env,ex,...) BASEJNIC(CallNonvirtualBooleanMethod,env,ex,__VA_ARGS__)
 #define _GetBooleanArrayElements(env,src,iscopy) BASEJNIC(GetBooleanArrayElements,env,src,iscopy)
 #define _GetBooleanArrayRegion(env,array,start,len,buf) BASEJNIC(GetBooleanArrayRegion,env,array,start,len,buf)
 #define _SetBooleanField(env,obj,jid,val) BASEJNIC(SetBooleanField,env,obj,jid,val)
@@ -204,10 +189,8 @@
 // Long
 #define _NewLongArray(env,len) BASEJNIC(NewLongArray,env,len)
 #define _GetStaticLongField(env,clazz,fieldID) BASEJNIC(GetStaticLongField,env,clazz,fieldID)
-#define _CallLongMethod(env,ex,methodID) BASEJNIC(CallLongMethod,env,ex,methodID)
-#define _CallLongMethod_l(env,ex,methodID,...) BASEJNIC(CallLongMethod,env,ex,methodID,__VA_ARGS__)
-#define _CallNonvirtualLongMethod(env,ex,methodID) BASEJNIC(CallNonvirtualLongMethod,env,ex,methodID)
-#define _CallNonvirtualLongMethod_l(env,ex,methodID,...) BASEJNIC(CallNonvirtualLongMethod,env,ex,methodID,__VA_ARGS__)
+#define _CallLongMethod(env,ex,...) BASEJNIC(CallLongMethod,env,ex,__VA_ARGS__)
+#define _CallNonvirtualLongMethod_l(env,ex,...) BASEJNIC(CallNonvirtualLongMethod,env,ex,__VA_ARGS__)
 #define _GetLongField(env,clazz,fieldID) BASEJNIC(GetLongField,env,clazz,fieldID)
 #define _SetLongField(env,obj,fieldID,val) BASEJNIC(SetLongField,env,obj,fieldID,val)
 #define _SetStaticLongField(env,obj,fieldID,val) BASEJNIC(SetStaticLongField,env,obj,fieldID,val)
@@ -230,8 +213,7 @@
 #define _ReleaseStringUTFChars(env,src,out) BASEJNIC(ReleaseStringUTFChars,env,src,out)
 
 // Byte
-#define _CallByteMethod(env,ex,methodID) BASEJNIC(CallByteMethod,env,ex,methodID)
-#define _CallByteMethod_l(env,ex,methodID,...) BASEJNIC(CallByteMethod,env,ex,methodID,__VA_ARGS__)
+#define _CallByteMethod(env,ex,...) BASEJNIC(CallByteMethod,env,ex,__VA_ARGS__)
 #define _GetByteField(env,clazz,fieldID) BASEJNIC(GetByteField,env,clazz,fieldID)
 #define _GetStaticByteField(env,clazz,fieldID) BASEJNIC(GetStaticByteField,env,clazz,fieldID)
 #define _NewByteArray(env,len) BASEJNIC(NewByteArray,env,len)
@@ -245,8 +227,7 @@
 #define _GetIntField(env,clazz,fieldID) BASEJNIC(GetIntField,env,clazz,fieldID)
 #define _SetIntField(env,obj,fieldID,val) BASEJNIC(SetIntField,env,obj,fieldID,val)
 #define _SetStaticIntField(env,obj,fieldID,val) BASEJNIC(SetStaticIntField,env,obj,fieldID,val)
-#define _CallIntMethod(env,ex,methodID) BASEJNIC(CallIntMethod,env,ex,methodID)
-#define _CallIntMethod_l(env,ex,methodID,...) BASEJNIC(CallIntMethod,env,ex,methodID,__VA_ARGS__)
+#define _CallIntMethod(env,ex,...) BASEJNIC(CallIntMethod,env,ex,__VA_ARGS__)
 #define _ReleaseIntArrayElements(env,array,byte,mode) BASEJNIC(ReleaseIntArrayElements,env,array,byte,mode)
 #define _SetIntArrayRegion(env,array,start,len,buf) BASEJNIC(SetIntArrayRegion,env,array,start,len,buf)
 #define _GetIntArrayElements(env,src,iscopy) BASEJNIC(GetIntArrayElements,env,src,iscopy)
