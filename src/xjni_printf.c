@@ -164,13 +164,25 @@ JNIEXPORTC int JNICALL jprintf(const jchar* __format,...) {
 	return ret;
 }
 
-JNIEXPORTC int JNICALL vjdprintf(int __fd,const jchar* __format,va_list __arg) {
-	if (__fd < 0 || !__format) return -1;
+JNIEXPORTC int JNICALL vjdprintf(int fd,const jchar* __format,va_list __arg) {
+	if (fd < 0 || !__format) return -1;
+	int ret;
 	char* cret = xjni_tostring(__format);
 	if (!cret) return -1;
 	va_list ac;
 	va_copy(ac,__arg);
-	int ret = vdprintf(__fd,cret,ac);
+#ifdef _WIN32
+	FILE* fp = fdopen(fd, "w");
+	if (fp) {
+		ret = vfprintf(fp, cret, ac);
+		fflush(fp);
+	} else {
+		XJNI_LOGE("XJNIPrintf","_fdopen failed for fd %d", fd);
+		ret = -1;
+	}
+#else
+	ret = vdprintf(fd,cret,ac);
+#endif
 	va_end(ac);
 	free(cret);
 	return ret;

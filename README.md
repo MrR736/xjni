@@ -11,12 +11,24 @@
 
 ## Features
 
-- Access and release functions for Java primitive 2D arrays:
-  - `int[][]`, `byte[][]`, `long[][]`, `float[][]`, `double[][]`, `short[][]`, `char[][]`
-- Access and release functions for Java `String[][]` arrays
-- Exception helpers for Java exceptions from native code
-- Supports both **shared (`.so`)** and **static (`.a`)** libraries
-- Tested with multiple native/Java test cases
+* Access and release functions for Java primitive 2D arrays:
+  `int[][]`, `byte[][]`, `long[][]`, `float[][]`, `double[][]`, `short[][]`, `char[][]`, `boolean[][]`
+* Access and release functions for Java `String[][]` arrays
+* **Argument array utilities (`xjni_args.h`)**:
+
+  * Create, append, insert, replace, delete, and retrieve Java arguments (`jargs_t`)
+* **Formatted printing utilities (`xjni_va_list.h`)**:
+
+  * Print Java strings and `jargs_t` arrays to buffers, FILE streams, file descriptors, or stdout
+* **UTF-16 `jchar` printf utilities (`xjni_printf.h`)**:
+
+  * Print formatted `jchar` strings to buffers, FILE streams, file descriptors, or stdout
+* **Logging utilities (`xjni_log.h`)**:
+
+  * Log messages with priority, automatic file/line tagging, and optional colors
+* Exception helpers for Java exceptions from native code
+* Supports both **shared (`.so`)** and **static (`.a`)** libraries
+* Tested with multiple native/Java test cases
 
 ---
 
@@ -87,15 +99,15 @@ cmake --build . --target xjni2d_test_run
 
 ## Versioning
 
-Current version: **1.0.0**
+Current version: **1.0.8**
 
 Compile-time version macro:
 
 ```c
-_XJNI_VERSION        // Encoded as 1006
+_XJNI_VERSION        // Encoded as 1008
 _XJNI_VERSION_MAJOR  // 1
 _XJNI_VERSION_MINOR  // 0
-_XJNI_VERSION_PATCH  // 6
+_XJNI_VERSION_PATCH  // 8
 ```
 
 Runtime version function:

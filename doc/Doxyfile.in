@@ -1,0 +1,91 @@
+#---------------------------------------------------------------------------
+# Doxyfile 1.9.4
+# Configuration file for Doxygen
+#---------------------------------------------------------------------------
+
+# Project information
+PROJECT_NAME           = "XJNI Utilities"
+PROJECT_BRIEF          = "Extern JNI library"
+PROJECT_NUMBER         = @PROJECT_VERSION@
+OUTPUT_DIRECTORY       = "@DOXYGEN_OUTPUT_DIR@"
+CREATE_SUBDIRS         = YES
+OUTPUT_LANGUAGE        = English
+BRIEF_MEMBER_DESC      = YES
+REPEAT_BRIEF           = YES
+ALWAYS_DETAILED_SEC    = YES
+INLINE_INHERITED_MEMB  = YES
+
+# Input
+INPUT                  = @XJNI_SOURCE_DIR@/include/xjni
+RECURSIVE              = YES
+FILE_PATTERNS          = *.h
+STRIP_FROM_PATH        = @XJNI_SOURCE_DIR@/include/xjni
+
+# Source browsing
+SOURCE_BROWSER         = YES
+INLINE_SOURCES         = YES
+REFERENCED_BY_RELATION = YES
+REFERENCES_RELATION    = YES
+SHOW_INCLUDE_FILES     = YES
+SHOW_USED_FILES        = YES
+
+# Documentation options
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = YES
+EXTRACT_STATIC         = YES
+EXTRACT_LOCAL_CLASSES  = YES
+EXTRACT_LOCAL_METHODS  = YES
+EXTRACT_ANON_NSPACES   = YES
+HIDE_UNDOC_MEMBERS     = NO
+HIDE_UNDOC_CLASSES     = NO
+HIDE_FRIEND_COMPOUNDS  = NO
+HIDE_IN_BODY_DOCS      = NO
+
+# Diagrams
+HAVE_DOT               = YES
+DOT_NUM_THREADS        = 4
+CALL_GRAPH             = YES
+CALLER_GRAPH           = YES
+CLASS_DIAGRAMS         = YES
+COLLABORATION_GRAPH    = YES
+GROUP_GRAPHS           = YES
+UML_LOOK               = YES
+DOT_IMAGE_FORMAT       = svg
+
+# HTML output
+GENERATE_HTML          = YES
+HTML_OUTPUT            = html
+HTML_FILE_EXTENSION    = .html
+HTML_HEADER            =
+HTML_FOOTER            =
+HTML_STYLESHEET        =
+HTML_COLORSTYLE_HUE    = 220
+HTML_COLORSTYLE_SAT    = 100
+HTML_COLORSTYLE_GAMMA  = 80
+GENERATE_TREEVIEW      = YES
+DISABLE_INDEX          = NO
+
+# LaTeX output (optional)
+GENERATE_LATEX         = YES
+LATEX_OUTPUT           = latex
+PDF_HYPERLINKS         = YES
+USE_PDFLATEX           = YES
+LATEX_BATCHMODE        = NO
+LATEX_HIDE_INDICES     = NO
+
+# C/C++ specific
+OPTIMIZE_OUTPUT_JAVA   = NO
+ENABLE_PREPROCESSING   = YES
+MACRO_EXPANSION        = YES
+EXPAND_ONLY_PREDEF     = NO
+PREDEFINED             = JNIEXPORT=, JNICALL=
+SKIP_FUNCTION_MACROS   = YES
+ALIASES                =
+
+# Misc
+QUIET                  = NO
+WARNINGS               = YES
+WARN_IF_UNDOCUMENTED   = YES
+WARN_IF_DOC_ERROR      = YES
+GENERATE_LATEX         = NO
+INPUT_ENCODING         = UTF-8

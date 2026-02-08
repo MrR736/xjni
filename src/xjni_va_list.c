@@ -162,7 +162,18 @@ JNIEXPORTC void JNICALL JDPrintf(JNIEnv *env,int fd,jstring format, jargs_t args
 		XJNI_LOGE("XJniVaList", "GetStringUTFChars failed");
 		goto cleanup;
 	}
+#ifdef _WIN32
+	FILE* fp = fdopen(fd, "w");
+	if (fp) {
+		fprintf(fp,"%s",utf);
+		fflush(fp);
+	} else {
+		XJNI_LOGE("XJniVaList","_fdopen failed for fd %d", fd);
+		goto cleanup;
+	}
+#else
 	dprintf(fd,"%s",utf);
+#endif
 cleanup:
 	if (utf) _ReleaseStringUTFChars(env, result, utf);
 	if (result) _DeleteLocalRef(env, result);

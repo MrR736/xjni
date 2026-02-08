@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 #include <jni.h>
 
 #define LOG_TAG "xjni"
@@ -11,11 +12,11 @@
 #define _ReleaseArrayElements(env,func,array,elements,mode) BASEJNIC(func,env,array,elements,mode)
 #define _GetArrayElements(env,func,array,elements) BASEJNIC(func,env,array,elements)
 #define _GetArrayRegion(env,func,array,start,len,buf) BASEJNIC(func,env,array,start,len,buf)
-#define _GetArrayElement(env,A,name,array,index) A name = ((A)(uintptr_t)(_GetObjectArrayElement(env,array,index)))
+#define _GetArrayElement(env,A,name,array,index) A name = ubase_cast(A,_GetObjectArrayElement(env,array,index))
 
 #define GetT2DArrayRegion(name,func,A,T)\
 JNIEXPORTC void JNICALL name(JNIEnv *env,jobjectArray array,jsize start,jsize len,T **buf) {\
-	if (buf == NULL) return;\
+	if (env == NULL || array == NULL || buf == NULL) return;\
 	jsize outer_len = _GetArrayLength(env,array);\
 	if (start < 0 || len < 0 || start + len > outer_len) return;\
 	for (jsize i = 0; i < len; ++i) {\
@@ -33,7 +34,7 @@ JNIEXPORTC void JNICALL name(JNIEnv *env,jobjectArray array,jsize start,jsize le
 
 #define ReleaseT2DArrayElements(name,func,A,T)\
 JNIEXPORTC void JNICALL name(JNIEnv *env,jobjectArray array,T **elements,jint mode) {\
-	if (elements == NULL) return;\
+	if (env == NULL || array == NULL || elements == NULL) return;\
 	jsize outer_len = _GetArrayLength(env,array);\
 	for (jsize i = 0; i < outer_len; ++i) {\
 		if (elements[i] == NULL) continue;\
@@ -48,6 +49,7 @@ JNIEXPORTC void JNICALL name(JNIEnv *env,jobjectArray array,T **elements,jint mo
 
 #define GetT2DArrayElements(name,func,A,T)\
 JNIEXPORTC T** JNICALL name(JNIEnv *env,jobjectArray array,jboolean *isCopy) {\
+	if (env == NULL || array == NULL) return NULL;\
 	jsize outer_len = _GetArrayLength(env,array);\
 	T **elements = ((T **)(calloc(outer_len,sizeof(T*))));\
 	if (!elements) return NULL;\
@@ -134,33 +136,44 @@ ReleaseT2DArrayElements(ReleaseChar2DArrayElements,ReleaseCharArrayElements,jcha
 GetT2DArrayRegion(SetChar2DArrayRegion,SetCharArrayRegion,jcharArray,const jchar)
 GetT2DArrayRegion(GetChar2DArrayRegion,GetCharArrayRegion,jcharArray,jchar)
 
+// Boolean2D - Access and release functions for Java boolean[][].
+NewT2DArray(NewBoolean2DArray,"[Z",jbooleanArray,_NewBooleanArray)
+GetT2DArrayElements(GetBoolean2DArrayElements,GetBooleanArrayElements,jbooleanArray,jboolean)
+ReleaseT2DArrayElements(ReleaseBoolean2DArrayElements,ReleaseBooleanArrayElements,jbooleanArray,jboolean)
+GetT2DArrayRegion(SetBoolean2DArrayRegion,SetBooleanArrayRegion,jbooleanArray,const jboolean)
+GetT2DArrayRegion(GetBoolean2DArrayRegion,GetBooleanArrayRegion,jbooleanArray,jboolean)
+
 // StringUTF2D - Access and release functions for Java String[][].
-JNIEXPORTC jobjectArray JNICALL NewStringUTF2DArray(JNIEnv *env,const char ***utf,jsize row,jsize col) {
+JNIEXPORTC jobjectArray JNICALL NewStringUTF2DArray(JNIEnv *env, const char ***utf, jsize row, jsize col) {
 	if (row < 0 || col < 0) return NULL;
-	jclass stringCls = _FindClass(env,"java/lang/String");
-	if (!stringCls) return NULL;
-	jobjectArray outer = _NewObjectArray(env,row,stringCls,NULL);
+	jclass stringCls = _FindClass(env, "java/lang/String");
+	jclass stringArrayCls = _FindClass(env, "[Ljava/lang/String;");
+	if (!stringCls || !stringArrayCls) return NULL;
+	jobjectArray outer = _NewObjectArray(env, row, stringArrayCls, NULL);
 	if (!outer) return NULL;
 	for (jsize i = 0; i < row; i++) {
-		jobjectArray inner = _NewObjectArray(env,col,stringCls,NULL);
+		jobjectArray inner = _NewObjectArray(env, col, stringCls, NULL);
 		if (!inner) return NULL;
 		for (jsize j = 0; j < col; j++) {
 			if (utf && utf[i] && utf[i][j]) {
-				jstring str = _NewStringUTF(env,utf[i][j]);
+				jstring str = _NewStringUTF(env, utf[i][j]);
 				if (!str) return NULL;
-				_SetObjectArrayElement(env,inner,j,str);
-				_DeleteLocalRef(env,str);
+				_SetObjectArrayElement(env, inner, j, str);
+				_DeleteLocalRef(env, str);
 			}
 		}
-		_SetObjectArrayElement(env,outer,i,inner);
-		_DeleteLocalRef(env,inner);
+		_SetObjectArrayElement(env, outer, i, inner);
+		_DeleteLocalRef(env, inner);
 	}
+	_DeleteLocalRef(env, stringCls);
+	_DeleteLocalRef(env, stringArrayCls);
 	return outer;
 }
 
+
 JNIEXPORTC const char*** JNICALL GetStringUTF2DArrayElements(JNIEnv *env,jobjectArray array,jboolean *isCopy) {
 	jsize outer_len = _GetArrayLength(env,array);
-	const char ***elements = ((const char ***)(uintptr_t)(calloc(outer_len,sizeof(const char**))));
+	const char ***elements = ubase_cast(const char***,calloc(outer_len,sizeof(const char**)));
 	if (!elements) return NULL;
 	jboolean anyCopy = JNI_FALSE;
 	for (jsize i = 0; i < outer_len; ++i) {
@@ -227,36 +240,36 @@ JNIEXPORTC void JNICALL GetStringUTF2DArrayRegion(JNIEnv *env,jobjectArray array
 }
 
 // String2D - Access and release functions for Java String[][].
-JNIEXPORTC jobjectArray JNICALL NewString2DArray(JNIEnv *env,const jchar ***utf,jsize len,jsize row,jsize col) {
-	if (row < 0 || col < 0 || len < 0) return NULL;
-	jclass stringCls = _FindClass(env,"java/lang/String");
-	if (!stringCls) return NULL;
-
-	jobjectArray outer = _NewObjectArray(env,row,stringCls,NULL);
+JNIEXPORTC jobjectArray JNICALL NewString2DArray(JNIEnv *env, const jchar ***utf, jsize row, jsize col) {
+	if (row < 0 || col < 0) return NULL;
+	jclass stringCls = _FindClass(env, "java/lang/String");
+	jclass stringArrayCls = _FindClass(env, "[Ljava/lang/String;");
+	if (!stringCls || !stringArrayCls) return NULL;
+	jobjectArray outer = _NewObjectArray(env, row, stringArrayCls, NULL);
 	if (!outer) return NULL;
-
 	for (jsize i = 0; i < row; i++) {
-		jobjectArray inner = _NewObjectArray(env,col,stringCls,NULL);
+		jobjectArray inner = _NewObjectArray(env, col, stringCls, NULL);
 		if (!inner) return NULL;
+
 		for (jsize j = 0; j < col; j++) {
 			if (utf && utf[i] && utf[i][j]) {
-				jstring str = _NewString(env,utf[i][j],len);
+				jstring str = _NewString(env, utf[i][j],base_cast(jsize,jstrlen(utf[i][j])));
 				if (!str) return NULL;
-				_SetObjectArrayElement(env,inner,j,str);
-				_DeleteLocalRef(env,str);
+				_SetObjectArrayElement(env, inner, j, str);
+				_DeleteLocalRef(env, str);
 			}
 		}
-
-		_SetObjectArrayElement(env,outer,i,inner);
-		_DeleteLocalRef(env,inner);
+		_SetObjectArrayElement(env, outer, i, inner);
+		_DeleteLocalRef(env, inner);
 	}
-
+	_DeleteLocalRef(env, stringCls);
+	_DeleteLocalRef(env, stringArrayCls);
 	return outer;
 }
 
 JNIEXPORTC const jchar*** JNICALL GetString2DArrayElements(JNIEnv *env,jobjectArray array,jboolean *isCopy) {
 	jsize outer_len = _GetArrayLength(env,array);
-	const jchar ***elements = ((const jchar ***)(uintptr_t)(calloc(outer_len,sizeof(const jchar**))));
+	const jchar ***elements = ubase_cast(const jchar***,calloc(outer_len,sizeof(const jchar**)));
 	if (!elements) return NULL;
 	jboolean anyCopy = JNI_FALSE;
 	for (jsize i = 0; i < outer_len; ++i) {

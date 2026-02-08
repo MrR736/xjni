@@ -1,57 +1,48 @@
 /**
- * xjni_log.h: Extern JNI Log Utility
+ * @file xjni_log.h
+ * @brief Extern JNI Log Utility
  *
- * Copyright (C) 2025 MrR736 <MrR736@users.github.com>
+ * Provides logging utilities for native code interacting with Java via JNI.
+ * Supports standard log priorities, optional colors on non-Android platforms,
+ * and automatic source file and line tagging.
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- *
- * The complete text of the GNU General Public License
- * can be found in /usr/share/common-licenses/GPL-3 file.
+ * @author MrR736
+ * @date 2025
+ * @copyright GPL-3
  */
 
 #ifndef __XJNI_LOG_H__
 #define __XJNI_LOG_H__
 
 #include <stdarg.h>
+#include <jni.h>
 
+/** Default tag used in logging */
 #define XJNI_DEFAULT_TAG "XJNI"
 
+/** @enum xjni_LogPriority
+ *  @brief Logging priority levels
+ */
 typedef enum xjni_LogPriority {
-  /** For internal use only.  */
-  XJNI_LOG_UNKNOWN = 0,
-  /** The default priority, for internal use only.  */
-  XJNI_LOG_DEFAULT,
-  /** Verbose logging. Should typically be disabled for a release apk. */
-  XJNI_LOG_VERBOSE,
-  /** Debug logging. Should typically be disabled for a release apk. */
-  XJNI_LOG_DEBUG,
-  /** Informational logging. Should typically be disabled for a release apk. */
-  XJNI_LOG_INFO,
-  /** Warning logging. For use with recoverable failures. */
-  XJNI_LOG_WARN,
-  /** Error logging. For use with unrecoverable failures. */
-  XJNI_LOG_ERROR,
-  /** Fatal logging. For use when aborting. */
-  XJNI_LOG_FATAL,
-  /** For internal use only.  */
-  XJNI_LOG_SILENT,
+  XJNI_LOG_UNKNOWN = 0,   /**< Internal use only */
+  XJNI_LOG_DEFAULT,       /**< Default priority, internal use only */
+  XJNI_LOG_VERBOSE,       /**< Verbose logging (usually disabled in release) */
+  XJNI_LOG_DEBUG,         /**< Debug logging (usually disabled in release) */
+  XJNI_LOG_INFO,          /**< Informational logging */
+  XJNI_LOG_WARN,          /**< Warning logging, recoverable failures */
+  XJNI_LOG_ERROR,         /**< Error logging, unrecoverable failures */
+  XJNI_LOG_FATAL,         /**< Fatal logging, for abort scenarios */
+  XJNI_LOG_SILENT,        /**< Internal use only */
 } xjni_LogPriority;
 
+/** Convenience macros for printing logs with automatic file and line info */
+#define xjni_log_vprint(prio,tag,fmt,ap) \
+    xjni_log_vcprint(prio,__LINE__,__FILE__,tag,fmt,ap)
 
-#define xjni_log_vprint(prio,tag,fmt,ap) xjni_log_vcprint(prio,__LINE__,__FILE__,tag,fmt,ap)
-#define xjni_log_print(prio,tag,fmt,...) xjni_log_cprint(prio,__LINE__,__FILE__,tag,fmt,##__VA_ARGS__)
+#define xjni_log_print(prio,tag,fmt,...) \
+    xjni_log_cprint(prio,__LINE__,__FILE__,tag,fmt,##__VA_ARGS__)
 
+/** Platform-specific macros for log printing */
 #ifdef __ANDROID__
 #define xjni_log_vccprint xjni_log_vcprint
 #define xjni_log_ccprint xjni_log_cprint
@@ -62,11 +53,7 @@ typedef enum xjni_LogPriority {
 #define xjni_log_printc(prio,tag,fmt,...) xjni_log_ccprint(prio,__LINE__,__FILE__,tag,fmt,##__VA_ARGS__)
 #endif
 
-/*
- * Example:
- *   XJNI_LOGI("MyTag","Hello,%s!","World");
- *   XJNI_LOGE("MyTag","An error occurred: %d",errCode);
- */
+/** Standard log level macros */
 #define XJNI_LOGE(tag,fmt,...) xjni_log_print(XJNI_LOG_ERROR,tag,fmt,##__VA_ARGS__)
 #define XJNI_LOGI(tag,fmt,...) xjni_log_print(XJNI_LOG_INFO,tag,fmt,##__VA_ARGS__)
 #define XJNI_LOGV(tag,fmt,...) xjni_log_print(XJNI_LOG_VERBOSE,tag,fmt,##__VA_ARGS__)
@@ -74,6 +61,7 @@ typedef enum xjni_LogPriority {
 #define XJNI_LOGW(tag,fmt,...) xjni_log_print(XJNI_LOG_WARN, tag,fmt,##__VA_ARGS__)
 #define XJNI_LOGF(tag,fmt,...) xjni_log_print(XJNI_LOG_FATAL,tag,fmt,##__VA_ARGS__)
 
+/** Colored or console variants (non-Android) */
 #define XJNI_LOGEC(tag,fmt,...) xjni_log_printc(XJNI_LOG_ERROR,tag,fmt,##__VA_ARGS__)
 #define XJNI_LOGIC(tag,fmt,...) xjni_log_printc(XJNI_LOG_INFO,tag,fmt,##__VA_ARGS__)
 #define XJNI_LOGVC(tag,fmt,...) xjni_log_printc(XJNI_LOG_VERBOSE,tag,fmt,##__VA_ARGS__)
@@ -86,13 +74,14 @@ extern "C" {
 #endif
 
 #ifndef __ANDROID__
-// with colors
-int xjni_log_vccprint(int prio,int line,const char* file,const char* tag,const char* fmt,va_list ap);
-int xjni_log_ccprint(int prio,int line,const char* file,const char* tag,const char* fmt,...);
+/** Log to console with colors (non-Android) */
+JNIEXPORT int JNICALL xjni_log_vccprint(int prio,int line,const char* file,const char* tag,const char* fmt,va_list ap);
+JNIEXPORT int JNICALL xjni_log_ccprint(int prio,int line,const char* file,const char* tag,const char* fmt,...);
 #endif
 
-int xjni_log_vcprint(int prio,int line,const char* file,const char* tag,const char* fmt,va_list ap);
-int xjni_log_cprint(int prio,int line,const char* file,const char* tag,const char* fmt,...);
+/** Log to console with optional colors */
+JNIEXPORT int JNICALL xjni_log_vcprint(int prio,int line,const char* file,const char* tag,const char* fmt,va_list ap);
+JNIEXPORT int JNICALL xjni_log_cprint(int prio,int line,const char* file,const char* tag,const char* fmt,...);
 
 #ifdef __cplusplus
 }

@@ -63,7 +63,7 @@ static const char* xjni_LogPriorityColor(int prio) {
 	}
 }
 
-int xjni_log_vccprint(int prio, int line, const char* file, const char* tag,const char* fmt, va_list ap) {
+JNIEXPORT int JNICALL xjni_log_vccprint(int prio, int line, const char* file, const char* tag,const char* fmt, va_list ap) {
 	va_list apc;
 	va_copy(apc,ap);
 	if (prio == XJNI_LOG_SILENT) {
@@ -75,7 +75,7 @@ int xjni_log_vccprint(int prio, int line, const char* file, const char* tag,cons
 	time_t now = time(NULL);
 	struct tm tm;
 	char ts[48];
-#if defined(_WIN32)
+#ifdef _WIN32
 	localtime_s(&tm, &now);
 #else
 	localtime_r(&now, &tm);
@@ -85,7 +85,7 @@ int xjni_log_vccprint(int prio, int line, const char* file, const char* tag,cons
 	const char* color = xjni_LogPriorityColor(prio);
 
 	// Print timestamp + priority + tag + file
-	fprintf(stderr, "%s %s[%s]%s %s (%s:%d) ",
+	fprintf(stderr, "%s %s[%s]\t%s %s (%s:%d) ",
 		ts,color,xjni_LogPrioritytostring(prio),
 		XJNI_COLOR_RESET,t,cbasename(file),line);
 
@@ -96,7 +96,7 @@ int xjni_log_vccprint(int prio, int line, const char* file, const char* tag,cons
 	return ret;
 }
 
-int xjni_log_ccprint(int prio,int line,const char* file,const char* tag,const char* fmt,...) {
+JNIEXPORT int JNICALL xjni_log_ccprint(int prio,int line,const char* file,const char* tag,const char* fmt,...) {
 	va_list ap;
 	va_start(ap,fmt);
 	int ret = xjni_log_vccprint(prio,line,file,tag,fmt,ap);
@@ -106,7 +106,7 @@ int xjni_log_ccprint(int prio,int line,const char* file,const char* tag,const ch
 #endif  // __ANDROID__
 
 
-int xjni_log_vcprint(int prio,int line,const char* file,const char* tag,const char* fmt,va_list ap) {
+JNIEXPORT int JNICALL xjni_log_vcprint(int prio,int line,const char* file,const char* tag,const char* fmt,va_list ap) {
 	va_list apc;
 	va_copy(apc,ap);
 #ifdef __ANDROID__
@@ -125,7 +125,7 @@ int xjni_log_vcprint(int prio,int line,const char* file,const char* tag,const ch
 	time_t now = time(NULL);
 	struct tm tm;
 	char ts[48];
-#if defined(_WIN32)
+#ifdef _WIN32
 	localtime_s(&tm, &now);
 #else
 	localtime_r(&now, &tm);
@@ -133,8 +133,8 @@ int xjni_log_vcprint(int prio,int line,const char* file,const char* tag,const ch
 	strftime(ts, sizeof(ts), "%Y-%m-%d %H:%M:%S", &tm);
 	fprintf(stderr, "%s ", ts);
 	const char* pstr = xjni_LogPrioritytostring(prio);
-	if (pstr) fprintf(stderr, "[%s] ", pstr);
-	fprintf(stderr, "%s ", t);
+	if (pstr) fprintf(stderr, "[%s]\t", pstr);
+	fprintf(stderr, " %s ", t);
 	if (file && line > 0) fprintf(stderr, "(%s:%d) ", cbasename(file), line);
 	int ret = vfprintf(stderr, fmt, apc);
 	va_end(apc);
@@ -144,7 +144,7 @@ int xjni_log_vcprint(int prio,int line,const char* file,const char* tag,const ch
 #endif
 }
 
-int xjni_log_cprint(int prio,int line,const char* file,const char* tag,const char* fmt,...) {
+JNIEXPORT int JNICALL xjni_log_cprint(int prio,int line,const char* file,const char* tag,const char* fmt,...) {
 	va_list ap;
 	va_start(ap,fmt);
 	int ret = xjni_log_vcprint(prio,line,file,tag,fmt,ap);

@@ -8,6 +8,14 @@
 
 #include <xjni.h>
 
+#ifdef _WIN32
+#define pthread_once(once_control, init_routine) InitOnceExecuteOnce(once_control, init_routine, NULL, NULL)
+#define pthread_mutex_init(mutex, attr) InitializeCriticalSection(mutex)
+#define pthread_mutex_lock(mutex) EnterCriticalSection(mutex)
+#define pthread_mutex_unlock(mutex) LeaveCriticalSection(mutex)
+#define pthread_mutex_destroy(mutex) DeleteCriticalSection(mutex)
+#endif
+
 static char version[16];  // Enough for "255.255.255\0"
 
 static jclass ioExceptionCls = NULL;
@@ -43,9 +51,19 @@ static pthread_mutex_t writeAbortedExceptionMutex = PTHREAD_MUTEX_INITIALIZER;
 static jclass outOfMemoryErrorCls = NULL;
 static pthread_mutex_t outOfMemoryErrorMutex = PTHREAD_MUTEX_INITIALIZER;
 
+#ifdef _WIN32
+static BOOL CALLBACK init_version(PINIT_ONCE InitOnce, PVOID Parameter, PVOID *Context) {
+	(void)InitOnce;
+	(void)Parameter;
+	(void)Context;
+	snprintf(version,sizeof(version),"%d.%d.%d",_XJNI_VERSION_MAJOR,_XJNI_VERSION_MINOR,_XJNI_VERSION_PATCH);
+	return TRUE;
+}
+#else
 static void init_version(void) {
 	snprintf(version,sizeof(version),"%d.%d.%d",_XJNI_VERSION_MAJOR,_XJNI_VERSION_MINOR,_XJNI_VERSION_PATCH);
 }
+#endif
 
 JNIEXPORTC const char* JNICALL xjni_version(void) {
 	static pthread_once_t once = PTHREAD_ONCE_INIT;

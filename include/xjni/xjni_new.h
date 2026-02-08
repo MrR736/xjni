@@ -1,23 +1,12 @@
 /**
- * xjni_new.h: Extern JNI New Utility
+ * @file xjni_new.h
+ * @brief Extern JNI "New" Utility - Create Java objects and arrays from native code
  *
- * Copyright (C) 2025 MrR736 <MrR736@users.github.com>
+ * Provides functions to create Java arrays and objects from C/C++ native data.
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- *
- * The complete text of the GNU General Public License
- * can be found in /usr/share/common-licenses/GPL-3 file.
+ * @author MrR736
+ * @date 2025
+ * @copyright GPL-3
  */
 
 #ifndef __XJNI_NEW_H__
@@ -30,29 +19,103 @@
 extern "C" {
 #endif
 
-/* Create a new object array in Java from the provided C data. */
+/** @defgroup XJNI_New JNI Object & Array Creation
+ *  @brief Functions to create Java arrays and objects from native data
+ *  @{
+ */
+
+/**
+ * @brief Create a new Java object array of the specified class and length
+ * @param env JNI environment pointer
+ * @param clz Java class for the array elements
+ * @param len Number of elements in the array
+ * @return Newly created `jobjectArray`
+ */
 JNIEXPORT jobjectArray JNICALL xjni_NewObjectArray(JNIEnv* env, jclass clz, jsize len);
 
-/* Create a new byte array in Java from the provided C data. */
+/**
+ * @brief Create a new Java byte array from native `jbyte` data
+ * @param env JNI environment pointer
+ * @param data Pointer to native byte data
+ * @param len Number of bytes
+ * @return Newly created `jbyteArray`
+ */
 JNIEXPORT jbyteArray JNICALL xjni_NewByteArray(JNIEnv* env, const jbyte* data, jsize len);
 
-/* Create a new integer array in Java from the provided C data. */
+/**
+ * @brief Create a new Java integer array from native `jint` data
+ * @param env JNI environment pointer
+ * @param data Pointer to native integer data
+ * @param len Number of integers
+ * @return Newly created `jintArray`
+ */
 JNIEXPORT jintArray JNICALL xjni_NewIntArray(JNIEnv* env, const jint* data, jsize len);
 
-/* Create a new long array in Java from the provided C data. */
+/**
+ * @brief Create a new Java long array from native `jlong` data
+ * @param env JNI environment pointer
+ * @param data Pointer to native long data
+ * @param len Number of longs
+ * @return Newly created `jlongArray`
+ */
 JNIEXPORT jlongArray JNICALL xjni_NewLongArray(JNIEnv* env, const jlong* data, jsize len);
 
-/* Create a new float array in Java from the provided C data. */
+/**
+ * @brief Create a new Java float array from native `float` data
+ * @param env JNI environment pointer
+ * @param data Pointer to native float data
+ * @param len Number of floats
+ * @return Newly created `jfloatArray`
+ */
 JNIEXPORT jfloatArray JNICALL xjni_NewFloatArray(JNIEnv* env, const float* data, jsize len);
 
-/* Create a new double array in Java from the provided C data. */
+/**
+ * @brief Create a new Java double array from native `double` data
+ * @param env JNI environment pointer
+ * @param data Pointer to native double data
+ * @param len Number of doubles
+ * @return Newly created `jdoubleArray`
+ */
 JNIEXPORT jdoubleArray JNICALL xjni_NewDoubleArray(JNIEnv* env, const double* data, jsize len);
 
-JNIEXPORT jint JNICALL XJNI_New_OnLoad(JavaVM* vm,void* reserved,jint ver);
-JNIEXPORT void JNICALL XJNI_New_OnUnload(JavaVM* vm,void* reserved,jint ver);
+/**
+ * @brief Called when the "New" module is loaded
+ * @param vm JavaVM pointer
+ * @param reserved Reserved pointer (JNI spec)
+ * @param ver JNI version
+ * @return JNI_OK on success
+ */
+JNIEXPORT jint JNICALL XJNI_New_OnLoad(JavaVM* vm, void* reserved, jint ver);
 
-JNIEXPORT jobject JNICALL NewObjectBuilderV(JNIEnv* env,const char* className,const char* sig,va_list ap);
-JNIEXPORT jobject JNICALL NewObjectBuilder(JNIEnv* env,const char* className,const char* sig,...);
+/**
+ * @brief Called when the "New" module is unloaded
+ * @param vm JavaVM pointer
+ * @param reserved Reserved pointer (JNI spec)
+ * @param ver JNI version
+ */
+JNIEXPORT void JNICALL XJNI_New_OnUnload(JavaVM* vm, void* reserved, jint ver);
+
+/**
+ * @brief Create a new Java object using a constructor signature and `va_list`
+ * @param env JNI environment pointer
+ * @param className Fully qualified Java class name
+ * @param sig Constructor signature
+ * @param ap Variable argument list
+ * @return Newly created Java object
+ */
+JNIEXPORT jobject JNICALL NewObjectBuilderV(JNIEnv* env, const char* className, const char* sig, va_list ap);
+
+/**
+ * @brief Create a new Java object using a constructor signature and variable arguments
+ * @param env JNI environment pointer
+ * @param className Fully qualified Java class name
+ * @param sig Constructor signature
+ * @param ... Variable arguments for constructor
+ * @return Newly created Java object
+ */
+JNIEXPORT jobject JNICALL NewObjectBuilder(JNIEnv* env, const char* className, const char* sig, ...);
+
+/** @} */
 
 #ifdef __cplusplus
 }

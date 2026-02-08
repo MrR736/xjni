@@ -1,23 +1,13 @@
 /**
- * xjni_printf.h: Extern JNI Printf Utility
+ * @file xjni_printf.h
+ * @brief Extern JNI Printf Utility - printf-style functions for `jchar` strings
  *
- * Copyright (C) 2025 MrR736 <MrR736@users.github.com>
+ * Provides printf-like functions for `jchar` strings in native code.
+ * Supports standard output, file streams, file descriptors, and buffers.
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- *
- * The complete text of the GNU General Public License
- * can be found in /usr/share/common-licenses/GPL-3 file.
+ * @author MrR736
+ * @date 2025
+ * @copyright GPL-3
  */
 
 #ifndef __XJNI_PRINTF_H__
@@ -31,20 +21,102 @@
 extern "C" {
 #endif
 
-JNIEXPORT int JNICALL vsjprintf(jchar * __s,const jchar * __format,va_list __arg);
-JNIEXPORT int JNICALL sjprintf(jchar * __s, const jchar * __format,...);
+/** @defgroup XJNI_Printf JNI Printf Utilities
+ *  @brief Printf-style functions for `jchar` strings
+ *  @{
+ */
 
-JNIEXPORT int JNICALL vsnjprintf(jchar * __s,size_t __maxlen,const jchar * __format,va_list __arg);
-JNIEXPORT int JNICALL snjprintf(jchar * __s,size_t __maxlen,const jchar * __format, ...);
+/**
+ * @brief Write formatted output to a `jchar` buffer using `va_list`
+ * @param s Destination buffer
+ * @param format Format string (`jchar*`)
+ * @param arg Variable argument list
+ * @return Number of characters written (excluding null terminator)
+ */
+JNIEXPORT int JNICALL vsjprintf(jchar* s, const jchar* format, va_list arg);
 
-JNIEXPORT int JNICALL vjfprintf(FILE* __stream, const jchar* __format, va_list __arg);
-JNIEXPORT int JNICALL jfprintf(FILE* __stream, const jchar* __format, ...);
+/**
+ * @brief Write formatted output to a `jchar` buffer
+ * @param s Destination buffer
+ * @param format Format string (`jchar*`)
+ * @param ... Variable arguments
+ * @return Number of characters written (excluding null terminator)
+ */
+JNIEXPORT int JNICALL sjprintf(jchar* s, const jchar* format, ...);
 
-JNIEXPORT int JNICALL vjdprintf(int __fd, const jchar* __format, va_list __arg);
-JNIEXPORT int JNICALL jdprintf(int __fd, const jchar* __format, ...);
+/**
+ * @brief Write formatted output to a `jchar` buffer with maximum length using `va_list`
+ * @param s Destination buffer
+ * @param maxlen Maximum number of characters to write
+ * @param format Format string (`jchar*`)
+ * @param arg Variable argument list
+ * @return Number of characters written (excluding null terminator)
+ */
+JNIEXPORT int JNICALL vsnjprintf(jchar* s, size_t maxlen, const jchar* format, va_list arg);
 
-JNIEXPORT int JNICALL vjprintf(const jchar* __format, va_list __arg);
-JNIEXPORT int JNICALL jprintf(const jchar* __format, ...);
+/**
+ * @brief Write formatted output to a `jchar` buffer with maximum length
+ * @param s Destination buffer
+ * @param maxlen Maximum number of characters to write
+ * @param format Format string (`jchar*`)
+ * @param ... Variable arguments
+ * @return Number of characters written (excluding null terminator)
+ */
+JNIEXPORT int JNICALL snjprintf(jchar* s, size_t maxlen, const jchar* format, ...);
+
+/**
+ * @brief Write formatted output to a `FILE` stream using `va_list`
+ * @param stream Output file stream
+ * @param format Format string (`jchar*`)
+ * @param arg Variable argument list
+ * @return Number of characters written
+ */
+JNIEXPORT int JNICALL vjfprintf(FILE* stream, const jchar* format, va_list arg);
+
+/**
+ * @brief Write formatted output to a `FILE` stream
+ * @param stream Output file stream
+ * @param format Format string (`jchar*`)
+ * @param ... Variable arguments
+ * @return Number of characters written
+ */
+JNIEXPORT int JNICALL jfprintf(FILE* stream, const jchar* format, ...);
+
+/**
+ * @brief Write formatted output to a file descriptor using `va_list`
+ * @param fd File descriptor
+ * @param format Format string (`jchar*`)
+ * @param arg Variable argument list
+ * @return Number of characters written
+ */
+JNIEXPORT int JNICALL vjdprintf(int fd, const jchar* format, va_list arg);
+
+/**
+ * @brief Write formatted output to a file descriptor
+ * @param fd File descriptor
+ * @param format Format string (`jchar*`)
+ * @param ... Variable arguments
+ * @return Number of characters written
+ */
+JNIEXPORT int JNICALL jdprintf(int fd, const jchar* format, ...);
+
+/**
+ * @brief Write formatted output to standard output using `va_list`
+ * @param format Format string (`jchar*`)
+ * @param arg Variable argument list
+ * @return Number of characters written
+ */
+JNIEXPORT int JNICALL vjprintf(const jchar* format, va_list arg);
+
+/**
+ * @brief Write formatted output to standard output
+ * @param format Format string (`jchar*`)
+ * @param ... Variable arguments
+ * @return Number of characters written
+ */
+JNIEXPORT int JNICALL jprintf(const jchar* format, ...);
+
+/** @} */
 
 #ifdef __cplusplus
 }

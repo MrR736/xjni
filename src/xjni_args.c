@@ -158,21 +158,21 @@ static jobject jargs_box(JNIEnv *env, jclass cls, jmethodID ctor, ...) {
 }
 
 #define DEFINE_JARGS_FUNCS(type, jtype, cls_func) \
-JNIEXPORTC void JArgsAppend##type(JNIEnv *env, jargs_t args, jtype val) { \
+JNIEXPORTC void JNICALL JArgsAppend##type(JNIEnv *env, jargs_t args, jtype val) { \
 	if (!cls_func(env)) return; \
 	jobject obj = _NewObject(env, g##type##Cls, g##type##Ctor, val); \
 	if (!obj) return; \
 	jargs_handle_object(env, args, obj, JARGS_OP_APPEND, 0); \
 } \
 \
-JNIEXPORTC void JArgsInsert##type(JNIEnv *env, jargs_t args, jtype val, jsize index) { \
+JNIEXPORTC void JNICALL JArgsInsert##type(JNIEnv *env, jargs_t args, jtype val, jsize index) { \
 	if (!cls_func(env)) return; \
 	jobject obj = _NewObject(env, g##type##Cls, g##type##Ctor, val); \
 	if (!obj) return; \
 	jargs_handle_object(env, args, obj, JARGS_OP_INSERT, index); \
 } \
 \
-JNIEXPORTC void JArgsReplace##type(JNIEnv *env, jargs_t args, jtype val, jsize index) { \
+JNIEXPORTC void JNICALL JArgsReplace##type(JNIEnv *env, jargs_t args, jtype val, jsize index) { \
 	if (!cls_func(env)) return; \
 	jobject obj = _NewObject(env, g##type##Cls, g##type##Ctor, val); \
 	if (!obj) return; \

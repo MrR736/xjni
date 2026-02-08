@@ -1,23 +1,14 @@
 /**
- * xjni_va_list.h: Extern JNI VA LIST Utility
+ * @file xjni_va_list.h
+ * @brief Extern JNI VA LIST Utility - variable argument printing helpers for JNI
  *
- * Copyright (C) 2026 MrR736 <MrR736@users.github.com>
+ * Provides utility functions to print formatted strings using Java strings (`jstring`)
+ * and argument arrays (`jargs_t`) in native code, supporting standard output, file streams,
+ * and file descriptors.
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- *
- * The complete text of the GNU General Public License
- * can be found in /usr/share/common-licenses/GPL-3 file.
+ * @author MrR736
+ * @date 2026
+ * @copyright GPL-3
  */
 
 #ifndef __XJNI_VA_LIST_H__
@@ -31,20 +22,72 @@
 extern "C" {
 #endif
 
-JNIEXPORT void JNICALL JSnPrintf(JNIEnv *env,char* s,size_t maxlen,jstring format,jargs_t args);
-JNIEXPORT void JNICALL JSnPrintfUTF(JNIEnv *env,char* s,size_t maxlen,const char* format,jargs_t args);
+/** @defgroup XJNI_VA_Print VA List Printing
+ *  @brief Functions to print formatted output using `jargs_t` arrays
+ *  @{
+ */
 
-JNIEXPORT void JNICALL JSPrintf(JNIEnv *env,char* s,jstring format,jargs_t args);
-JNIEXPORT void JNICALL JSPrintfUTF(JNIEnv *env,char* s,const char* format,jargs_t args);
+/**
+ * @brief Print formatted string to a buffer using a Java format string
+ * @param env JNI environment
+ * @param s Destination buffer
+ * @param maxlen Maximum length of buffer
+ * @param format Java string format
+ * @param args Argument array (`jargs_t`)
+ */
+JNIEXPORT void JNICALL JSnPrintf(JNIEnv *env, char* s, size_t maxlen, jstring format, jargs_t args);
 
-JNIEXPORT void JNICALL JFPrintf(JNIEnv *env,FILE* fp,jstring format, jargs_t args);
-JNIEXPORT void JNICALL JFPrintfUTF(JNIEnv *env,FILE* fp,const char* format,jargs_t args);
+/**
+ * @brief Print formatted string to a buffer using UTF-8 C format string
+ * @param env JNI environment
+ * @param s Destination buffer
+ * @param maxlen Maximum length of buffer
+ * @param format UTF-8 format string
+ * @param args Argument array (`jargs_t`)
+ */
+JNIEXPORT void JNICALL JSnPrintfUTF(JNIEnv *env, char* s, size_t maxlen, const char* format, jargs_t args);
 
-JNIEXPORT void JNICALL JDPrintf(JNIEnv *env,int fd,jstring format, jargs_t args);
-JNIEXPORT void JNICALL JDPrintfUTF(JNIEnv *env,int fd,const char* format,jargs_t args);
+/**
+ * @brief Print formatted string to a buffer using a Java format string (no length limit)
+ */
+JNIEXPORT void JNICALL JSPrintf(JNIEnv *env, char* s, jstring format, jargs_t args);
 
-JNIEXPORT void JNICALL JPrintf(JNIEnv *env,jstring format, jargs_t args);
-JNIEXPORT void JNICALL JPrintfUTF(JNIEnv *env,const char* format, jargs_t args);
+/**
+ * @brief Print formatted string to a buffer using UTF-8 C format string (no length limit)
+ */
+JNIEXPORT void JNICALL JSPrintfUTF(JNIEnv *env, char* s, const char* format, jargs_t args);
+
+/**
+ * @brief Print formatted string to a FILE stream using a Java format string
+ */
+JNIEXPORT void JNICALL JFPrintf(JNIEnv *env, FILE* fp, jstring format, jargs_t args);
+
+/**
+ * @brief Print formatted string to a FILE stream using UTF-8 C format string
+ */
+JNIEXPORT void JNICALL JFPrintfUTF(JNIEnv *env, FILE* fp, const char* format, jargs_t args);
+
+/**
+ * @brief Print formatted string to a file descriptor using a Java format string
+ */
+JNIEXPORT void JNICALL JDPrintf(JNIEnv *env, int fd, jstring format, jargs_t args);
+
+/**
+ * @brief Print formatted string to a file descriptor using UTF-8 C format string
+ */
+JNIEXPORT void JNICALL JDPrintfUTF(JNIEnv *env, int fd, const char* format, jargs_t args);
+
+/**
+ * @brief Print formatted string to standard output using a Java format string
+ */
+JNIEXPORT void JNICALL JPrintf(JNIEnv *env, jstring format, jargs_t args);
+
+/**
+ * @brief Print formatted string to standard output using UTF-8 C format string
+ */
+JNIEXPORT void JNICALL JPrintfUTF(JNIEnv *env, const char* format, jargs_t args);
+
+/** @} */
 
 #ifdef __cplusplus
 }
