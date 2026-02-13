@@ -1,13 +1,8 @@
-#include <xjni_log.h>
-#include <xjni_va_list.h>
-
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <inttypes.h>
-
 #define LOG_TAG "xjni"
 #include "base-jni.h"
+
+#include <xjni_log.h>
+#include <xjni_va_list.h>
 
 static jclass gStringCls = NULL;
 static jmethodID gFormatMid = NULL;

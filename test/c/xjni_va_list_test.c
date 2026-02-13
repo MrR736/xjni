@@ -10,22 +10,14 @@ JNIEXPORT jstring JNICALL Java_TestXJNIPrintf_formatWithJNI
 
 JNIEXPORT jstring JNICALL Java_TestXJNIPrintf_formatWithJNINoArgs
   (JNIEnv *env, jobject thiz) {
-
-    jargs_t args = NewJArgs(env, 10, (*env)->FindClass(env,"java/lang/Object"), NULL);
-    if (!args) return NULL;
-
-    JArgsAppendChar(env, args, 'A');         // index 0
-    JArgsInsertDouble(env, args, 3.14, 1);   // index 1
-    JArgsAppendInt(env, args, 42);           // index 2
     jstring helloStr = (*env)->NewStringUTF(env, "hello");
-    JArgsAppendString(env, args, helloStr);  // index 3
-    JArgsAppendBoolean(env, args, JNI_TRUE); // index 4
-    JArgsReplaceInt(env, args,(jchar)0x754C,0);      // Replace index 0
-
-    // keep helloStr until after formatting
+    jargs_t args = JArgsStart(env,5,"CDILjava/lang/String;Z",'A', 3.14, 42, helloStr, JNI_TRUE);
+    if (!args) return NULL;
+    JArgsReplaceChar(env, args, (jchar)0x754C, 0);
     char buffer[4096];
-    JSnPrintfUTF(env, buffer, sizeof(buffer), "Char: %c, Double: %f, Int: %d, String: %s, Boolean: %b", args);
+    JSnPrintfUTF(env, buffer, sizeof(buffer),"Char: %c, Double: %.3g, Int: %d, String: %s, Boolean: %b",args);
     (*env)->DeleteLocalRef(env, helloStr);
     (*env)->DeleteLocalRef(env, args);
     return (*env)->NewStringUTF(env, buffer);
 }
+

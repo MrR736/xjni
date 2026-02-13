@@ -13,6 +13,7 @@
 #ifndef __XJNI_ARGS_H__
 #define __XJNI_ARGS_H__
 
+#include <stdarg.h>
 #include <jni.h>
 
 /** @typedef jargs_t
@@ -53,6 +54,8 @@ JNIEXPORT void JNICALL JArgsAppendInt(JNIEnv *env, jargs_t args, jint obj);
 JNIEXPORT void JNICALL JArgsAppendLong(JNIEnv *env, jargs_t args, jlong obj);
 JNIEXPORT void JNICALL JArgsAppendFloat(JNIEnv *env, jargs_t args, jfloat obj);
 JNIEXPORT void JNICALL JArgsAppendDouble(JNIEnv *env, jargs_t args, jdouble obj);
+JNIEXPORT void JNICALL JArgsAppendByte(JNIEnv *env, jargs_t args, jbyte obj);
+JNIEXPORT void JNICALL JArgsAppendShort(JNIEnv *env, jargs_t args, jshort obj);
 /** @} */
 
 /** @defgroup XJNI_Args_Insert Insert Elements
@@ -68,6 +71,8 @@ JNIEXPORT void JNICALL JArgsInsertInt(JNIEnv *env, jargs_t args, jint obj, jsize
 JNIEXPORT void JNICALL JArgsInsertLong(JNIEnv *env, jargs_t args, jlong obj, jsize index);
 JNIEXPORT void JNICALL JArgsInsertFloat(JNIEnv *env, jargs_t args, jfloat obj, jsize index);
 JNIEXPORT void JNICALL JArgsInsertDouble(JNIEnv *env, jargs_t args, jdouble obj, jsize index);
+JNIEXPORT void JNICALL JArgsInsertByte(JNIEnv *env, jargs_t args, jbyte obj, jsize index);
+JNIEXPORT void JNICALL JArgsInsertShort(JNIEnv *env, jargs_t args, jshort obj, jsize index);
 /** @} */
 
 /** @defgroup XJNI_Args_Replace Replace Elements
@@ -83,6 +88,8 @@ JNIEXPORT void JNICALL JArgsReplaceInt(JNIEnv *env, jargs_t args, jint obj, jsiz
 JNIEXPORT void JNICALL JArgsReplaceLong(JNIEnv *env, jargs_t args, jlong obj, jsize index);
 JNIEXPORT void JNICALL JArgsReplaceFloat(JNIEnv *env, jargs_t args, jfloat obj, jsize index);
 JNIEXPORT void JNICALL JArgsReplaceDouble(JNIEnv *env, jargs_t args, jdouble obj, jsize index);
+JNIEXPORT void JNICALL JArgsReplaceByte(JNIEnv *env, jargs_t args, jbyte obj, jsize index);
+JNIEXPORT void JNICALL JArgsReplaceShort(JNIEnv *env, jargs_t args, jshort obj, jsize index);
 /** @} */
 
 /** @defgroup XJNI_Args_Delete Delete Elements
@@ -113,6 +120,50 @@ JNIEXPORT jboolean JNICALL GetJArgsBoolean(JNIEnv *env, jargs_t args, jsize inde
 JNIEXPORT jlong JNICALL GetJArgsLong(JNIEnv *env, jargs_t args, jsize index);
 JNIEXPORT jfloat JNICALL GetJArgsFloat(JNIEnv *env, jargs_t args, jsize index);
 JNIEXPORT jdouble JNICALL GetJArgsDouble(JNIEnv *env, jargs_t args, jsize index);
+JNIEXPORT jbyte JNICALL GetJArgsByte(JNIEnv *env, jargs_t args, jsize index);
+JNIEXPORT jshort JNICALL GetJArgsShort(JNIEnv *env, jargs_t args, jsize index);
+/** @} */
+
+/** @defgroup XJNI_Args_Start Start Elements
+ *  @brief Functions to create and populate Java argument arrays from C/varargs.
+ *
+ *  These functions allow building a `jargs_t` array from a C-style
+ *  variable argument list, based on a JNI-style signature string.
+ *
+ *  Example usage:
+ *  @code
+ *      jstring s = (*env)->NewStringUTF(env, "Hello");
+ *      jargs_t args = JArgsStart(env, 3, "Ljava/lang/String;IF", s, 42, 3.14f);
+ *  @endcode
+ *  - `"L…;"` types are objects; `"Ljava/lang/String;"` expects a `jstring`.
+ *  - Primitives are promoted according to C default promotion rules:
+ *      - `float` → `double`
+ *      - `char`, `short`, `boolean`, `byte` → `int`
+ *  - Other object types (`L<classname>;`) expect `jobject`.
+ *
+ *  @{
+ */
+
+/**
+ * @brief Create a Java argument array from a C `va_list`.
+ * @param env JNI environment pointer
+ * @param index Number of elements in the argument array
+ * @param sig JNI-style signature string describing argument types
+ * @param ap C `va_list` containing the argument values
+ * @return A `jargs_t` array with boxed Java objects
+ */
+JNIEXPORT jargs_t JNICALL JArgsStartV(JNIEnv *env, jsize index, const char* sig, va_list ap);
+
+/**
+ * @brief Create a Java argument array from C variable arguments.
+ * @param env JNI environment pointer
+ * @param index Number of elements in the argument array
+ * @param sig JNI-style signature string describing argument types
+ * @param ... Values corresponding to the signature
+ * @return A `jargs_t` array with boxed Java objects
+ */
+JNIEXPORT jargs_t JNICALL JArgsStart(JNIEnv *env, jsize index, const char* sig, ...);
+
 /** @} */
 
 #ifdef __cplusplus

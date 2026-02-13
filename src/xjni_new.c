@@ -2,7 +2,7 @@
 #define LOG_TAG "xjni"
 #include "base-jni.h"
 
-#include <xjni.h>
+#include <xjni_new.h>
 
 static JavaVM* g_vm = NULL;
 static jobject g_classLoader = NULL;
@@ -63,10 +63,8 @@ JNIEXPORTC jint JNICALL XJNI_New_OnLoad(JavaVM* vm,void* reserved,jint ver) {
 	g_vm = vm;
 
 	jclass clsThread = _FindClass(env,"java/lang/Thread");
-	jmethodID midCurrent = _GetStaticMethodID(
-		env,clsThread,"currentThread","()Ljava/lang/Thread;");
-	jmethodID midGetCL = _GetMethodID(
-		env,clsThread,"getContextClassLoader","()Ljava/lang/ClassLoader;");
+	jmethodID midCurrent = _GetStaticMethodID(env,clsThread,"currentThread","()Ljava/lang/Thread;");
+	jmethodID midGetCL = _GetMethodID(env,clsThread,"getContextClassLoader","()Ljava/lang/ClassLoader;");
 
 	jobject thread = _CallStaticObjectMethod(env,clsThread,midCurrent);
 	jobject loader = _CallObjectMethod(env,thread,midGetCL);
@@ -74,8 +72,7 @@ JNIEXPORTC jint JNICALL XJNI_New_OnLoad(JavaVM* vm,void* reserved,jint ver) {
 	g_classLoader = _NewGlobalRef(env,loader);
 
 	jclass clsCL = _FindClass(env,"java/lang/ClassLoader");
-	g_loadClass = _GetMethodID(
-		env,clsCL,"loadClass","(Ljava/lang/String;)Ljava/lang/Class;");
+	g_loadClass = _GetMethodID(env,clsCL,"loadClass","(Ljava/lang/String;)Ljava/lang/Class;");
 
 	_DeleteLocalRef(env,clsThread);
 	_DeleteLocalRef(env,clsCL);
@@ -87,53 +84,38 @@ JNIEXPORTC jint JNICALL XJNI_New_OnLoad(JavaVM* vm,void* reserved,jint ver) {
 
 JNIEXPORTC void JNICALL XJNI_New_OnUnload(JavaVM* vm,void* reserved,jint ver) {
 	JNIEnv* env = NULL;
-
-	if (_GetEnv(vm,(void**)&env,ver) != JNI_OK)
-		return;
-
+	if (_GetEnv(vm,(void**)&env,ver) != JNI_OK) return;
 	if (g_classLoader) {
 		_DeleteGlobalRef(env,g_classLoader);
 		g_classLoader = NULL;
 	}
-
 	g_loadClass = NULL;
 	g_vm = NULL;
 }
 
-
 static jclass FindClassSafe(JNIEnv* env,const char* name) {
 	jclass cls = _FindClass(env,name);
-	if (cls)
-		return cls;
-
+	if (cls) return cls;
 	_ExceptionClear(env);
-
 	jstring jname = _NewStringUTF(env,name);
 	cls = (jclass)_CallObjectMethod(env,g_classLoader,g_loadClass,jname);
-
 	_DeleteLocalRef(env,jname);
 	return cls;
 }
 
 JNIEXPORTC jobject JNICALL NewObjectBuilderV(JNIEnv* env,const char* className,const char* sig,va_list ap) {
-	if (!env || !className || !sig)
-		return NULL;
-
+	if (!env || !className || !sig) return NULL;
 	jclass cls = FindClassSafe(env,className);
-	if (!cls)
-		return NULL;
-
+	if (!cls) return NULL;
 	jmethodID ctor = _GetMethodID(env,cls,"<init>",sig);
 	if (!ctor) {
 		_DeleteLocalRef(env,cls);
 		return NULL;
 	}
-
 	va_list args;
 	va_copy(args,ap);
 	jobject obj = _NewObjectV(env,cls,ctor,args);
 	va_end(args);
-
 	_DeleteLocalRef(env,cls);
 	return obj;
 }

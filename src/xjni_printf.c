@@ -5,7 +5,8 @@
 #define LOG_TAG "xjni"
 #include "base-jni.h"
 
-#include <xjni.h>
+#include <xjni_string.h>
+#include <xjni_printf.h>
 
 JNIEXPORTC int JNICALL vsjprintf(jchar * __s,const jchar * __format,va_list __arg) {
 	if (!__s || !__format)

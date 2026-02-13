@@ -6,7 +6,8 @@
 #define LOG_TAG "xjni"
 #include "base-jni.h"
 
-#include <xjni.h>
+#include <xjni_string.h>
+#include <xjni_stringwriter.h>
 
 // String Builder Utility
 JNIEXPORTC jstringWriter JNICALL NewStringWriter(JNIEnv *env) {
@@ -17,7 +18,6 @@ JNIEXPORTC jstringWriter JNICALL NewStringWriter(JNIEnv *env) {
 		}
 		return NULL;
 	}
-
 	jmethodID ctor = _GetMethodID(env,clz,"<init>","()V");
 	if (!ctor) {
 		if (_ExceptionCheck(env)) {
@@ -26,14 +26,11 @@ JNIEXPORTC jstringWriter JNICALL NewStringWriter(JNIEnv *env) {
 		_DeleteLocalRef(env,clz);
 		return NULL;
 	}
-
 	jobject obj = _NewObject(env,clz,ctor);
-
 	if (_ExceptionCheck(env)) {
 		_ExceptionClear(env);
 		obj = NULL;
 	}
-
 	_DeleteLocalRef(env,clz);
 	return obj;
 }
@@ -46,7 +43,6 @@ JNIEXPORTC jstringWriter JNICALL NewStringWriterInitialSize(JNIEnv *env,jint ini
 		}
 		return NULL;
 	}
-
 	jmethodID ctor = _GetMethodID(env,clz,"<init>","(I)V");
 	if (!ctor) {
 		if (_ExceptionCheck(env)) {
@@ -55,14 +51,11 @@ JNIEXPORTC jstringWriter JNICALL NewStringWriterInitialSize(JNIEnv *env,jint ini
 		_DeleteLocalRef(env,clz);
 		return NULL;
 	}
-
 	jobject obj = _NewObject(env,clz,ctor,initialSize);
-
 	if (_ExceptionCheck(env)) {
 		_ExceptionClear(env);
 		obj = NULL;
 	}
-
 	_DeleteLocalRef(env,clz);
 	return obj;
 }
@@ -91,30 +84,24 @@ JNIEXPORTC jstring JNICALL StringWriterToString(JNIEnv *env,jstringWriter sw) {
 
 JNIEXPORTC char* JNICALL StringWriterToStringUTF(JNIEnv *env,jstringWriter sw) {
 	if (!env || !sw) return NULL;
-
 	jstring jstr = StringWriterToString(env,sw);
 	if (!jstr) return NULL;
-
 	jsize utfLen = _GetStringUTFLength(env,jstr);
 	const char *utf = _GetStringUTFChars(env,jstr,NULL);
 	if (!utf) {
 		_DeleteLocalRef(env,jstr);
 		return NULL;
 	}
-
 	char *copy = ubase_cast(char*,malloc(base_cast(size_t,utfLen) + 1));
 	if (!copy) {
 		_ReleaseStringUTFChars(env,jstr,utf);
 		_DeleteLocalRef(env,jstr);
 		return NULL;
 	}
-
 	jmemcpy(copy,utf,base_cast(size_t,utfLen));
 	copy[utfLen] = '\0';
-
 	_ReleaseStringUTFChars(env,jstr,utf);
 	_DeleteLocalRef(env,jstr);
-
 	return copy;
 }
 

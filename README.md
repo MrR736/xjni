@@ -104,10 +104,10 @@ Current version: **1.0.8**
 Compile-time version macro:
 
 ```c
-_XJNI_VERSION        // Encoded as 1008
+_XJNI_VERSION        // Encoded as 1009
 _XJNI_VERSION_MAJOR  // 1
 _XJNI_VERSION_MINOR  // 0
-_XJNI_VERSION_PATCH  // 8
+_XJNI_VERSION_PATCH  // 9
 ```
 
 Runtime version function:

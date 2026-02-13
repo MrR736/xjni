@@ -8,21 +8,7 @@
 #define LOG_TAG "xjni"
 #include "base-jni.h"
 
-#include <xjni.h>
-
-#define DEFINE_ARRAY_FIELD_GETTERS_SETTERS(type,jtype) \
-JNIEXPORTC j##jtype##Array JNICALL Get##type##ArrayField(JNIEnv *env,jobject obj,jfieldID fid) { \
-	return ubase_cast(j##jtype##Array,GetObjectArrayField(env,obj,fid)); \
-} \
-JNIEXPORTC j##jtype##Array JNICALL GetStatic##type##ArrayField(JNIEnv *env,jclass cls,jfieldID fid) { \
-	return ubase_cast(j##jtype##Array,GetStaticObjectArrayField(env,cls,fid)); \
-}\
-JNIEXPORTC void JNICALL Set##type##ArrayField(JNIEnv *env,jobject obj,jfieldID fid,j##jtype##Array value) {\
-	SetObjectArrayField(env,obj,fid,ubase_cast(jobjectArray,value));\
-}\
-JNIEXPORTC void JNICALL SetStatic##type##ArrayField(JNIEnv *env,jclass cls,jfieldID fid,j##jtype##Array value) {\
-	SetStaticObjectArrayField(env,cls,fid,ubase_cast(jobjectArray,value));\
-}
+#include <xjni_arrayfield.h>
 
 // ObjectArray
 JNIEXPORTC jobjectArray JNICALL GetObjectArrayField(JNIEnv *env,jobject obj,jfieldID fid) {
@@ -60,6 +46,20 @@ JNIEXPORTC void JNICALL SetArrayField(JNIEnv *env,jobject obj,jfieldID fid,jarra
 
 JNIEXPORTC void JNICALL SetStaticArrayField(JNIEnv *env,jclass cls,jfieldID fid,jarray value) {
 	SetObjectArrayField(env,cls,fid,ubase_cast(jobjectArray,value));
+}
+
+#define DEFINE_ARRAY_FIELD_GETTERS_SETTERS(type,jtype) \
+JNIEXPORTC j##jtype##Array JNICALL Get##type##ArrayField(JNIEnv *env,jobject obj,jfieldID fid) { \
+	return ubase_cast(j##jtype##Array,GetObjectArrayField(env,obj,fid)); \
+} \
+JNIEXPORTC j##jtype##Array JNICALL GetStatic##type##ArrayField(JNIEnv *env,jclass cls,jfieldID fid) { \
+	return ubase_cast(j##jtype##Array,GetStaticObjectArrayField(env,cls,fid)); \
+}\
+JNIEXPORTC void JNICALL Set##type##ArrayField(JNIEnv *env,jobject obj,jfieldID fid,j##jtype##Array value) {\
+	SetObjectArrayField(env,obj,fid,ubase_cast(jobjectArray,value));\
+}\
+JNIEXPORTC void JNICALL SetStatic##type##ArrayField(JNIEnv *env,jclass cls,jfieldID fid,j##jtype##Array value) {\
+	SetStaticObjectArrayField(env,cls,fid,ubase_cast(jobjectArray,value));\
 }
 
 DEFINE_ARRAY_FIELD_GETTERS_SETTERS(Byte,byte)

@@ -4,7 +4,9 @@
 #define LOG_TAG "xjni"
 #include "base-jni.h"
 
-#include <xjni.h>
+#include <xjni_log.h>
+#include <xjni_string.h>
+#include <xjni_stringarray.h>
 
 JNIEXPORTC jsize JNICALL GetStringUTFArrayLength(JNIEnv *env,jobjectArray array) {
 	if (array == NULL) return 0;
@@ -25,7 +27,7 @@ JNIEXPORTC jobjectArray JNICALL NewStringUTFArray(JNIEnv *env,const char **utf,j
 		jstring jstr = NULL;
 		jstr = _NewStringUTF(env,utf[i]);
 		if (jstr == NULL) {
-			BASE_LOGE("Failed to create jstring from UTF-8 string: %s\n",utf[i]);
+			XJNI_LOGE("NewStringUTFArray","Failed to create jstring from UTF-8 string: %s\n",utf[i]);
 			return NULL;
 		}
 		_SetObjectArrayElement(env,stringArray,i,jstr);
@@ -40,7 +42,7 @@ JNIEXPORTC const char** JNICALL GetStringUTFArrayChars(JNIEnv *env,jobjectArray 
 
 	const char **strArray = ubase_cast(const char**,malloc(arrayLength * sizeof(const char *)));
 	if (strArray == NULL) {
-		BASE_LOGE("Memory allocation failed for string array\n");
+		XJNI_LOGE("GetStringUTFArrayChars","Memory allocation failed for string array\n");
 		return NULL;
 	}
 
@@ -97,7 +99,7 @@ JNIEXPORTC void JNICALL SetStringUTFArrayRegion(JNIEnv *env,jobjectArray array,j
 		if (buf[i] != NULL) {
 			jstr = _NewStringUTF(env,buf[i]);
 			if (jstr == NULL) {
-				BASE_LOGE("Failed to create jstring from UTF-8 string: %s\n",buf[i]);
+				XJNI_LOGE("SetStringUTFArrayRegion","Failed to create jstring from UTF-8 string: %s\n",buf[i]);
 				return;
 			}
 		}
@@ -119,7 +121,7 @@ JNIEXPORTC jobjectArray JNICALL NewStringArray(JNIEnv *env,const jchar **unicode
 	for (jsize i = 0; i < n; i++) {
 		jstring jstr = _NewString(env,unicode[i],len);
 		if (jstr == NULL) {
-			BASE_LOGE("Failed to create jstring from jchar array at index %d",i);
+			XJNI_LOGE("NewStringArray","Failed to create jstring from jchar array at index %d",i);
 			return NULL;
 		}
 		_SetObjectArrayElement(env,stringArray,i,jstr);
@@ -135,30 +137,28 @@ JNIEXPORTC jsize JNICALL GetStringArrayLength(JNIEnv *env,jobjectArray array) {
 
 JNIEXPORTC const jchar** JNICALL GetStringArrayChars(JNIEnv *env,jobjectArray str,jboolean *isCopy) {
 	if (str == NULL) {
-		BASE_LOGE("Input jobjectArray is NULL\n");
+		XJNI_LOGE("GetStringArrayChars","Input jobjectArray is NULL\n");
 		return NULL;
 	}
 
 	if (str == NULL) return NULL;
 	jsize arrayLength = _GetArrayLength(env,str);
 	if (arrayLength == 0) {
-		BASE_LOGE("Empty string array\n");
+		XJNI_LOGE("GetStringArrayChars","Empty string array\n");
 		return NULL;
 	}
 
 	const jchar **strArray = ubase_cast(const jchar**,malloc(arrayLength * sizeof(const jchar*)));
 	if (strArray == NULL) {
-		BASE_LOGE("Memory allocation failed for jchar array\n");
+		XJNI_LOGE("","Memory allocation failed for jchar array\n");
 		return NULL;
 	}
 
 
 	for (jsize i = 0; i < arrayLength; i++) {
 		jstring jstr = ubase_cast(jstring,_GetObjectArrayElement(env,str,i));
-		if (jstr != NULL)
-			strArray[i] = _GetStringChars(env,jstr,isCopy);
-		else
-			strArray[i] = NULL;
+		if (jstr != NULL) strArray[i] = _GetStringChars(env,jstr,isCopy);
+		else strArray[i] = NULL;
 	}
 
 	return strArray;
@@ -166,14 +166,14 @@ JNIEXPORTC const jchar** JNICALL GetStringArrayChars(JNIEnv *env,jobjectArray st
 
 JNIEXPORTC void JNICALL ReleaseStringArrayChars(JNIEnv *env,jobjectArray str,const jchar **chars) {
 	if (str == NULL || chars == NULL) {
-		BASE_LOGE("Input parameters are NULL\n");
+		XJNI_LOGE("ReleaseStringArrayChars","Input parameters are NULL\n");
 		return;
 	}
 
 	if (str == NULL) return;
 	jsize arrayLength = _GetArrayLength(env,str);
 	if (arrayLength == 0) {
-		BASE_LOGE("Empty string array\n");
+		XJNI_LOGE("ReleaseStringArrayChars","Empty string array\n");
 		return;
 	}
 
@@ -187,15 +187,10 @@ JNIEXPORTC void JNICALL ReleaseStringArrayChars(JNIEnv *env,jobjectArray str,con
 }
 
 JNIEXPORTC void JNICALL GetStringArrayRegion(JNIEnv *env,jobjectArray str,jsize start,jsize len,jchar **buf) {
-	if (str == NULL || buf == NULL || start < 0 || len < 0)
-		return;
-
+	if (str == NULL || buf == NULL || start < 0 || len < 0) return;
 	if (str == NULL) return;
 	jsize arrayLength = _GetArrayLength(env,str);
-	if (start >= arrayLength || start + len > arrayLength)
-		return;
-
-
+	if (start >= arrayLength || start + len > arrayLength) return;
 	for (jsize i = 0; i < len; i++) {
 		jstring jstr = ubase_cast(jstring,_GetObjectArrayElement(env,str,start + i));
 		if (jstr != NULL) {
@@ -206,20 +201,16 @@ JNIEXPORTC void JNICALL GetStringArrayRegion(JNIEnv *env,jobjectArray str,jsize 
 }
 
 JNIEXPORTC void JNICALL SetStringArrayRegion(JNIEnv *env,jobjectArray array,jsize start,jsize len,const jchar **buf) {
-	if (array == NULL || buf == NULL || start < 0 || len < 0)
-		return;
-
+	if (array == NULL || buf == NULL || start < 0 || len < 0) return;
 	if (array == NULL) return;
 	jsize arrayLength = _GetArrayLength(env,array);
-	if (start >= arrayLength || start + len > arrayLength)
-		return;
-
+	if (start >= arrayLength || start + len > arrayLength) return;
 	for (jsize i = 0; i < len; i++) {
 		jstring jstr = NULL;
 		if (buf[i] != NULL) {
 			jstr = _NewString(env,buf[i],len);
 			if (jstr == NULL) {
-				BASE_LOGE("Failed to create jstring from jchar array at index %d",i);
+				XJNI_LOGE("SetStringArrayRegion","Failed to create jstring from jchar array at index %d",i);
 				return;
 			}
 		}

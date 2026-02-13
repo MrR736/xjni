@@ -6,7 +6,8 @@
 #define LOG_TAG "xjni"
 #include "base-jni.h"
 
-#include <xjni.h>
+#include <xjni_string.h>
+#include <xjni_stringbuilder.h>
 
 #define MakeStringBuilderAppend(name,type,sig)\
 JNIEXPORTC void JNICALL name(JNIEnv *env,jstringBuilder sb,type obj) {\

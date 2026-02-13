@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(xjni VERSION 1.0.8 LANGUAGES C CXX)
+project(xjni VERSION 1.0.9 LANGUAGES C CXX)
 
 # ------------------------------------
 # Verbose & helper options
@@ -68,6 +68,7 @@ set(XJNI_SOURCES
 	${XJNI_SOURCE_DIR}/src/xjni_log.c
 	${XJNI_SOURCE_DIR}/src/xjni_new.c
 	${XJNI_SOURCE_DIR}/src/xjni_printf.c
+	${XJNI_SOURCE_DIR}/src/xjni_string.c
 	${XJNI_SOURCE_DIR}/src/xjni_stringarray.c
 	${XJNI_SOURCE_DIR}/src/xjni_stringbuffer.c
 	${XJNI_SOURCE_DIR}/src/xjni_stringbuilder.c

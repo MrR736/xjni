@@ -6,7 +6,8 @@
 #define LOG_TAG "xjni"
 #include "base-jni.h"
 
-#include <xjni.h>
+#include <xjni_string.h>
+#include <xjni_stringbuffer.h>
 
 #define MakeStringBufferAppend(name,type,sig)\
 JNIEXPORTC void JNICALL name(JNIEnv *env,jstringBuffer sb,type obj) {\
@@ -32,28 +33,20 @@ JNIEXPORTC void JNICALL name(JNIEnv *env,jstringBuffer sb,jint offset,type obj) 
 JNIEXPORTC jstringBuffer JNICALL NewStringBuffer(JNIEnv *env) {
 	jclass clz = _FindClass(env,"java/lang/StringBuffer");
 	if (!clz) {
-		if (_ExceptionCheck(env)) {
-			_ExceptionClear(env);
-		}
+		if (_ExceptionCheck(env)) _ExceptionClear(env);
 		return NULL;
 	}
-
 	jmethodID ctor = _GetMethodID(env,clz,"<init>","()V");
 	if (!ctor) {
-		if (_ExceptionCheck(env)) {
-			_ExceptionClear(env);
-		}
+		if (_ExceptionCheck(env)) _ExceptionClear(env);
 		_DeleteLocalRef(env,clz);
 		return NULL;
 	}
-
 	jobject obj = _NewObject(env,clz,ctor);
-
 	if (_ExceptionCheck(env)) {
 		_ExceptionClear(env);
 		obj = NULL;
 	}
-
 	_DeleteLocalRef(env,clz);
 	return obj;
 }
@@ -61,28 +54,20 @@ JNIEXPORTC jstringBuffer JNICALL NewStringBuffer(JNIEnv *env) {
 JNIEXPORTC jstringBuffer JNICALL NewStringBufferCapacity(JNIEnv *env,jint capacity) {
 	jclass clz = _FindClass(env,"java/lang/StringBuffer");
 	if (!clz) {
-		if (_ExceptionCheck(env)) {
-			_ExceptionClear(env);
-		}
+		if (_ExceptionCheck(env)) _ExceptionClear(env);
 		return NULL;
 	}
-
 	jmethodID ctor = _GetMethodID(env,clz,"<init>","(I)V");
 	if (!ctor) {
-		if (_ExceptionCheck(env)) {
-			_ExceptionClear(env);
-		}
+		if (_ExceptionCheck(env)) _ExceptionClear(env);
 		_DeleteLocalRef(env,clz);
 		return NULL;
 	}
-
 	jobject obj = _NewObject(env,clz,ctor,capacity);
-
 	if (_ExceptionCheck(env)) {
 		_ExceptionClear(env);
 		obj = NULL;
 	}
-
 	_DeleteLocalRef(env,clz);
 	return obj;
 }
@@ -90,28 +75,20 @@ JNIEXPORTC jstringBuffer JNICALL NewStringBufferCapacity(JNIEnv *env,jint capaci
 JNIEXPORT jobject JNICALL NewStringBufferString(JNIEnv *env,jstring str) {
 	jclass clz = _FindClass(env,"java/lang/StringBuffer");
 	if (!clz) {
-		if (_ExceptionCheck(env)) {
-			_ExceptionClear(env);
-		}
+		if (_ExceptionCheck(env)) _ExceptionClear(env);
 		return NULL;
 	}
-
 	jmethodID ctor = _GetMethodID(env,clz,"<init>","(Ljava/lang/String;)V");
 	if (!ctor) {
-		if (_ExceptionCheck(env)) {
-			_ExceptionClear(env);
-		}
+		if (_ExceptionCheck(env)) _ExceptionClear(env);
 		_DeleteLocalRef(env,clz);
 		return NULL;
 	}
-
 	jobject obj = _NewObject(env,clz,ctor,str);
-
 	if (_ExceptionCheck(env)) {
 		_ExceptionClear(env);
 		obj = NULL;
 	}
-
 	_DeleteLocalRef(env,clz);
 	return obj;
 }
@@ -130,48 +107,38 @@ JNIEXPORTC jstringBuffer JNICALL NewStringBufferStringUTF(JNIEnv *env,const char
 
 JNIEXPORTC jstring JNICALL StringBufferToString(JNIEnv *env,jstringBuffer sb) {
 	if (env == NULL || sb == NULL) return NULL;
-
 	jclass sbClass = _GetObjectClass(env,sb);
 	if (sbClass == NULL) return NULL;
-
 	jmethodID toStringMID = _GetMethodID(env,sbClass,"toString","()Ljava/lang/String;");
 	if (toStringMID == NULL) {
 		_DeleteLocalRef(env,sbClass);
 		return NULL;
 	}
-
 	jstring result = base_cast(jstring,_CallObjectMethod(env,sb,toStringMID));
-
 	_DeleteLocalRef(env,sbClass);
 	return result;
 }
 
 JNIEXPORTC char* JNICALL StringBufferToStringUTF(JNIEnv *env,jstringBuffer sb) {
 	if (!env || !sb) return NULL;
-
 	jstring jstr = StringBufferToString(env,sb);
 	if (!jstr) return NULL;
-
 	jsize utfLen = _GetStringUTFLength(env,jstr);
 	const char *utf = _GetStringUTFChars(env,jstr,NULL);
 	if (!utf) {
 		_DeleteLocalRef(env,jstr);
 		return NULL;
 	}
-
 	char *copy = ubase_cast(char*,malloc(base_cast(size_t,utfLen) + 1));
 	if (!copy) {
 		_ReleaseStringUTFChars(env,jstr,utf);
 		_DeleteLocalRef(env,jstr);
 		return NULL;
 	}
-
 	jmemcpy(copy,utf,base_cast(size_t,utfLen));
 	copy[utfLen] = '\0';
-
 	_ReleaseStringUTFChars(env,jstr,utf);
 	_DeleteLocalRef(env,jstr);
-
 	return copy;
 }
 

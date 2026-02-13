@@ -1,13 +1,11 @@
-#include <stdio.h>
-#include <stdint.h>
 #include <stdlib.h>
-#include <string.h>
-#include <jni.h>
 
 #define LOG_TAG "xjni"
 #include "base-jni.h"
 
-#include <xjni.h>
+#include <xjni_string.h>
+#include <xjni_stringarray.h>
+#include <xjni2d.h>
 
 #define _ReleaseArrayElements(env,func,array,elements,mode) BASEJNIC(func,env,array,elements,mode)
 #define _GetArrayElements(env,func,array,elements) BASEJNIC(func,env,array,elements)

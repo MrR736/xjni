@@ -6,34 +6,27 @@
 #define LOG_TAG "xjni"
 #include "base-jni.h"
 
-#include <xjni.h>
+#include <xjni_string.h>
+#include <xjni_stringreader.h>
 
 // String Reader Utility
 JNIEXPORTC jstringReader JNICALL NewStringReader(JNIEnv *env,jstring s) {
 	jclass clz = _FindClass(env,"java/io/StringReader");
 	if (!clz) {
-		if (_ExceptionCheck(env)) {
-			_ExceptionClear(env);
-		}
+		if (_ExceptionCheck(env)) _ExceptionClear(env);
 		return NULL;
 	}
-
 	jmethodID ctor = _GetMethodID(env,clz,"<init>","(Ljava/lang/String;)V");
 	if (!ctor) {
-		if (_ExceptionCheck(env)) {
-			_ExceptionClear(env);
-		}
+		if (_ExceptionCheck(env)) _ExceptionClear(env);
 		_DeleteLocalRef(env,clz);
 		return NULL;
 	}
-
 	jobject obj = _NewObject(env,clz,ctor,s);
-
 	if (_ExceptionCheck(env)) {
 		_ExceptionClear(env);
 		obj = NULL;
 	}
-
 	_DeleteLocalRef(env,clz);
 	return obj;
 }
@@ -52,52 +45,42 @@ JNIEXPORTC jstringReader JNICALL NewStringReaderUTF(JNIEnv *env,const char* str)
 
 JNIEXPORTC jstring JNICALL StringReaderToString(JNIEnv *env,jstringReader sr) {
 	if (env == NULL || sr == NULL) return NULL;
-
 	jclass srClass = _GetObjectClass(env,sr);
 	if (srClass == NULL) return NULL;
-
 	jmethodID toStringMID = _GetMethodID(env,srClass,"toString","()Ljava/lang/String;");
 	if (toStringMID == NULL) {
 		_DeleteLocalRef(env,srClass);
 		return NULL;
 	}
-
 	jstring result = base_cast(jstring,_CallObjectMethod(env,sr,toStringMID));
 	if (result == NULL) {
 		_DeleteLocalRef(env,srClass);
 		return NULL;
 	}
-
 	_DeleteLocalRef(env,srClass);
 	return result;
 }
 
 JNIEXPORTC char* JNICALL StringReaderToStringUTF(JNIEnv *env,jstringReader sr) {
 	if (!env || !sr) return NULL;
-
-	jstring jstr = StringWriterToString(env,sr);
+	jstring jstr = StringReaderToString(env,sr);
 	if (!jstr) return NULL;
-
 	jsize utfLen = _GetStringUTFLength(env,jstr);
 	const char *utf = _GetStringUTFChars(env,jstr,NULL);
 	if (!utf) {
 		_DeleteLocalRef(env,jstr);
 		return NULL;
 	}
-
 	char *copy = ubase_cast(char*,malloc(base_cast(size_t,utfLen) + 1));
 	if (!copy) {
 		_ReleaseStringUTFChars(env,jstr,utf);
 		_DeleteLocalRef(env,jstr);
 		return NULL;
 	}
-
 	jmemcpy(copy,utf,base_cast(size_t,utfLen));
 	copy[utfLen] = '\0';
-
 	_ReleaseStringUTFChars(env,jstr,utf);
 	_DeleteLocalRef(env,jstr);
-
 	return copy;
 }
 
