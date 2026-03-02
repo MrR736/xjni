@@ -13,16 +13,12 @@
 JNIEXPORTC jstringWriter JNICALL NewStringWriter(JNIEnv *env) {
 	jclass clz = _FindClass(env,"java/io/StringWriter");
 	if (!clz) {
-		if (_ExceptionCheck(env)) {
-			_ExceptionClear(env);
-		}
+		if (_ExceptionCheck(env)) _ExceptionClear(env);
 		return NULL;
 	}
 	jmethodID ctor = _GetMethodID(env,clz,"<init>","()V");
 	if (!ctor) {
-		if (_ExceptionCheck(env)) {
-			_ExceptionClear(env);
-		}
+		if (_ExceptionCheck(env)) _ExceptionClear(env);
 		_DeleteLocalRef(env,clz);
 		return NULL;
 	}
@@ -38,16 +34,12 @@ JNIEXPORTC jstringWriter JNICALL NewStringWriter(JNIEnv *env) {
 JNIEXPORTC jstringWriter JNICALL NewStringWriterInitialSize(JNIEnv *env,jint initialSize) {
 	jclass clz = _FindClass(env,"java/io/StringWriter");
 	if (!clz) {
-		if (_ExceptionCheck(env)) {
-			_ExceptionClear(env);
-		}
+		if (_ExceptionCheck(env)) _ExceptionClear(env);
 		return NULL;
 	}
 	jmethodID ctor = _GetMethodID(env,clz,"<init>","(I)V");
 	if (!ctor) {
-		if (_ExceptionCheck(env)) {
-			_ExceptionClear(env);
-		}
+		if (_ExceptionCheck(env)) _ExceptionClear(env);
 		_DeleteLocalRef(env,clz);
 		return NULL;
 	}

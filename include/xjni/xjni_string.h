@@ -38,7 +38,7 @@ JNIEXPORT void* JNICALL jmemcpy(void *dest,const void *src,size_t n);
 JNIEXPORT void* JNICALL jmemmove(void *dest,const void *src,size_t n);
 JNIEXPORT void* JNICALL jmemchr(const void *s,jint c,size_t n);
 JNIEXPORT void* JNICALL jmemset(void *s,jint c,size_t n);
-JNIEXPORT jint JNICALL jmemcmp(const void *cs,const void *ct,size_t count);
+JNIEXPORT jint  JNICALL jmemcmp(const void *cs,const void *ct,size_t count);
 /** @} */
 
 /** @defgroup XJNI_String jchar String Utilities
@@ -121,22 +121,22 @@ JNIEXPORT size_t JNICALL jstrnlen(const jchar * s,size_t count);
 JNIEXPORT jchar* JNICALL jstrchr(const jchar *s,jint c);
 JNIEXPORT jchar* JNICALL jstrchrnul(const jchar *__s,jint __c);
 JNIEXPORT jchar* JNICALL jstrrchr(const jchar *s,jint c);
-JNIEXPORT jint JNICALL jstrcmp(const jchar *cs,const jchar *ct);
 JNIEXPORT jchar* JNICALL jstrcpy(jchar* __dest,const jchar* __src);
 JNIEXPORT size_t JNICALL jstrlcpy(jchar *dest,const jchar *src,size_t size);
 JNIEXPORT jchar* JNICALL jstrcat(jchar* __dest,const jchar* __src);
 JNIEXPORT size_t JNICALL jstrlcat(jchar *dest,const jchar *src,size_t size);
-JNIEXPORT jint JNICALL jstrncmp(const jchar *cs,const jchar *ct,size_t count);
+JNIEXPORT jint   JNICALL jstrcmp(const jchar *cs,const jchar *ct);
+JNIEXPORT jint   JNICALL jstrncmp(const jchar *cs,const jchar *ct,size_t count);
 JNIEXPORT jchar* JNICALL jstrpbrk(const jchar * cs,const jchar * ct);
 JNIEXPORT jchar* JNICALL jstrstr(const jchar *s1,const jchar *s2);
 JNIEXPORT size_t JNICALL jstrcspn(const jchar *__s,const jchar *__reject);
 JNIEXPORT size_t JNICALL jstrspn(const jchar *s,const jchar *accept);
 JNIEXPORT jchar* JNICALL jstrdup(const jchar *s);
 JNIEXPORT jchar* JNICALL jstrndup(const jchar *__string,size_t __n);
-JNIEXPORT jint JNICALL jstrcoll(const jchar *__s1,const jchar *__s2);
+JNIEXPORT jint   JNICALL jstrcoll(const jchar *__s1,const jchar *__s2);
 JNIEXPORT size_t JNICALL jstrxfrm(jchar* __dest,const jchar* __src,size_t __n);
 JNIEXPORT jchar* JNICALL jstrtok(jchar* __s,const jchar* __delim);
-JNIEXPORT void JNICALL jstrreverse(jchar* __str);
+JNIEXPORT void   JNICALL jstrreverse(jchar* __str);
 JNIEXPORT jchar* JNICALL jstrrev(const jchar* jstr);
 /** @} */
 

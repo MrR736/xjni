@@ -145,12 +145,35 @@ JNIEXPORT jshort JNICALL GetJArgsShort(JNIEnv *env, jargs_t args, jsize index);
  */
 
 /**
- * @brief Create a Java argument array from a C `va_list`.
- * @param env JNI environment pointer
- * @param index Number of elements in the argument array
- * @param sig JNI-style signature string describing argument types
- * @param ap C `va_list` containing the argument values
- * @return A `jargs_t` array with boxed Java objects
+ * @brief Builds a Java argument array from a signature string and va_list.
+ *
+ * Parses a JNI-style method signature and extracts corresponding
+ * arguments from the provided variable argument list.
+ *
+ * Supported signature types:
+ *  - L<class>;  Object type (e.g., Ljava/lang/String;)
+ *  - I          jint
+ *  - J          jlong
+ *  - Z          jboolean
+ *  - F          jfloat
+ *  - D          jdouble
+ *  - C          jchar
+ *  - S          jshort
+ *  - B          jbyte
+ *
+ * Object types:
+ *  - java/lang/String → handled via JArgsAppendString()
+ *  - Other objects    → validated via IsSameObjectChars()
+ *
+ * @param env   Pointer to the JNI environment.
+ * @param index Number of expected arguments.
+ * @param sig   JNI method signature string.
+ * @param ap    Variable argument list containing argument values.
+ *
+ * @return Constructed jargs_t containing appended arguments.
+ *
+ * @note The signature must follow JNI descriptor format.
+ * @note Caller is responsible for proper va_list handling.
  */
 JNIEXPORT jargs_t JNICALL JArgsStartV(JNIEnv *env, jsize index, const char* sig, va_list ap);
 

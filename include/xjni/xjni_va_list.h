@@ -15,7 +15,6 @@
 #define __XJNI_VA_LIST_H__
 
 #include <stdio.h>
-#include <jni.h>
 #include <xjni_args.h>
 
 #ifdef __cplusplus

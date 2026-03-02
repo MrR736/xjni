@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(xjni VERSION 1.0.9 LANGUAGES C CXX)
+project(xjni VERSION 1.1.0 LANGUAGES C CXX)
 
 # ------------------------------------
 # Verbose & helper options
@@ -14,9 +14,11 @@ include(CTest)
 # ------------------------------------
 # Project options
 # ------------------------------------
+option(XJNI_BUILD_DEBUG "Build Debug library" OFF)
+option(XJNI_BUILD_TESTS "Build JNI/Java tests" OFF)
+
 option(XJNI_BUILD_STATIC "Build static library" ON)
 option(XJNI_BUILD_DOCS "Build Doxygen documentation" ON)
-option(XJNI_BUILD_TESTS "Build JNI/Java tests" OFF)
 
 # ------------------------------------
 # Detect Java / JNI
@@ -64,8 +66,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(XJNI_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(XJNI_SOURCES
 	${XJNI_SOURCE_DIR}/src/xjni_args.c
+	${XJNI_SOURCE_DIR}/src/xjni_hashmap.c
+	${XJNI_SOURCE_DIR}/src/xjni_classcache.c
 	${XJNI_SOURCE_DIR}/src/xjni_arrayfield.c
 	${XJNI_SOURCE_DIR}/src/xjni_log.c
+	${XJNI_SOURCE_DIR}/src/xjni_pool.c
 	${XJNI_SOURCE_DIR}/src/xjni_new.c
 	${XJNI_SOURCE_DIR}/src/xjni_printf.c
 	${XJNI_SOURCE_DIR}/src/xjni_string.c
@@ -74,6 +79,9 @@ set(XJNI_SOURCES
 	${XJNI_SOURCE_DIR}/src/xjni_stringbuilder.c
 	${XJNI_SOURCE_DIR}/src/xjni_stringreader.c
 	${XJNI_SOURCE_DIR}/src/xjni_stringwriter.c
+	${XJNI_SOURCE_DIR}/src/xjni_struct.c
+	${XJNI_SOURCE_DIR}/src/xjni_thread.c
+	${XJNI_SOURCE_DIR}/src/xjni_utils.c
 	${XJNI_SOURCE_DIR}/src/xjni_va_list.c
 	${XJNI_SOURCE_DIR}/src/xjni2d.c
 	${XJNI_SOURCE_DIR}/src/xjni.c
@@ -110,6 +118,10 @@ if(NOT WIN32)
 	)
 endif()
 
+if(XJNI_BUILD_DEBUG)
+	target_compile_definitions(xjni PUBLIC DEBUG)
+endif()
+
 # ------------------------------------
 # Optional static library
 # ------------------------------------
@@ -124,8 +136,13 @@ if(XJNI_BUILD_STATIC)
 			$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/xjni>
 			${JNI_INCLUDE_DIRS}
 	)
+
 	if(NOT WIN32)
 		target_link_libraries(xjni_static PUBLIC JNI::JNI)
+	endif()
+
+	if(XJNI_BUILD_DEBUG)
+		target_compile_definitions(xjni_static PUBLIC DEBUG)
 	endif()
 endif()
 
@@ -233,6 +250,7 @@ if(XJNI_BUILD_TESTS)
 		${CMAKE_SOURCE_DIR}/test/java/TestXJNI.java
 		${CMAKE_SOURCE_DIR}/test/java/TestXJNILOG.java
 		${CMAKE_SOURCE_DIR}/test/java/TestXJNIPrintf.java
+		${CMAKE_SOURCE_DIR}/test/java/MyStructObject.java
 	)
 
 	if(GENERATE_HEADERS)
@@ -278,7 +296,7 @@ if(XJNI_BUILD_TESTS)
 		${CMAKE_SOURCE_DIR}/test/c/xjni_stringreader_test.c
 		${CMAKE_SOURCE_DIR}/test/c/xjni2d_test.c
 		${CMAKE_SOURCE_DIR}/test/c/xjni_va_list_test.c
-		${CMAKE_SOURCE_DIR}/test/c/xjni_va_list_test.c
+		${CMAKE_SOURCE_DIR}/test/c/xjni_struct_test.c
 		${CMAKE_SOURCE_DIR}/test/c/xjni_log_test.c
 		${CMAKE_SOURCE_DIR}/test/c/xjni_test.c
 	)
@@ -292,6 +310,7 @@ if(XJNI_BUILD_TESTS)
 	endif()
 	target_link_libraries(xjni_test PRIVATE xjni)
 
+
 	set(LIBS_TEST_OUTPUT_DIR "${CMAKE_BINARY_DIR}/build/lib")
 	set_target_properties(xjni_test PROPERTIES
 		ARCHIVE_OUTPUT_DIRECTORY ${LIBS_TEST_OUTPUT_DIR}
@@ -299,10 +318,29 @@ if(XJNI_BUILD_TESTS)
 		RUNTIME_OUTPUT_DIRECTORY ${LIBS_TEST_OUTPUT_DIR}
 	)
 
+	add_executable(xjni_hashmap_test ${CMAKE_SOURCE_DIR}/test/xjni_hashmap_test.c)
+	target_include_directories(xjni_hashmap_test PRIVATE ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/include)
+	target_link_libraries(xjni_hashmap_test PRIVATE xjni)
+	set_target_properties(xjni_hashmap_test PROPERTIES
+		ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build
+		LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build
+		RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build
+	)
+
+	add_executable(xjni_pool_test ${CMAKE_SOURCE_DIR}/test/xjni_pool_test.c)
+	target_include_directories(xjni_pool_test PRIVATE ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/include)
+	target_link_libraries(xjni_pool_test PRIVATE xjni)
+	set_target_properties(xjni_pool_test PROPERTIES
+		ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build
+		LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build
+		RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build
+	)
+
+
 	# Java test targets
 	foreach(TESTCLASS TestStringArray ArrayFieldTest Array2DTest
 		TestXJNI TestStringBuilder TestStringWriter TestStringReader TestStringBuffer TestXJNIPrintf
-		TestXJNILOG)
+		TestXJNILOG MyStructObject)
 		add_custom_target(run_${TESTCLASS}
 			COMMAND ${_JAVA_CMD} -Djava.library.path=${LIBS_TEST_OUTPUT_DIR} -cp ${JAR_OUTPUT_DIR}/xjni-test.jar ${TESTCLASS}
 			WORKING_DIRECTORY "${JAR_OUTPUT_DIR}"

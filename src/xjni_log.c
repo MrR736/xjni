@@ -1,5 +1,7 @@
 #include <xjni_log.h>
 
+#define XJNI_STREAM stderr
+
 #ifdef __ANDROID__
 #include <android/log.h>
 
@@ -71,7 +73,7 @@ JNIEXPORT int JNICALL xjni_log_vccprint(int prio, int line, const char* file, co
 		return 0;
 	}
 
-	const char* t = tag ? tag : "XJNI";
+	const char* t = tag ? tag : XJNI_DEFAULT_TAG;
 	time_t now = time(NULL);
 	struct tm tm;
 	char ts[48];
@@ -81,18 +83,13 @@ JNIEXPORT int JNICALL xjni_log_vccprint(int prio, int line, const char* file, co
 	localtime_r(&now, &tm);
 #endif
 	strftime(ts, sizeof(ts), "%Y-%m-%d %H:%M:%S", &tm);
-
 	const char* color = xjni_LogPriorityColor(prio);
-
-	// Print timestamp + priority + tag + file
-	fprintf(stderr, "%s %s[%s]\t%s %s (%s:%d) ",
+	fprintf(XJNI_STREAM, "%s %s[%s]\t%s %s (%s:%d) ",
 		ts,color,xjni_LogPrioritytostring(prio),
 		XJNI_COLOR_RESET,t,cbasename(file),line);
-
-	int ret = vfprintf(stderr, fmt, apc);
+	int ret = vfprintf(XJNI_STREAM, fmt, apc);
 	va_end(apc);
-
-	fputc('\n', stderr);
+	fputc('\n', XJNI_STREAM);
 	return ret;
 }
 
@@ -104,7 +101,6 @@ JNIEXPORT int JNICALL xjni_log_ccprint(int prio,int line,const char* file,const 
 	return ret;
 }
 #endif  // __ANDROID__
-
 
 JNIEXPORT int JNICALL xjni_log_vcprint(int prio,int line,const char* file,const char* tag,const char* fmt,va_list ap) {
 	va_list apc;
@@ -120,7 +116,6 @@ JNIEXPORT int JNICALL xjni_log_vcprint(int prio,int line,const char* file,const 
 		va_end(apc);
 		return 0;
 	}
-
 	const char* t = tag ? tag : XJNI_DEFAULT_TAG;
 	time_t now = time(NULL);
 	struct tm tm;
@@ -131,15 +126,15 @@ JNIEXPORT int JNICALL xjni_log_vcprint(int prio,int line,const char* file,const 
 	localtime_r(&now, &tm);
 #endif
 	strftime(ts, sizeof(ts), "%Y-%m-%d %H:%M:%S", &tm);
-	fprintf(stderr, "%s ", ts);
+	fprintf(XJNI_STREAM, "%s ", ts);
 	const char* pstr = xjni_LogPrioritytostring(prio);
-	if (pstr) fprintf(stderr, "[%s]\t", pstr);
-	fprintf(stderr, " %s ", t);
-	if (file && line > 0) fprintf(stderr, "(%s:%d) ", cbasename(file), line);
-	int ret = vfprintf(stderr, fmt, apc);
+	if (pstr) fprintf(XJNI_STREAM, "[%s]\t", pstr);
+	fprintf(XJNI_STREAM, " %s ", t);
+	if (file && line > 0) fprintf(XJNI_STREAM, "(%s:%d) ", cbasename(file), line);
+	int ret = vfprintf(XJNI_STREAM, fmt, apc);
 	va_end(apc);
-	fputc('\n', stderr);
-	fflush(stderr);
+	fputc('\n', XJNI_STREAM);
+	fflush(XJNI_STREAM);
 	return ret;
 #endif
 }

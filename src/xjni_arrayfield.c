@@ -1,10 +1,3 @@
-#include <stdio.h>
-#include <stdint.h>
-#include <string.h>
-#include <stddef.h>
-#include <stdlib.h>
-#include <jni.h>
-
 #define LOG_TAG "xjni"
 #include "base-jni.h"
 

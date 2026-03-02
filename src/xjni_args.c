@@ -1,9 +1,15 @@
 #include <string.h>
 #include <xjni_log.h>
 #include <xjni_args.h>
+#include <xjni_utils.h>
+#include <xjni_string.h>
 
 #define LOG_TAG "xjni"
 #include "base-jni.h"
+
+#define JLSTR "java/lang/String"
+#define JLSTR_LEN (sizeof(JLSTR) - 1)
+#define CLASSNAME_LEN 4096
 
 typedef enum {
 	JARGS_OP_APPEND,
@@ -235,21 +241,25 @@ JNIEXPORTC jargs_t JNICALL JArgsStartV(JNIEnv *env,jsize index,const char* sig,v
 			case 'L': {
 				const char* start = ++p;
 				while (*p && *p != ';') p++;
-				if (*p == ';') {
-					size_t len = p - start;
-					char className[512];
-					if (len >= sizeof(className)) len = sizeof(className) - 1;
-					strncpy(className,start,len);
-					className[len] = '\0';
-					if (strcmp(className,"java/lang/String") == 0) {
-						jstring str = va_arg(ap,jstring);
-						JArgsAppendString(env,args,str);
+				if (*p != ';') return args;
+				size_t len = (size_t)(p - start);
+				if (len == JLSTR_LEN && jmemcmp(start, JLSTR, JLSTR_LEN) == 0) {
+					jstring str = va_arg(ap, jstring);
+					JArgsAppendString(env, args, str);
+				} else {
+					if (len > 0 && len < CLASSNAME_LEN) {
+						char className[CLASSNAME_LEN];
+						jmemcpy(className, start, len);
+						className[len] = '\0';
+						jobject obj = va_arg(ap, jobject);
+						if (obj && IsSameObjectChars(env, className, obj))
+							JArgsAppendObject(env, args, obj);
 					} else {
-						jobject obj = va_arg(ap,jobject);
-						JArgsAppendObject(env,args,obj);
+						(void)va_arg(ap, jobject);
 					}
-					p++;
 				}
+
+				p++; /* skip ';' */
 				break;
 			}
 			case 'I': {
@@ -276,7 +286,6 @@ JNIEXPORTC jargs_t JNICALL JArgsStartV(JNIEnv *env,jsize index,const char* sig,v
 				p++;
 				break;
 			}
-
 			case 'D': {
 				jdouble v = va_arg(ap,jdouble);
 				JArgsAppendDouble(env,args,v);
@@ -370,7 +379,7 @@ JNIEXPORTC void JNICALL JArgsInsertStringUTF(JNIEnv *env,jargs_t args,const char
 }
 
 JNIEXPORTC void JNICALL JArgsReplaceObject(JNIEnv *env,jargs_t args,jobject obj,jsize index) {
-    jargs_handle_object(env,args,obj,JARGS_OP_REPLACE,index);
+	jargs_handle_object(env,args,obj,JARGS_OP_REPLACE,index);
 }
 
 JNIEXPORTC void JNICALL JArgsReplaceString(JNIEnv *env,jargs_t args,jstring obj,jsize index) {
@@ -427,58 +436,24 @@ JNIEXPORTC char* JNICALL GetJArgsStringUTF(JNIEnv *env,jargs_t args,jsize index)
 	return ret;
 }
 
-JNIEXPORTC jchar JNICALL GetJArgsChar(JNIEnv *env,jargs_t args,jsize index) {
-	if (!ensureCharacterClass(env)) return '\0';
-	jobject obj = GetJArgs(env,args,index);
-	jchar value = _CallCharMethod(env,obj,gCharValue);
-	_DeleteLocalRef(env,obj);
-	return value;
+#define MAKE_GETJARGS(NAME,TYPE,CALL,ENSURE,VALUE,RET) \
+JNIEXPORTC TYPE JNICALL NAME(JNIEnv *env,jargs_t args,jsize index) {\
+	if (!ENSURE(env)) return RET;\
+	jobject obj = GetJArgs(env,args,index);\
+	if (!obj) return RET; \
+	TYPE value = CALL(env,obj,VALUE);\
+	if ((*env)->ExceptionCheck(env)) {\
+		_DeleteLocalRef(env, obj);\
+		return RET;\
+	}\
+	_DeleteLocalRef(env,obj);\
+	return value;\
 }
 
-JNIEXPORTC jboolean JNICALL GetJArgsBoolean(JNIEnv *env,jargs_t args,jsize index) {
-	if (!ensureBooleanClass(env)) return JNI_FALSE;
-	jobject obj = GetJArgs(env,args,index);
-	jboolean value = _CallBooleanMethod(env,obj,gBooleanValue);
-	_DeleteLocalRef(env,obj);
-	return value;
-}
-
-JNIEXPORTC jlong JNICALL GetJArgsLong(JNIEnv *env,jargs_t args,jsize index) {
-	if (!ensureLongClass(env)) { return 0; }
-	jobject obj = GetJArgs(env,args,index);
-	jlong value = _CallLongMethod(env,obj,gLongValue);
-	_DeleteLocalRef(env,obj);
-	return value;
-}
-
-JNIEXPORTC jfloat JNICALL GetJArgsFloat(JNIEnv *env,jargs_t args,jsize index) {
-	if (!ensureFloatClass(env)) { return 0.0; }
-	jobject obj = GetJArgs(env,args,index);
-	jfloat value = _CallFloatMethod(env,obj,gFloatValue);
-	_DeleteLocalRef(env,obj);
-	return value;
-}
-
-JNIEXPORTC jdouble JNICALL GetJArgsDouble(JNIEnv *env,jargs_t args,jsize index) {
-	if (!ensureDoubleClass(env)) { return 0.0; }
-	jobject obj = GetJArgs(env,args,index);
-	jdouble value = _CallDoubleMethod(env,obj,gDoubleValue);
-	_DeleteLocalRef(env,obj);
-	return value;
-}
-
-JNIEXPORTC jbyte JNICALL GetJArgsByte(JNIEnv *env,jargs_t args,jsize index) {
-	if (!ensureByteClass(env)) { return 0.0; }
-	jobject obj = GetJArgs(env,args,index);
-	jbyte value = _CallByteMethod(env,obj,gByteValue);
-	_DeleteLocalRef(env,obj);
-	return value;
-}
-
-JNIEXPORTC jshort JNICALL GetJArgsShort(JNIEnv *env,jargs_t args,jsize index) {
-	if (!ensureShortClass(env)) { return 0.0; }
-	jobject obj = GetJArgs(env,args,index);
-	jshort value = _CallShortMethod(env,obj,gShortValue);
-	_DeleteLocalRef(env,obj);
-	return value;
-}
+MAKE_GETJARGS(GetJArgsChar,jchar,_CallCharMethod,ensureCharacterClass,gCharValue,'\0')
+MAKE_GETJARGS(GetJArgsBoolean,jboolean,_CallBooleanMethod,ensureBooleanClass,gBooleanValue,JNI_FALSE)
+MAKE_GETJARGS(GetJArgsLong,jlong,_CallLongMethod,ensureLongClass,gLongValue,0)
+MAKE_GETJARGS(GetJArgsFloat,jfloat,_CallFloatMethod,ensureFloatClass,gFloatValue,0.0)
+MAKE_GETJARGS(GetJArgsDouble,jdouble,_CallDoubleMethod,ensureDoubleClass,gDoubleValue,0.0)
+MAKE_GETJARGS(GetJArgsByte,jbyte,_CallByteMethod,ensureByteClass,gByteValue,0x00)
+MAKE_GETJARGS(GetJArgsShort,jshort,_CallShortMethod,ensureShortClass,gShortValue,0)

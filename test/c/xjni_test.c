@@ -3,7 +3,7 @@
 #include <string.h>
 #include <xjni.h>
 
-JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm,void* reserved) {
+JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved) {
 	return XJNI_OnLoad(vm,reserved,JNI_VERSION_1_6);
 }
 

@@ -24,23 +24,23 @@
  *  @brief Logging priority levels
  */
 typedef enum xjni_LogPriority {
-  XJNI_LOG_UNKNOWN = 0,   /**< Internal use only */
-  XJNI_LOG_DEFAULT,       /**< Default priority, internal use only */
-  XJNI_LOG_VERBOSE,       /**< Verbose logging (usually disabled in release) */
-  XJNI_LOG_DEBUG,         /**< Debug logging (usually disabled in release) */
-  XJNI_LOG_INFO,          /**< Informational logging */
-  XJNI_LOG_WARN,          /**< Warning logging, recoverable failures */
-  XJNI_LOG_ERROR,         /**< Error logging, unrecoverable failures */
-  XJNI_LOG_FATAL,         /**< Fatal logging, for abort scenarios */
-  XJNI_LOG_SILENT,        /**< Internal use only */
+	XJNI_LOG_UNKNOWN = 0,	/**< Internal use only */
+	XJNI_LOG_DEFAULT,	/**< Default priority, internal use only */
+	XJNI_LOG_VERBOSE,	/**< Verbose logging (usually disabled in release) */
+	XJNI_LOG_DEBUG,		/**< Debug logging (usually disabled in release) */
+	XJNI_LOG_INFO,		/**< Informational logging */
+	XJNI_LOG_WARN,		/**< Warning logging, recoverable failures */
+	XJNI_LOG_ERROR,		/**< Error logging, unrecoverable failures */
+	XJNI_LOG_FATAL,		/**< Fatal logging, for abort scenarios */
+	XJNI_LOG_SILENT,	/**< Internal use only */
 } xjni_LogPriority;
 
 /** Convenience macros for printing logs with automatic file and line info */
 #define xjni_log_vprint(prio,tag,fmt,ap) \
-    xjni_log_vcprint(prio,__LINE__,__FILE__,tag,fmt,ap)
+	xjni_log_vcprint(prio,__LINE__,__FILE__,tag,fmt,ap)
 
 #define xjni_log_print(prio,tag,fmt,...) \
-    xjni_log_cprint(prio,__LINE__,__FILE__,tag,fmt,##__VA_ARGS__)
+	xjni_log_cprint(prio,__LINE__,__FILE__,tag,fmt,##__VA_ARGS__)
 
 /** Platform-specific macros for log printing */
 #ifdef __ANDROID__
@@ -57,7 +57,13 @@ typedef enum xjni_LogPriority {
 #define XJNI_LOGE(tag,fmt,...) xjni_log_print(XJNI_LOG_ERROR,tag,fmt,##__VA_ARGS__)
 #define XJNI_LOGI(tag,fmt,...) xjni_log_print(XJNI_LOG_INFO,tag,fmt,##__VA_ARGS__)
 #define XJNI_LOGV(tag,fmt,...) xjni_log_print(XJNI_LOG_VERBOSE,tag,fmt,##__VA_ARGS__)
-#define XJNI_LOGD(tag,fmt,...) xjni_log_print(XJNI_LOG_DEBUG,tag,fmt,##__VA_ARGS__)
+
+#ifdef DEBUG
+#  define XJNI_LOGD(tag,fmt,...) xjni_log_print(XJNI_LOG_DEBUG,tag,fmt,##__VA_ARGS__)
+# else
+#  define XJNI_LOGD(tag,fmt,...) 0
+#endif
+
 #define XJNI_LOGW(tag,fmt,...) xjni_log_print(XJNI_LOG_WARN, tag,fmt,##__VA_ARGS__)
 #define XJNI_LOGF(tag,fmt,...) xjni_log_print(XJNI_LOG_FATAL,tag,fmt,##__VA_ARGS__)
 
@@ -65,7 +71,11 @@ typedef enum xjni_LogPriority {
 #define XJNI_LOGEC(tag,fmt,...) xjni_log_printc(XJNI_LOG_ERROR,tag,fmt,##__VA_ARGS__)
 #define XJNI_LOGIC(tag,fmt,...) xjni_log_printc(XJNI_LOG_INFO,tag,fmt,##__VA_ARGS__)
 #define XJNI_LOGVC(tag,fmt,...) xjni_log_printc(XJNI_LOG_VERBOSE,tag,fmt,##__VA_ARGS__)
-#define XJNI_LOGDC(tag,fmt,...) xjni_log_printc(XJNI_LOG_DEBUG,tag,fmt,##__VA_ARGS__)
+#ifdef DEBUG
+#  define XJNI_LOGDC(tag,fmt,...) xjni_log_printc(XJNI_LOG_DEBUG,tag,fmt,##__VA_ARGS__)
+# else
+#  define XJNI_LOGDC(tag,fmt,...) 0
+#endif
 #define XJNI_LOGWC(tag,fmt,...) xjni_log_printc(XJNI_LOG_WARN,tag,fmt,##__VA_ARGS__)
 #define XJNI_LOGFC(tag,fmt,...) xjni_log_printc(XJNI_LOG_FATAL,tag,fmt,##__VA_ARGS__)
 

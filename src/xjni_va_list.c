@@ -9,14 +9,11 @@ static jmethodID gFormatMid = NULL;
 
 static jboolean ensureStringFormat(JNIEnv *env) {
 	if (gStringCls && gFormatMid) return JNI_TRUE;
-
 	jclass local = _FindClass(env, "java/lang/String");
 	if (!local) return JNI_FALSE;
-
 	jclass global = _NewGlobalRef(env, local);
 	_DeleteLocalRef(env, local);
 	if (!global) return JNI_FALSE;
-
 	jmethodID mid = _GetStaticMethodID(env, global,"format","(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;");
 	if (!mid) {
 		_DeleteGlobalRef(env, global);
@@ -163,7 +160,7 @@ JNIEXPORTC void JNICALL JDPrintf(JNIEnv *env,int fd,jstring format, jargs_t args
 		fprintf(fp,"%s",utf);
 		fflush(fp);
 	} else {
-		XJNI_LOGE("XJniVaList","_fdopen failed for fd %d", fd);
+		XJNI_LOGE("XJniVaList","fdopen failed for fd %d", fd);
 		goto cleanup;
 	}
 #else

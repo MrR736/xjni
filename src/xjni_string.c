@@ -9,6 +9,16 @@
 #include <windows.h>
 #endif
 
+#if UINTPTR_MAX == 0xffffffffU
+#define ONES  0x01010101U
+#define HIGHS 0x80808080U
+#elif UINTPTR_MAX == 0xffffffffffffffffULL
+#define ONES  0x0101010101010101ULL
+#define HIGHS 0x8080808080808080ULL
+#else
+#error Unsupported uintptr_t size
+#endif
+
 JNIEXPORTC jint JNICALL xjni_tochar(const jchar c,char* out,size_t out_size) {
 	 if (!out || out_size == 0) return 0;
 
@@ -207,23 +217,14 @@ JNIEXPORTC jboolean JNICALL xjni_fromjstring(const jchar *src,char *dst,size_t *
 
 	while (*src) {
 		uint32_t codepoint;
-
 		/* -------- UTF-16 decode -------- */
 		jchar wc = *src++;
-
 		if (wc >= 0xD800 && wc <= 0xDBFF) {
-			/* High surrogate */
 			jchar wc2 = *src++;
-			if (wc2 < 0xDC00 || wc2 > 0xDFFF)
-				return JNI_FALSE;
-			codepoint = 0x10000 +
-						(((wc - 0xD800) << 10) |
-						 (wc2 - 0xDC00));
-		} else if (wc >= 0xDC00 && wc <= 0xDFFF) {
-			return JNI_FALSE;
-		} else {
-			codepoint = wc;
-		}
+			if (wc2 < 0xDC00 || wc2 > 0xDFFF) return JNI_FALSE;
+			codepoint = 0x10000 + (((wc - 0xD800) << 10) | (wc2 - 0xDC00));
+		} else if (wc >= 0xDC00 && wc <= 0xDFFF) return JNI_FALSE;
+		else codepoint = wc;
 
 		/* -------- UTF-8 encode -------- */
 		if (codepoint <= 0x7F) {
@@ -248,52 +249,100 @@ JNIEXPORTC jboolean JNICALL xjni_fromjstring(const jchar *src,char *dst,size_t *
 			return JNI_FALSE;
 		}
 	}
-
 	dst[out] = '\0';
 	*dstlen = out;
-
 	return (*src == 0);
 }
 
-JNIEXPORTC void* JNICALL jmemcpy(void *dest,const void *src,size_t n) {
-	unsigned char *tmp = (unsigned char*)dest;
+JNIEXPORTC void* JNICALL jmemcpy(void *dest, const void *src, size_t n) {
+	unsigned char *d = (unsigned char*)dest;
 	const unsigned char *s = (const unsigned char*)src;
-	while (n--) *tmp++ = *s++;
+	if (!n) return dest;
+	while (n && ((uintptr_t)d & (sizeof(uintptr_t)-1))) { *d++ = *s++; --n; }
+	uintptr_t *dw = (uintptr_t*)d;
+	const uintptr_t *sw = (const uintptr_t*)s;
+	while (n >= sizeof(uintptr_t)) { *dw++ = *sw++; n -= sizeof(uintptr_t); }
+	d = (unsigned char*)dw;
+	s = (const unsigned char*)sw;
+	while (n--) *d++ = *s++;
 	return dest;
 }
 
-JNIEXPORTC void* JNICALL jmemmove(void *dest,const void *src,size_t n) {
-	unsigned char *tmp;
-	unsigned char *s;
-	if (dest <= src) {
-		tmp = (unsigned char*)dest;
-		s = (unsigned char*)src;
-		while (n--) *tmp++ = *s++;
-	} else {
-		tmp = (unsigned char*)dest + n;
-		s = (unsigned char*)src + n;
-		while (n--) *--tmp = *--s;
-	}
-	return dest;
-}
-
-JNIEXPORTC void* JNICALL jmemchr(const void *s,jint c,size_t n) {
-	const unsigned char *p = s;
-	while (n--) { if (base_cast(unsigned char,c) == *p++) return ubase_cast(void*,p - 1); }
-	return NULL;
-}
-
-JNIEXPORTC void* JNICALL jmemset(void *s,jint c,size_t n) {
-	unsigned char *xs = (unsigned char*)s;
-	while (n--) *xs++ = (unsigned char)c;
+JNIEXPORTC void* JNICALL jmemset(void *s, jint c, size_t n) {
+	unsigned char *d = (unsigned char*)s;
+	unsigned char byte = (unsigned char)c;
+	if (!n) return s;
+	while (n && ((uintptr_t)d & (sizeof(uintptr_t)-1))) { *d++ = byte; --n; }
+	uintptr_t pattern = byte;
+	for (size_t i = 1; i < sizeof(uintptr_t); i++) pattern |= pattern << 8;
+	uintptr_t *dw = (uintptr_t*)d;
+	while (n >= sizeof(uintptr_t)) { *dw++ = pattern; n -= sizeof(uintptr_t); }
+	d = (unsigned char*)dw;
+	while (n--) *d++ = byte;
 	return s;
 }
 
-JNIEXPORTC jint JNICALL jmemcmp(const void *cs,const void *ct,size_t count) {
-	const unsigned char *su1,*su2;
-	jint res = 0;
-	for(su1 = cs,su2 = ct; 0 < count; ++su1,++su2,count--) { if ((res = *su1 - *su2) != 0) break; }
-	return res;
+JNIEXPORTC jint JNICALL jmemcmp(const void *cs, const void *ct, size_t n) {
+	const unsigned char *s1 = (const unsigned char*)cs;
+	const unsigned char *s2 = (const unsigned char*)ct;
+	while (n && (((uintptr_t)s1 | (uintptr_t)s2) & (sizeof(uintptr_t)-1))) {
+		int diff = *s1++ - *s2++;
+		if (diff) return diff;
+		--n;
+	}
+	const uintptr_t *w1 = (const uintptr_t*)s1;
+	const uintptr_t *w2 = (const uintptr_t*)s2;
+	while (n >= sizeof(uintptr_t)) {
+		if (*w1 != *w2) break;
+		++w1; ++w2;
+		n -= sizeof(uintptr_t);
+	}
+	s1 = (const unsigned char*)w1;
+	s2 = (const unsigned char*)w2;
+	while (n--) {
+		int diff = *s1++ - *s2++;
+		if (diff) return diff;
+	}
+	return 0;
+}
+
+JNIEXPORTC void* JNICALL jmemmove(void *dest, const void *src, size_t n) {
+	unsigned char *d = (unsigned char*)dest;
+	const unsigned char *s = (const unsigned char*)src;
+	if (d == s || !n) return dest;
+	if (d < s) return jmemcpy(dest, src, n);
+	else {
+		d += n; s += n;
+		while (n--) *--d = *--s;
+		return dest;
+	}
+}
+
+JNIEXPORTC void* JNICALL jmemchr(const void *s, jint c, size_t n) {
+	const unsigned char *p = (const unsigned char*)s;
+	unsigned char ch = (unsigned char)c;
+	while (n && ((uintptr_t)p & (sizeof(uintptr_t)-1))) {
+		if (*p == ch) return (void*)p;
+		++p; --n;
+	}
+	size_t wsize = sizeof(uintptr_t);
+	uintptr_t pattern = ch;
+	for (size_t i = 1; i < wsize; ++i) pattern |= pattern << 8;
+	while (n >= wsize) {
+		uintptr_t v;
+		jmemcpy(&v, p, wsize);
+		v ^= pattern;
+		if ((v - ONES) & ~v & HIGHS) {
+			for (size_t i = 0; i < wsize; ++i)
+				if (p[i] == ch) return (void*)(p + i);
+		}
+		p += wsize; n -= wsize;
+	}
+	while (n--) {
+		if (*p == ch) return (void*)p;
+		++p;
+	}
+	return NULL;
 }
 
 JNIEXPORTC size_t JNICALL jstrlen(const jchar* __s) {
@@ -305,9 +354,8 @@ JNIEXPORTC size_t JNICALL jstrlen(const jchar* __s) {
 
 JNIEXPORTC size_t JNICALL jstrnlen(const jchar * s,size_t count) {
 	const jchar *sc;
-	for (sc = s; count-- && *sc != '\0'; ++sc)
-		/* nothing */;
-	return base_cast(jint,sc - s);
+	for (sc = s; count-- && *sc != '\0'; ++sc);
+	return (jint)(sc - s);
 }
 
 JNIEXPORTC jchar* JNICALL jstrrchr(const jchar *s,jint c) {
@@ -338,13 +386,13 @@ JNIEXPORTC size_t JNICALL jstrlcpy(jchar *dest,const jchar *src,size_t size) {
 	return ret;
 }
 
-JNIEXPORTC jchar* JNICALL jstrcpy(jchar* __dest,const jchar* __src) {
-	if (__dest == NULL || __src == NULL) return NULL;
-	jchar* dest = __dest;
-	const jchar* src = __src;
-	while (*src != 0) { *dest = *src; ++dest; ++src; }
-	*dest = '\0';
-	return __dest;
+JNIEXPORTC jchar* JNICALL jstrcpy(jchar* dest,const jchar* src) {
+	if (dest == NULL || src == NULL) return NULL;
+	jchar* d = dest;
+	const jchar* s = src;
+	while (*s != 0) { *d = *s; ++d; ++s; }
+	*d = '\0';
+	return dest;
 }
 
 
@@ -565,7 +613,7 @@ JNIEXPORTC wchar_t* JNICALL xjni_jmbstowcs(const jchar* c) {
 
 JNIEXPORTC jchar* JNICALL xjni_jwcstombs(const wchar_t* c) {
 	if (!c) return NULL;
-	char* ret = xjni_wcstombs(c);      // wchar_t → UTF-8
+	char* ret = xjni_wcstombs(c);	  // wchar_t → UTF-8
 	if (!ret) return NULL;
 	jchar* jret = xjni_tojstring(ret); // UTF-8 → UTF-16
 	if (!jret) {

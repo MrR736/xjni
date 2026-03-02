@@ -62,28 +62,20 @@ JNIEXPORTC jstringBuilder JNICALL NewStringBuilder(JNIEnv *env) {
 JNIEXPORTC jstringBuilder JNICALL NewStringBuilderCapacity(JNIEnv *env,jint capacity) {
 	jclass clz = _FindClass(env,"java/lang/StringBuilder");
 	if (!clz) {
-		if (_ExceptionCheck(env)) {
-			_ExceptionClear(env);
-		}
+		if (_ExceptionCheck(env)) _ExceptionClear(env);
 		return NULL;
 	}
-
 	jmethodID ctor = _GetMethodID(env,clz,"<init>","(I)V");
 	if (!ctor) {
-		if (_ExceptionCheck(env)) {
-			_ExceptionClear(env);
-		}
+		if (_ExceptionCheck(env)) _ExceptionClear(env);
 		_DeleteLocalRef(env,clz);
 		return NULL;
 	}
-
 	jobject obj = _NewObject(env,clz,ctor,capacity);
-
 	if (_ExceptionCheck(env)) {
 		_ExceptionClear(env);
 		obj = NULL;
 	}
-
 	_DeleteLocalRef(env,clz);
 	return obj;
 }
@@ -91,28 +83,20 @@ JNIEXPORTC jstringBuilder JNICALL NewStringBuilderCapacity(JNIEnv *env,jint capa
 JNIEXPORTC jstringBuilder JNICALL NewStringBuilderString(JNIEnv *env,jstring str) {
 	jclass clz = _FindClass(env,"java/lang/StringBuilder");
 	if (!clz) {
-		if (_ExceptionCheck(env)) {
-			_ExceptionClear(env);
-		}
+		if (_ExceptionCheck(env)) _ExceptionClear(env);
 		return NULL;
 	}
-
 	jmethodID ctor = _GetMethodID(env,clz,"<init>","(Ljava/lang/String;)V");
 	if (!ctor) {
-		if (_ExceptionCheck(env)) {
-			_ExceptionClear(env);
-		}
+		if (_ExceptionCheck(env)) _ExceptionClear(env);
 		_DeleteLocalRef(env,clz);
 		return NULL;
 	}
-
 	jobject obj = _NewObject(env,clz,ctor,str);
-
 	if (_ExceptionCheck(env)) {
 		_ExceptionClear(env);
 		obj = NULL;
 	}
-
 	_DeleteLocalRef(env,clz);
 	return obj;
 }
@@ -131,48 +115,38 @@ JNIEXPORTC jstringBuilder JNICALL NewStringBuilderStringUTF(JNIEnv *env,const ch
 
 JNIEXPORTC jstring JNICALL StringBuilderToString(JNIEnv *env,jstringBuilder sb) {
 	if (env == NULL || sb == NULL) return NULL;
-
 	jclass sbClass = _GetObjectClass(env,sb);
 	if (sbClass == NULL) return NULL;
-
 	jmethodID toStringMID = _GetMethodID(env,sbClass,"toString","()Ljava/lang/String;");
 	if (toStringMID == NULL) {
 		_DeleteLocalRef(env,sbClass);
 		return NULL;
 	}
-
-	jstring result = base_cast(jstring,_CallObjectMethod(env,sb,toStringMID));
-
+	jstring ret = base_cast(jstring,_CallObjectMethod(env,sb,toStringMID));
 	_DeleteLocalRef(env,sbClass);
-	return result;
+	return ret;
 }
 
 JNIEXPORTC char* JNICALL StringBuilderToStringUTF(JNIEnv *env,jstringBuilder sb) {
 	if (!env || !sb) return NULL;
-
 	jstring jstr = StringBuilderToString(env,sb);
 	if (!jstr) return NULL;
-
 	jsize utfLen = _GetStringUTFLength(env,jstr);
 	const char *utf = _GetStringUTFChars(env,jstr,NULL);
 	if (!utf) {
 		_DeleteLocalRef(env,jstr);
 		return NULL;
 	}
-
 	char *copy = ubase_cast(char*,malloc(base_cast(size_t,utfLen) + 1));
 	if (!copy) {
 		_ReleaseStringUTFChars(env,jstr,utf);
 		_DeleteLocalRef(env,jstr);
 		return NULL;
 	}
-
 	jmemcpy(copy,utf,base_cast(size_t,utfLen));
 	copy[utfLen] = '\0';
-
 	_ReleaseStringUTFChars(env,jstr,utf);
 	_DeleteLocalRef(env,jstr);
-
 	return copy;
 }
 

@@ -20,17 +20,9 @@
 #include <stddef.h>
 #include <jni.h>
 
-#ifdef _WIN32
-#include <windows.h>
-typedef CRITICAL_SECTION pthread_mutex_t;
-#define pthread_once_t INIT_ONCE
-#define PTHREAD_ONCE_INIT INIT_ONCE_STATIC_INIT
-#define PTHREAD_MUTEX_INITIALIZER {0}
-#else
-#include <pthread.h>
-#endif
-
 #include <xjni_new.h>
+#include <xjni_classcache.h>
+#include <xjni_hashmap.h>
 #include <xjni_printf.h>
 #include <xjni_arrayfield.h>
 #include <xjni_string.h>
@@ -40,6 +32,9 @@ typedef CRITICAL_SECTION pthread_mutex_t;
 #include <xjni_stringreader.h>
 #include <xjni_stringwriter.h>
 #include <xjni_va_list.h>
+#include <xjni_struct.h>
+#include <xjni_thread.h>
+#include <xjni_utils.h>
 #include <xjni_log.h>
 #include <xjni2d.h>
 
@@ -51,10 +46,10 @@ typedef CRITICAL_SECTION pthread_mutex_t;
 #define _XJNI_VERSION_MAJOR	1
 #endif
 #ifndef _XJNI_VERSION_MINOR
-#define _XJNI_VERSION_MINOR	0
+#define _XJNI_VERSION_MINOR	1
 #endif
 #ifndef _XJNI_VERSION_PATCH
-#define _XJNI_VERSION_PATCH	9
+#define _XJNI_VERSION_PATCH	0
 #endif
 
 #define _XJNI_VERSION		((_XJNI_VERSION_MAJOR * 1000) + (_XJNI_VERSION_MINOR * 100) + _XJNI_VERSION_PATCH)
@@ -86,9 +81,9 @@ JNIEXPORT void JNICALL FatalErrorF(JNIEnv *env, const char *msg, ...);
 JNIEXPORT jint JNICALL ThrowNewV(JNIEnv *env, jclass clazz, const char *msg, va_list __arg);
 JNIEXPORT jint JNICALL ThrowNewF(JNIEnv *env, jclass clazz, const char *msg, ...);
 
-JNIEXPORT void JNICALL throwJava(JNIEnv *env, const char* tag, const char* msg, const char* cls_name, jclass* cache, pthread_mutex_t* mutex);
-JNIEXPORT void JNICALL throwJavaV(JNIEnv *env, const char* tag, const char* cls_name, jclass* cache, pthread_mutex_t* mutex, const char* msg, va_list ap);
-JNIEXPORT void JNICALL throwJavaF(JNIEnv *env, const char* tag, const char* cls_name, jclass* cache, pthread_mutex_t* mutex, const char* msg, ...);
+JNIEXPORT void JNICALL throwJava(JNIEnv *env,const char* tag,const char* msg, const char* cls_name, jclass* cache);
+JNIEXPORT void JNICALL throwJavaV(JNIEnv *env,const char* tag,const char* clsName,jclass* cache,const char* msg,va_list ap);
+JNIEXPORT void JNICALL throwJavaF(JNIEnv *env,const char* tag,const char* cls_name,jclass* cache,const char* msg,...);
 /** @} */
 
 /** @name Specific Java Exception Utilities */

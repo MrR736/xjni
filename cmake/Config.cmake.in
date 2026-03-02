@@ -1,5 +1,7 @@
 @PACKAGE_INIT@
 
+find_package(JNI REQUIRED)
+
 # Load the exported targets
 include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Targets.cmake")
 

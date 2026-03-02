@@ -130,6 +130,7 @@
 #define _PushLocalFrame(env,i) BASEJNIC(PushLocalFrame,env,i)
 #define _GetPrimitiveArrayCritical(env,array,isCopy) BASEJNIC(GetPrimitiveArrayCritical,env,array,isCopy)
 #define _ReleasePrimitiveArrayCritical(env,array,carray,mode) BASEJNIC(ReleasePrimitiveArrayCritical,env,array,carray,mode)
+#define _IsSameObject(env,obj1,obj2) BASEJNIC(IsSameObject,env,obj1,obj2)
 
 // MethodID
 #define _GetMethodID(env,ex,name,sig) BASEJNIC(GetMethodID,env,ex,name,sig)
@@ -274,6 +275,8 @@
 #define _GetSuperclass(env,sub) BASEJNIC(GetSuperclass,env,sub)
 #define _IsAssignableFrom(env,sub,sup) BASEJNIC(IsAssignableFrom,env,sub,sup)
 #define _GetEnv(vm,env,ver) BASEJNIC(GetEnv,vm,env,ver)
+#define _AttachCurrentThread(vm,env,ver) BASEJNIC(AttachCurrentThread,vm,env,ver)
+#define _DetachCurrentThread(vm) BASEJNIO(DetachCurrentThread,vm)
 
 #define _ExceptionClear(env) BASEJNIO(ExceptionClear,env)
 #define _ExceptionOccurred(env) BASEJNIO(ExceptionOccurred,env)
