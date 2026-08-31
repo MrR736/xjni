@@ -67,7 +67,7 @@ JNIEXPORT jlongArray JNICALL xjni_NewLongArray(JNIEnv* env, const jlong* data, j
  * @param len Number of floats
  * @return Newly created `jfloatArray`
  */
-JNIEXPORT jfloatArray JNICALL xjni_NewFloatArray(JNIEnv* env, const float* data, jsize len);
+JNIEXPORT jfloatArray JNICALL xjni_NewFloatArray(JNIEnv* env, const jfloat* data, jsize len);
 
 /**
  * @brief Create a new Java double array from native `double` data
@@ -76,7 +76,7 @@ JNIEXPORT jfloatArray JNICALL xjni_NewFloatArray(JNIEnv* env, const float* data,
  * @param len Number of doubles
  * @return Newly created `jdoubleArray`
  */
-JNIEXPORT jdoubleArray JNICALL xjni_NewDoubleArray(JNIEnv* env, const double* data, jsize len);
+JNIEXPORT jdoubleArray JNICALL xjni_NewDoubleArray(JNIEnv* env, const jdouble* data, jsize len);
 
 /**
  * @brief Called when the "New" module is loaded

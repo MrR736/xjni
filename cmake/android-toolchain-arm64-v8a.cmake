@@ -3,7 +3,7 @@
 set(CMAKE_SYSTEM_NAME Android)
 
 # Path to your NDK
-set(ANDROID_NDK /lib/android-sdk/ndk/25.2.9519653)
+set(ANDROID_NDK /lib/android-ndk)
 
 # Target ABI
 set(ANDROID_ABI arm64-v8a)

@@ -58,6 +58,23 @@ JNIEXPORT void JNICALL JArgsAppendByte(JNIEnv *env, jargs_t args, jbyte obj);
 JNIEXPORT void JNICALL JArgsAppendShort(JNIEnv *env, jargs_t args, jshort obj);
 /** @} */
 
+/** @defgroup XJNI_Args_PushBack PushBack Elements
+ *  @brief Functions to append elements to a Java argument array
+ *  @{
+ */
+#define JArgsPushBackObject JArgsAppendObject
+#define JArgsPushBackString JArgsAppendString
+#define JArgsPushBackStringUTF JArgsAppendStringUTF
+#define JArgsPushBackChar JArgsAppendChar
+#define JArgsPushBackBoolean JArgsAppendBoolean
+#define JArgsPushBackInt JArgsAppendInt
+#define JArgsPushBackLong JArgsAppendLong
+#define JArgsPushBackFloat JArgsAppendFloat
+#define JArgsPushBackDouble JArgsAppendDouble
+#define JArgsPushBackByte JArgsAppendByte
+#define JArgsPushBackShort JArgsAppendShort
+/** @} */
+
 /** @defgroup XJNI_Args_Insert Insert Elements
  *  @brief Functions to insert elements at a specific index
  *  @{
@@ -187,6 +204,22 @@ JNIEXPORT jargs_t JNICALL JArgsStartV(JNIEnv *env, jsize index, const char* sig,
  */
 JNIEXPORT jargs_t JNICALL JArgsStart(JNIEnv *env, jsize index, const char* sig, ...);
 
+/** @} */
+
+/** @{ */
+/**
+ * @brief Removes the last element from a Java argument array.
+ *
+ * Deletes the element at the current last index of the supplied
+ * Java argument array.
+ *
+ * @param env  Pointer to the JNI environment.
+ * @param args Java argument array to modify.
+ *
+ * @note If the array is empty, no element is removed.
+ * @note The argument array itself is not resized by this function.
+ */
+JNIEXPORT void JNICALL JArgsPopBack(JNIEnv *env, jargs_t args);
 /** @} */
 
 #ifdef __cplusplus

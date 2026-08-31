@@ -306,7 +306,7 @@ JNIEXPORT void JNICALL xjni_struct_set_region(xjni_struct_ctx_t* ctx,JNIEnv *env
  *
  * @param ptr Pointer to memory (ignored).
  */
-static inline void xjni_free_null(void* ptr) {
+static inline void xjni_struct_free_null(void* ptr) {
 	(void)ptr;
 }
 

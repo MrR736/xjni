@@ -206,15 +206,15 @@ cmake --build . --target xjni2d_test_run
 
 ## Versioning
 
-Current version: **1.1.0**
+Current version: **1.1.1**
 
 ### Compile-Time Macros
 
 ```c
-_XJNI_VERSION        // 1100
+_XJNI_VERSION        // 1101
 _XJNI_VERSION_MAJOR  // 1
 _XJNI_VERSION_MINOR  // 1
-_XJNI_VERSION_PATCH  // 0
+_XJNI_VERSION_PATCH  // 1
 ```
 
 ### Runtime Query

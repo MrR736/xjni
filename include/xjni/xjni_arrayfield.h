@@ -79,6 +79,14 @@ JNIEXPORT void JNICALL SetDoubleArrayField(JNIEnv *env, jobject obj, jfieldID fi
 JNIEXPORT void JNICALL SetStaticDoubleArrayField(JNIEnv *env, jclass cls, jfieldID fid, jdoubleArray value);
 //@}
 
+/** @name Boolean Array Field Accessors */
+//@{
+JNIEXPORT jbooleanArray JNICALL GetBooleanArrayField(JNIEnv *env, jobject obj, jfieldID fid);
+JNIEXPORT jbooleanArray JNICALL GetStaticBooleanArrayField(JNIEnv *env, jclass cls, jfieldID fid);
+JNIEXPORT void JNICALL SetBooleanArrayField(JNIEnv *env, jobject obj, jfieldID fid, jbooleanArray value);
+JNIEXPORT void JNICALL SetStaticBooleanArrayField(JNIEnv *env, jclass cls, jfieldID fid, jbooleanArray value);
+//@}
+
 #ifdef __cplusplus
 }
 #endif

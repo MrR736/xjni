@@ -21,6 +21,7 @@
 #include <jni.h>
 
 #include <xjni_new.h>
+#include <xjni_class.h>
 #include <xjni_classcache.h>
 #include <xjni_hashmap.h>
 #include <xjni_printf.h>
@@ -36,6 +37,7 @@
 #include <xjni_thread.h>
 #include <xjni_utils.h>
 #include <xjni_log.h>
+#include <xjni_windows.h>
 #include <xjni2d.h>
 
 /** @defgroup XJNI_VERSION Version Macros
@@ -49,10 +51,22 @@
 #define _XJNI_VERSION_MINOR	1
 #endif
 #ifndef _XJNI_VERSION_PATCH
-#define _XJNI_VERSION_PATCH	0
+#define _XJNI_VERSION_PATCH	1
 #endif
 
 #define _XJNI_VERSION		((_XJNI_VERSION_MAJOR * 1000) + (_XJNI_VERSION_MINOR * 100) + _XJNI_VERSION_PATCH)
+
+#define __XJNI_VERSION_AT_LEAST(major,minor,patch) \
+	(((major * 1000) + (minor * 100) + patch) <= _XJNI_VERSION)
+
+#define __XJNI_VERSION_AT_MOST(major,minor,patch) \
+	(((major * 1000) + (minor * 100) + patch) >= _XJNI_VERSION)
+
+#define __XJNI_VERSION_EQ(major,minor,patch) \
+	(((major * 1000) + (minor * 100) + patch) == _XJNI_VERSION)
+
+#define __XJNI_VERSION_NE(major,minor,patch) \
+	(((major * 1000) + (minor * 100) + patch) != _XJNI_VERSION)
 /** @} */
 
 #ifdef __cplusplus
@@ -143,6 +157,7 @@ JNIEXPORT void JNICALL throwSyncFailedExceptionF(JNIEnv *env,const char* tag,con
 JNIEXPORT void JNICALL throwUTFDataFormatExceptionF(JNIEnv *env,const char* tag,const char* msg,...);
 JNIEXPORT void JNICALL throwUnsupportedEncodingExceptionF(JNIEnv *env,const char* tag,const char* msg,...);
 JNIEXPORT void JNICALL throwWriteAbortedExceptionF(JNIEnv *env,const char* tag,const char* msg,...);
+JNIEXPORT void JNICALL throwOutOfMemoryErrorF(JNIEnv *env,const char* tag,const char* msg,...);
 /** @} */
 
 /** @defgroup XJNI_Lifecycle JNI Lifecycle Hooks

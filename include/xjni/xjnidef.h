@@ -1,6 +1,6 @@
 /**
  * @file xjnidef.h
- * @brief Extern JNI Define Utility Header
+ * @brief Extern Define Utility Header
  *
  * Provides portable CPU detection, compiler builtin wrappers, and utility macros for C/C++ projects.
  * Includes modern/legacy CPU optimizations, bit manipulation helpers, branch prediction hints, and
@@ -37,28 +37,36 @@
 
 /* ----------------- C Standard Version Comparison Macros ----------------- */
 #ifdef __STDC_VERSION__
-# define STDC_VERSION_AT_LEAST(ver) (__STDC_VERSION__ >= (ver))
-# define STDC_VERSION_AT_MOST(ver)  (__STDC_VERSION__ <= (ver))
-# define STDC_VERSION_EQ(ver)       (__STDC_VERSION__ == (ver))
-# define STDC_VERSION_NE(ver)       (__STDC_VERSION__ != (ver))
+# define STDC_VERSION_GE(v) (__STDC_VERSION__ >= (v))
+# define STDC_VERSION_LE(v) (__STDC_VERSION__ <= (v))
+# define STDC_VERSION_EQ(v) (__STDC_VERSION__ == (v))
+# define STDC_VERSION_NE(v) (__STDC_VERSION__ != (v))
+# define STDC_VERSION_LT(v) (__STDC_VERSION__ < (v))
+# define STDC_VERSION_GT(v) (__STDC_VERSION__ > (v))
 #else
-# define STDC_VERSION_AT_LEAST(ver) 0
-# define STDC_VERSION_AT_MOST(ver)  0
-# define STDC_VERSION_EQ(ver)       0
-# define STDC_VERSION_NE(ver)       1
+# define STDC_VERSION_GE(v) 0
+# define STDC_VERSION_LE(v) 0
+# define STDC_VERSION_EQ(v) 0
+# define STDC_VERSION_NE(v) 1
+# define STDC_VERSION_LT(v) 0
+# define STDC_VERSION_GT(v) 0
 #endif
 
 /* ----------------- C++ Standard Version Comparison Macros ----------------- */
 #ifdef __cplusplus
-# define CPLUSPLUS_AT_LEAST(ver)   (__cplusplus >= (ver))
-# define CPLUSPLUS_AT_MOST(ver)    (__cplusplus <= (ver))
-# define CPLUSPLUS_VERSION_EQ(ver) (__cplusplus == (ver))
-# define CPLUSPLUS_VERSION_NE(ver) (__cplusplus != (ver))
+# define CPLUSPLUS_GE(v) (__cplusplus >= (v))
+# define CPLUSPLUS_LE(v) (__cplusplus <= (v))
+# define CPLUSPLUS_EQ(v) (__cplusplus == (v))
+# define CPLUSPLUS_NE(v) (__cplusplus != (v))
+# define CPLUSPLUS_LT(v) (__cplusplus < (v))
+# define CPLUSPLUS_GT(v) (__cplusplus > (v))
 #else
-# define CPLUSPLUS_AT_LEAST(ver)   0
-# define CPLUSPLUS_AT_MOST(ver)    0
-# define CPLUSPLUS_VERSION_EQ(ver) 0
-# define CPLUSPLUS_VERSION_NE(ver) 1
+# define CPLUSPLUS_GE(v) 0
+# define CPLUSPLUS_LE(v) 0
+# define CPLUSPLUS_EQ(v) 0
+# define CPLUSPLUS_NE(v) 1
+# define CPLUSPLUS_LT(v) 0
+# define CPLUSPLUS_GT(v) 0
 #endif
 
 /**
@@ -156,19 +164,17 @@
  * @return 1 if types are compatible, 0 otherwise
  */
 #ifndef __xjni_types_compatible_p
-
 # ifdef __cplusplus
-
 extern "C++" {
-#  if CPLUSPLUS_AT_LEAST(STDC20PP)
+#  if CPLUSPLUS_EQ(STDC20PP)
 #   include <type_traits>
 #   define __xjni_types_compatible_p(t1, t2) \
 	std::is_same_v<std::remove_cvref_t<t1>, std::remove_cvref_t<t2>>
-#  elif CPLUSPLUS_AT_LEAST(STDC17PP)
+#  elif CPLUSPLUS_GE(STDC17PP)
 #   include <type_traits>
 #   define __xjni_types_compatible_p(t1, t2) \
 	std::is_same_v<std::remove_cv_t<t1>, std::remove_cv_t<t2>>
-#  elif CPLUSPLUS_AT_LEAST(STDC11PP)
+#  elif CPLUSPLUS_GE(STDC11PP)
 #   include <type_traits>
 #   define __xjni_types_compatible_p(t1, t2) \
 	std::is_same<typename std::remove_cv<t1>::type,typename std::remove_cv<t2>::type>::value
@@ -374,10 +380,36 @@ static inline int __xjni_clzll(unsigned long long x) {
 # define arrayof(x) (sizeof(x) / sizeof(x[0]))
 #endif
 
-/** @} */
+#ifdef __cplusplus
+# define xusing(n,t) using n = t
+#else
+# define xusing(n,t) typedef t n
+#endif
+
+#define xtypedef(t,n) xusing(n,t)
 
 #ifdef __cplusplus
-}
-#endif /* __cplusplus */
+# define XJNI_BILUDER_ENUM(n,t) n : t
+#else
+# if STDC_VERSION_GE(STDC23)
+#  define XJNI_BILUDER_ENUM(n,t) n : t
+# else
+#  define XJNI_BILUDER_ENUM(n,t) n
+# endif
+#endif
+
+#define XJNI_ENUM(n) XJNI_BILUDER_ENUM(n,int)
+/** @} */
+
+/**
+ * @defgroup JNI_VERSION_UTILITY JNI Version Utility
+ * @brief JNI Version Utility
+ * @{
+ */
+#define JNI_VERSION_AT_LEAST(ver, min) ((ver) >= (min))
+#define JNI_VERSION_AT_MOST(ver, max) ((ver) <= (max))
+#define JNI_VERSION_EQ(ver1, ver2) ((ver1) == (ver2))
+#define JNI_VERSION_NE(ver1, ver2) ((ver1) != (ver2))
+/** @} */
 
 #endif /* __XJNIDEF_H__ */
