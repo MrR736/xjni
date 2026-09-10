@@ -7,4 +7,4 @@ Name: @PROJECT_NAME@
 Description: JNI helper library for UTF-16, arrays, log, and formatting
 Version: @PROJECT_VERSION@
 Libs: -L${libdir} -lxjni
-Cflags: -I${includedir} -I${includedir}/xjni
+Cflags: -I${includedir} -I${includedir}/xjni @JNI_CFLAGS@

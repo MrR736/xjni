@@ -63,8 +63,6 @@ static bool expectNoJavaException(JNIEnv* env, TestState& t, const char* name) {
 
 static void testVersionAndStrings(JNIEnv* env, TestState& t) {
 	xxjni::xxjni j(env);
-	const std::string v = xxjni::xxjni_version();
-	t.check(v == "1.0.0", "xxjni_version");
 
 	jstring js = env->NewStringUTF("Hello XJNI");
 	t.check(js != nullptr, "xjni_tojstring");

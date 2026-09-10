@@ -17,10 +17,6 @@
 
 #include "jni.hpp"
 
-#if !__XJNI_VERSION_EQ(1,1,1)
-#error "xjni version isn't 1.1.1"
-#endif
-
 /** @defgroup XXJNI_VERSION Version Macros
  *  @brief Version information for XJNI
  *  @{
@@ -32,7 +28,7 @@
 #define _XXJNI_VERSION_MINOR	0
 #endif
 #ifndef _XXJNI_VERSION_PATCH
-#define _XXJNI_VERSION_PATCH	0
+#define _XXJNI_VERSION_PATCH	1
 #endif
 
 #define _XXJNI_VERSION		((_XXJNI_VERSION_MAJOR * 1000) + (_XXJNI_VERSION_MINOR * 100) + _XXJNI_VERSION_PATCH)

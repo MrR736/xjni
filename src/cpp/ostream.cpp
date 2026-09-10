@@ -1,7 +1,23 @@
 #include <jni.h>
 
-#include <cstdint>
-#include <ostream>
+#include "xjava.h"
+
+extern "C" JNIEXPORT jlong JNICALL
+Java_xjava_io_OStream_nativeNew(JNIEnv* env,jclass /* clazz */,jbyteArray buffer) {
+	if (buffer == nullptr) return 0;
+	const jsize length = env->GetArrayLength(buffer);
+	jbyte* data = env->GetByteArrayElements(buffer, nullptr);
+	if (data == nullptr) return 0;
+	u8_string str(reinterpret_cast<const uint8_t*>(data),static_cast<size_t>(length));
+	env->ReleaseByteArrayElements(buffer, data, JNI_ABORT);
+	auto* stream = new u8ostringstream(std::move(str));
+	return reinterpret_cast<jlong>(stream);
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_xjava_io_OStream_nativeDelete(JNIEnv*,jclass,jlong streamHandle) {
+	delete reinterpret_cast<u8ostringstream*>(streamHandle);
+}
 
 extern "C" JNIEXPORT void JNICALL
 Java_xjava_io_OStream_nativeWrite__JI(JNIEnv* /* env */,jclass /* clazz */,jlong streamHandle,jint value) {

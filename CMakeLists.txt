@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(xjni VERSION 1.1.1 LANGUAGES C CXX)
+project(xjni VERSION 1.1.2 LANGUAGES C CXX)
 
 include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)
@@ -59,8 +59,19 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # ------------------------------------
 # Source files
 # ------------------------------------
+if (WIN32)
+	set(JNI_CFLAGS "-I${WIN_JAVA_HOME}/include -I${WIN_JAVA_HOME}/include/win32")
+else()
+	set(JNI_CFLAGS "")
+	foreach(dir IN LISTS JNI_INCLUDE_DIRS)
+		string(APPEND JNI_CFLAGS " -I${dir}")
+	endforeach()
+endif()
+
 set(XJNI_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(XJNI_SOURCES
+	${XJNI_SOURCE_DIR}/src/cpp/ifstream.cpp
+	${XJNI_SOURCE_DIR}/src/cpp/ofstream.cpp
 	${XJNI_SOURCE_DIR}/src/cpp/istream.cpp
 	${XJNI_SOURCE_DIR}/src/cpp/ostream.cpp
 
@@ -91,6 +102,8 @@ set(XJNI_SOURCES
 # --------------------------------------------------------
 set(XJAVA_SOURCES
 	${XJNI_SOURCE_DIR}/src/java/xjava/XJNILibrary.java
+	${XJNI_SOURCE_DIR}/src/java/xjava/io/IFStream.java
+	${XJNI_SOURCE_DIR}/src/java/xjava/io/OFStream.java
 	${XJNI_SOURCE_DIR}/src/java/xjava/io/IStream.java
 	${XJNI_SOURCE_DIR}/src/java/xjava/io/OStream.java
 	${XJNI_SOURCE_DIR}/src/java/xjava/nio/file/attribute/FILETIME.java
@@ -313,6 +326,9 @@ if(XJNI_BUILD_TESTS)
 	set(XJNI_JAVA_SOURCES
 
 		# Existing XJNI tests
+		${CMAKE_SOURCE_DIR}/test/java/StreamTest.java
+		${CMAKE_SOURCE_DIR}/test/java/FStreamTest.java
+
 		${CMAKE_SOURCE_DIR}/test/java/TestStringArray.java
 		${CMAKE_SOURCE_DIR}/test/java/ArrayFieldTest.java
 		${CMAKE_SOURCE_DIR}/test/java/Array2DTest.java
@@ -350,6 +366,7 @@ if(XJNI_BUILD_TESTS)
 			VERSION ${PROJECT_VERSION}
 			OUTPUT_NAME "xjni-test"
 			OUTPUT_DIR "${JAR_OUTPUT_DIR}"
+			INCLUDE_JARS xjava-jar
 			GENERATE_NATIVE_HEADERS xjni-test-native
 				DESTINATION "${HEADER_OUTPUT_DIR}"
 		)
@@ -533,6 +550,9 @@ if(XJNI_BUILD_TESTS)
 	# ========================================================
 
 	set(XJNI_JAVA_TEST_CLASSES
+		StreamTest
+		FStreamTest
+
 		TestStringArray
 		ArrayFieldTest
 		Array2DTest

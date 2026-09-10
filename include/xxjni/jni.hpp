@@ -29,6 +29,13 @@
 #include <unordered_map>
 #include <list>
 
+#if CPLUSPLUS_GE(STDC17PP)
+# include <fstream>
+# include <filesystem>
+#else
+# include <ghc/filesystem.hpp>
+#endif
+
 #if !defined(JNI_VERSION_21)
 # error "xjni requires JNI headers from JDK 21 or newer"
 #endif
@@ -36,6 +43,39 @@
 namespace jni {
 	using ::JavaVM;
 	using ::JNIEnv;
+
+	namespace filesystem {
+#if CPLUSPLUS_GE(STDC17PP)
+		namespace fs = std::filesystem;
+		using ifstream = std::ifstream;
+		using ofstream = std::ofstream;
+		using wfstream = std::wfstream;
+		using wofstream = std::wofstream;
+		using fstream = std::fstream;
+		using filebuf = std::filebuf;
+		using wfilebuf = std::wfilebuf;
+#else
+		namespace fs = ghc::filesystem;
+		using ifstream = fs::ifstream;
+		using ofstream = fs::ofstream;
+		using wfstream = fs::wfstream;
+		using wofstream = fs::wofstream;
+		using fstream = fs::fstream;
+		using filebuf = fs::filebuf;
+		using wfilebuf = fs::wfilebuf;
+#endif
+		using path = fs::path;
+		using filesystem_error = fs::filesystem_error;
+		using file_status = fs::file_status;
+		using file_time_type = fs::file_time_type;
+		using file_type = fs::file_type;
+		using copy_options = fs::copy_options;
+		using directory_options = fs::directory_options;
+		using directory_entry = fs::directory_entry;
+		using directory_iterator = fs::directory_iterator;
+		using recursive_directory_iterator = fs::recursive_directory_iterator;
+		using perm_options = fs::perm_options;
+	}
 
 #if CPLUSPLUS_GE(STDC17PP)
 	template <typename T, typename... Args>
@@ -663,38 +703,14 @@ namespace jni {
 			jmethodID getKeyMethod = NULL;
 			jmethodID getValueMethod = NULL;
 
-			while (
-				env->CallBooleanMethod(
-					iterator,
-					hasNextMethod
-				)
-			) {
+			while (env->CallBooleanMethod(iterator,hasNextMethod)) {
 				jobject entry =
-				env->CallObjectMethod(
-					iterator,
-					nextMethod
-				);
-
-				if (!entry)
-					continue;
-
+				env->CallObjectMethod(iterator,nextMethod);
+				if (!entry) continue;
 				if (!entryClass) {
-					entryClass =
-					env->GetObjectClass(entry);
-
-					getKeyMethod =
-					env->GetMethodID(
-						entryClass,
-					  "getKey",
-					  "()Ljava/lang/Object;"
-					);
-
-					getValueMethod =
-					env->GetMethodID(
-						entryClass,
-					  "getValue",
-					  "()Ljava/lang/Object;"
-					);
+					entryClass = env->GetObjectClass(entry);
+					getKeyMethod = env->GetMethodID(entryClass,"getKey","()Ljava/lang/Object;");
+					getValueMethod = env->GetMethodID( entryClass,"getValue","()Ljava/lang/Object;");
 				}
 
 				jobject keyObject =
@@ -708,42 +724,19 @@ namespace jni {
 					entry,
 					getValueMethod
 				);
-
-				K key =
-				__JavaToCppMap<K>(
-					env,
-				 keyObject
-				);
-
-				V value =
-				__JavaToCppMap<V>(
-					env,
-				 valueObject
-				);
-
-				result.emplace(
-					std::move(key),
-							   std::move(value)
-				);
-
-				if (keyObject)
-					env->DeleteLocalRef(keyObject);
-
-				if (valueObject)
-					env->DeleteLocalRef(valueObject);
-
+				K key = __JavaToCppMap<K>(env,keyObject);
+				V value = __JavaToCppMap<V>(env,valueObject);
+				result.emplace(std::move(key),std::move(value));
+				if (keyObject) env->DeleteLocalRef(keyObject);
+				if (valueObject) env->DeleteLocalRef(valueObject);
 				env->DeleteLocalRef(entry);
 			}
-
-			if (entryClass)
-				env->DeleteLocalRef(entryClass);
-
+			if (entryClass) env->DeleteLocalRef(entryClass);
 			env->DeleteLocalRef(iteratorClass);
 			env->DeleteLocalRef(iterator);
 			env->DeleteLocalRef(setClass);
 			env->DeleteLocalRef(entrySet);
 			env->DeleteLocalRef(mapClass);
-
 			return result;
 		}
 
@@ -831,16 +824,23 @@ namespace jni {
 	};
 
 	class jstring : public std::basic_string<jchar> {
+	private:
+		using jstring_ = std::basic_string<jchar>;
+
 	public:
-		using std::basic_string<jchar>::basic_string;
-		using std::basic_string<jchar>::resize;
+		using jstring_::basic_string;
+		using jstring_::resize;
 
 		::jsize jsize() const noexcept {
 			return static_cast<::jsize>(size());
 		}
 
 		void resize(::jsize n) {
-			std::basic_string<jchar>::resize(static_cast<std::size_t>(n));
+			jstring_::resize(static_cast<std::size_t>(n));
+		}
+
+		::jstring j_str(JNIEnv* env) {
+			return env->NewString(data(),jsize());
 		}
 	};
 
@@ -942,14 +942,73 @@ namespace jni {
 
 	protected:
 		int_type underflow() override {
-			if (gptr() != nullptr && gptr() < egptr()) { return traits_type::to_int_type(*gptr()); }
-			const jint count = mEnv->CallIntMethod(mInputStream,mRead,mBufferArray,0,static_cast<jint>(mBuffer.size()));
-			if (mEnv->ExceptionCheck()) { return traits_type::eof(); }
-			if (count <= 0) { return traits_type::eof(); }
+			if (gptr() != nullptr && gptr() < egptr()) {
+				return traits_type::to_int_type(*gptr());
+			}
+			const jsize length = static_cast<jsize>(mBuffer.size());
+			const jint count = mEnv->CallIntMethod(mInputStream,mRead,mBufferArray,0,length);
+			if (mEnv->ExceptionCheck()) {
+				setg(nullptr, nullptr, nullptr);
+				return traits_type::eof();
+			}
+			if (count <= 0) {
+				setg(nullptr, nullptr, nullptr);
+				return traits_type::eof();
+			}
 			mEnv->GetByteArrayRegion(static_cast<jbyteArray>(mBufferArray),0,count,reinterpret_cast<jbyte*>(mBuffer.data()));
-			if (mEnv->ExceptionCheck()) { return traits_type::eof(); }
+			if (mEnv->ExceptionCheck()) {
+				setg(nullptr, nullptr, nullptr);
+				return traits_type::eof();
+			}
 			setg(mBuffer.data(),mBuffer.data(),mBuffer.data() + count);
 			return traits_type::to_int_type(*gptr());
+		}
+
+		int_type uflow() override {
+			if (underflow() == traits_type::eof()) { return traits_type::eof(); }
+			const int_type result =
+			traits_type::to_int_type(*gptr());
+			gbump(1);
+			return result;
+		}
+
+		std::streamsize showmanyc() override {
+			if (gptr() == nullptr || egptr() == nullptr) { return 0; }
+			return static_cast<std::streamsize>(egptr() - gptr());
+		}
+
+		std::streamsize xsgetn(char_type* s,std::streamsize n) override {
+			if (s == nullptr || n <= 0) return 0;
+			std::streamsize total = 0;
+			while (n > 0) {
+				if (gptr() != nullptr && gptr() < egptr()) {
+					const std::streamsize available = static_cast<std::streamsize>(egptr() - gptr());
+					const std::streamsize count = std::min(n, available);
+					std::memcpy(s,gptr(),static_cast<std::size_t>(count));
+					gbump(static_cast<int>(count));
+					s += count;
+					n -= count;
+					total += count;
+					continue;
+				}
+				if (underflow() == traits_type::eof()) break;
+			}
+			return total;
+		}
+
+		int_type pbackfail(int_type c = traits_type::eof()) override {
+			if (gptr() != nullptr && eback() != nullptr && gptr() > eback()) {
+				if (c == traits_type::eof()) {
+					gbump(-1);
+					return traits_type::not_eof(c);
+				}
+				const char ch = traits_type::to_char_type(c);
+				if (traits_type::eq(ch,gptr()[-1])) {
+					gbump(-1);
+					return c;
+				}
+			}
+			return traits_type::eof();
 		}
 	private:
 		JNIEnv* mEnv;
@@ -965,6 +1024,17 @@ namespace jni {
 		JavaInputStream(JNIEnv* env,jobject inputStream) : std::istream(nullptr), mBuf(env, inputStream) {
 			rdbuf(&mBuf);
 		}
+	private:
+		JavaInputStreamBuf mBuf;
+	};
+
+	class JavaFileInputStream final : public filesystem::ifstream {
+	public:
+		JavaFileInputStream(JNIEnv* env,jobject inputStream)
+		: filesystem::ifstream(), mBuf(env, inputStream) {
+			set_rdbuf(&mBuf);
+		}
+
 	private:
 		JavaInputStreamBuf mBuf;
 	};
@@ -1031,14 +1101,11 @@ namespace jni {
 			return traits_type::not_eof(ch);
 		}
 
-		std::streamsize xsputn(const char* data,std::streamsize size) override {
+		std::streamsize xsputn(const char_type* data,std::streamsize size) override {
 			std::streamsize written = 0;
 			while (written < size) {
-				const std::streamsize available =
-				epptr() - pptr();
-				if (available == 0) {
-					if (traits_type::eq_int_type(overflow(),traits_type::eof())) { break; }
-				}
+				const std::streamsize available = epptr() - pptr();
+				if (available == 0) { if (traits_type::eq_int_type(overflow(),traits_type::eof())) { break; } }
 				const std::streamsize count = std::min(available, size - written);
 				std::memcpy(pptr(),data + written,static_cast<std::size_t>(count));
 				pbump(static_cast<int>(count));
@@ -1057,7 +1124,8 @@ namespace jni {
 			if (size <= 0) { return true; }
 			mEnv->SetByteArrayRegion(
 				static_cast<jbyteArray>(mBufferArray),0,static_cast<jsize>(size),
-				reinterpret_cast<const jbyte*>(mBuffer.data()));
+				reinterpret_cast<const jbyte*>(mBuffer.data())
+			);
 			if (mEnv->ExceptionCheck()) { return false; }
 			mEnv->CallVoidMethod(mOutputStream,mWrite,mBufferArray,0,static_cast<jint>(size));
 			if (mEnv->ExceptionCheck()) {
@@ -1083,10 +1151,23 @@ namespace jni {
 		JavaOutputStream(JNIEnv* env,jobject outputStream) : std::ostream(nullptr),
 		mBuf(env, outputStream) { rdbuf(&mBuf); }
 		~JavaOutputStream() override { flush(); }
-
 	private:
 		JavaOutputStreamBuf mBuf;
 	};
+
+	class JavaFileOutputStream final : public filesystem::ofstream {
+	public:
+		JavaFileOutputStream(JNIEnv* env,jobject outputStream) : filesystem::ofstream(),
+		mBuf(env, outputStream) { set_rdbuf(&mBuf); }
+		~JavaFileOutputStream() override { flush(); }
+	private:
+		JavaOutputStreamBuf mBuf;
+	};
+
+	using JavaIStream = std::unique_ptr<JavaInputStream>;
+	using JavaOStream = std::unique_ptr<JavaOutputStream>;
+	using JavaFileIStream = std::unique_ptr<JavaFileInputStream>;
+	using JavaFileOStream = std::unique_ptr<JavaFileOutputStream>;
 
 	class XJNIEnv {
 	public:
@@ -2060,7 +2141,7 @@ namespace jni {
 			return result;
 		}
 
-		std::unique_ptr<JavaInputStream> GetIStream(jobject stream) {
+		JavaIStream GetIStream(jobject stream) {
 			return make_unique<JavaInputStream>(_env, stream);
 		}
 
@@ -2077,7 +2158,7 @@ namespace jni {
 			return result;
 		}
 
-		std::unique_ptr<JavaOutputStream> GetOStream(jobject stream) {
+		JavaOStream GetOStream(jobject stream) {
 			return make_unique<JavaOutputStream>(_env, stream);
 		}
 
@@ -2234,7 +2315,7 @@ namespace jni {
 		}
 
 		template <typename T>
-		jobject CppToJava(JNIEnv* env,const std::list<T>& value) {
+		jobject CppListToJavaList(JNIEnv* env,const std::list<T>& value) {
 			jclass listClass = _env->FindClass("java/util/ArrayList");
 			if (!listClass) return NULL;
 			jmethodID constructor = env->GetMethodID(listClass,"<init>","()V");
@@ -2248,6 +2329,64 @@ namespace jni {
 			}
 			env->DeleteLocalRef(listClass);
 			return result;
+		}
+
+		jobject NewIFStream(const std::string& file) {
+			jclass cls = _env->FindClass("xjava/io/IFStream");
+			if (cls == nullptr) { return nullptr; }
+			jmethodID ctor = _env->GetMethodID(cls, "<init>", "(Ljava/lang/String;)V");
+			if (ctor == nullptr) {
+				_env->DeleteLocalRef(cls);
+				return nullptr;
+			}
+			::jstring s = NewStringUTF(file);
+			if (s == nullptr) {
+				_env->DeleteLocalRef(cls);
+				return nullptr;
+			}
+			jobject result = _env->NewObject(cls,ctor,s);
+			_env->DeleteLocalRef(cls);
+			_env->DeleteLocalRef(s);
+			return result;
+		}
+
+		JavaFileIStream GetIFStream(jobject stream) {
+			return make_unique<JavaFileInputStream>(_env, stream);
+		}
+
+		jobject NewOFStream(const std::string& file,bool append) {
+			jclass cls = _env->FindClass("xjava/io/OFStream");
+			if (cls == nullptr) { return nullptr; }
+			jmethodID ctor = _env->GetMethodID(cls,"<init>","(Ljava/lang/String;Z)V");
+			if (ctor == nullptr) {
+				_env->DeleteLocalRef(cls);
+				return nullptr;
+			}
+			::jstring s = NewStringUTF(file);
+			if (s == nullptr) {
+				_env->DeleteLocalRef(cls);
+				return nullptr;
+			}
+			jobject result = _env->NewObject(cls,ctor,s,toJBoolean(append));
+			_env->DeleteLocalRef(cls);
+			_env->DeleteLocalRef(s);
+			return result;
+		}
+
+		jobject NewOFStream(const std::string& file) {
+			return NewOFStream(file,false);
+		}
+
+		JavaFileOStream GetOFStream(jobject stream) {
+			return make_unique<JavaFileOutputStream>(_env, stream);
+		}
+
+		jboolean toJBoolean(bool z) {
+			return z ? JNI_TRUE : JNI_FALSE;
+		}
+
+		bool toBool(jboolean z) {
+			return z != JNI_FALSE;
 		}
 	private:
 		JNIEnv *_env = nullptr;

@@ -3,47 +3,41 @@
 #include "xjava.h"
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_xjava_io_IStream_nativeNew(JNIEnv* env,jclass /* clazz */,jbyteArray buffer) {
+Java_xjava_io_IFStream_nativeNew(JNIEnv* env,jclass /* clazz */,jstring buffer) {
 	if (buffer == nullptr) return 0;
-	const jsize length = env->GetArrayLength(buffer);
-	jbyte* data = env->GetByteArrayElements(buffer, nullptr);
+	const char* data = env->GetStringUTFChars(buffer, nullptr);
 	if (data == nullptr) return 0;
-	u8_string str(reinterpret_cast<const uint8_t*>(data),static_cast<size_t>(length));
-	env->ReleaseByteArrayElements(buffer, data, JNI_ABORT);
-	auto* stream = new u8istringstream(std::move(str));
+	jni::filesystem::path p(data);
+	jni::filesystem::ifstream* stream = new jni::filesystem::ifstream(p);
+	env->ReleaseStringUTFChars(buffer, data);
+	if (!stream->is_open()) {
+		delete stream;
+		return 0;
+	}
 	return reinterpret_cast<jlong>(stream);
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_xjava_io_IStream_nativeDelete(JNIEnv*,jclass,jlong streamHandle) {
-	delete reinterpret_cast<u8istringstream*>(streamHandle);
+Java_xjava_io_IFStream_nativeDelete(JNIEnv*,jclass,jlong streamHandle) {
+	delete reinterpret_cast<jni::filesystem::ifstream*>(streamHandle);
 }
 
 extern "C" JNIEXPORT jint JNICALL
-Java_xjava_io_IStream_nativeRead__J(
+Java_xjava_io_IFStream_nativeRead__J(
 	JNIEnv* env,
 	jclass /* clazz */,
 	jlong streamHandle
 ) {
-	auto* stream = reinterpret_cast<std::istream*>(static_cast<std::uintptr_t>(streamHandle));
+	auto* stream = reinterpret_cast<jni::filesystem::ifstream*>(static_cast<std::uintptr_t>(streamHandle));
 	if (stream == nullptr) { return -1; }
 	char c{};
-	if (stream->get(c)) {
-		return static_cast<unsigned char>(c);
-	}
+	if (stream->get(c)) { return static_cast<unsigned char>(c); }
 	return -1;
 }
 
 extern "C" JNIEXPORT jint JNICALL
-Java_xjava_io_IStream_nativeRead__J_3BII(
-	JNIEnv* env,
-	jclass /* clazz */,
-	jlong streamHandle,
-	jbyteArray buffer,
-	jint offset,
-	jint length
-) {
-	auto* stream = reinterpret_cast<std::istream*>(static_cast<std::uintptr_t>(streamHandle));
+Java_xjava_io_IFStream_nativeRead__J_3BII(JNIEnv* env,jclass /* clazz */,jlong streamHandle,jbyteArray buffer,jint offset,jint length) {
+	auto* stream = reinterpret_cast<jni::filesystem::ifstream*>(static_cast<std::uintptr_t>(streamHandle));
 	if (stream == nullptr || buffer == nullptr) { return -1; }
 	jbyte* data = env->GetByteArrayElements(buffer, nullptr);
 	if (data == nullptr) { return -1; }
@@ -55,8 +49,8 @@ Java_xjava_io_IStream_nativeRead__J_3BII(
 }
 
 extern "C" JNIEXPORT jint JNICALL
-Java_xjava_io_IStream_nativeAvailable(JNIEnv*,jclass,jlong streamHandle) {
-	auto* stream = reinterpret_cast<std::istream*>(streamHandle);
+Java_xjava_io_IFStream_nativeAvailable(JNIEnv*,jclass,jlong streamHandle) {
+	auto* stream = reinterpret_cast<jni::filesystem::ifstream*>(streamHandle);
 	if (stream == nullptr) return 0;
 	std::streampos current = stream->tellg();
 	if (current == std::streampos(-1)) return 0;
@@ -68,13 +62,13 @@ Java_xjava_io_IStream_nativeAvailable(JNIEnv*,jclass,jlong streamHandle) {
 	if (available > static_cast<std::streamoff>(
 		std::numeric_limits<jint>::max())) {
 		return std::numeric_limits<jint>::max();
-		}
-		return static_cast<jint>(available);
+	}
+	return static_cast<jint>(available);
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_xjava_io_IStream_nativeSkip(JNIEnv* /* env */,jclass /* clazz */,jlong streamHandle,jlong count) {
-	auto* stream = reinterpret_cast<std::istream*>(static_cast<std::uintptr_t>(streamHandle));
+Java_xjava_io_IFStream_nativeSkip(JNIEnv* /* env */,jclass /* clazz */,jlong streamHandle,jlong count) {
+	auto* stream = reinterpret_cast<jni::filesystem::ifstream*>(static_cast<std::uintptr_t>(streamHandle));
 	if (stream == nullptr || count <= 0) { return 0; }
 	stream->clear();
 	const std::streampos before = stream->tellg();
@@ -95,8 +89,8 @@ Java_xjava_io_IStream_nativeSkip(JNIEnv* /* env */,jclass /* clazz */,jlong stre
 	if (static_cast<unsigned long long>(count)>
 		static_cast<unsigned long long>(std::numeric_limits<std::streamoff>::max())) {
 		requested = std::numeric_limits<std::streamoff>::max();
-		} else { requested = static_cast<std::streamoff>(count); }
-		const std::streamoff skipped = (requested < remaining) ? requested : remaining;
+	} else { requested = static_cast<std::streamoff>(count); }
+	const std::streamoff skipped = (requested < remaining) ? requested : remaining;
 	stream->clear();
 	stream->seekg(before + skipped,std::ios::beg);
 	if (stream->fail()) {
