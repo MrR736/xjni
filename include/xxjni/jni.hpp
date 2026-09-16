@@ -4,7 +4,7 @@
  *
  * @author MrR736
  * @date 2026
- * @copyright GPL-3
+ * @copyright MIT
  */
 
 #ifndef __JNI_HPP__

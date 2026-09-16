@@ -4,14 +4,14 @@
  *
  * @author MrR736
  * @date 2025
- * @copyright GPL-3
+ * @copyright MIT
  */
 
 #ifndef __XJNI_STRINGBUILDER_H__
 #define __XJNI_STRINGBUILDER_H__
 
 #include <jni.h>
-#include <xjni_stringbuffer.h>
+#include "xjni_stringbuffer.h"
 
 /** @typedef jstringBuilder
  *  Represents a Java StringBuilder object.

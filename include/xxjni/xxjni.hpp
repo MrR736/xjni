@@ -4,16 +4,16 @@
  *
  * @author MrR736
  * @date 2026
- * @copyright GPL-3
+ * @copyright MIT
  */
 
 #ifndef __XXJNI_HPP__
 #define __XXJNI_HPP__
 
 #include <string>
-#include <xjni.h>
-#include <xjni_hashmap.h>
-#include <xjni_pool.h>
+#include "xjni.h"
+#include "xjni_hashmap.h"
+#include "xjni_pool.h"
 
 #include "jni.hpp"
 

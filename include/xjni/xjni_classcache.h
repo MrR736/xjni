@@ -11,7 +11,7 @@
  *
  * @author MrR736
  * @date 2026
- * @license GPL-3.0
+ * @license MIT
  */
 
 #ifndef XJNI_CLASSCACHE_H

@@ -8,7 +8,7 @@
  *
  * @author MrR736
  * @date 2026
- * @copyright GPL-3
+ * @copyright MIT
  */
 
 #ifndef __XJNIDEF_H__
@@ -77,12 +77,12 @@
 
 /** @brief Use 64-bit pointer architecture */
 #if defined(UINTPTR_MAX)
-# if UINTPTR_MAX == 0xffffffffffffffffULL
+# if UINTPTR_MAX == UINT64_MAX
 #  define __XJNI_x64__ 1
-# elif UINTPTR_MAX == 0xffffffffUL
+# elif UINTPTR_MAX == UINT32_MAX
 #  define __XJNI_x32__ 1
 # else
-#  error "Unknown pointer size! Cannot determine 32/64-bit architecture."
+#  error "Unsupported pointer size."
 # endif
 #else
 # if defined(__x86_64__) || defined(_M_X64) || defined(_M_AMD64) || defined(__aarch64__) || defined(__LP64__) || \
@@ -114,6 +114,19 @@
 #endif
 
 /** @} */
+
+#if defined(__has_feature)
+# if __has_feature(address_sanitizer)
+#  define __XJNI_ASAN__
+# endif
+# if __has_feature(thread_sanitizer)
+#  define __XJNI_TSAN__
+# endif
+#elif defined(__SANITIZE_ADDRESS__)
+# define __XJNI_ASAN__
+#elif defined(__SANITIZE_THREAD__)
+# define __XJNI_TSAN__
+#endif
 
 /**
  * @defgroup XJNI_CPU modern/legacy CPU Detection
@@ -411,5 +424,46 @@ static inline int __xjni_clzll(unsigned long long x) {
 #define JNI_VERSION_EQ(ver1, ver2) ((ver1) == (ver2))
 #define JNI_VERSION_NE(ver1, ver2) ((ver1) != (ver2))
 /** @} */
+
+#if defined(__GNUC__)
+# define XJNI_EXTENSION __extension__
+#else
+# define XJNI_EXTENSION
+#endif
+
+#if defined(_WIN32) || defined(__CYGWIN__)
+# define XJNI_EXPORT_API __declspec(dllimport)
+# define XJNI_IMPORT_API __declspec(dllimport)
+# if defined(XJNI_BUILD)
+#  define XJNI_API XJNI_EXPORT_API
+# else
+#  define XJNI_API XJNI_IMPORT_API
+# endif
+# define XJNI_PRIVATE_API
+#elif defined(__GNUC__) || defined(__clang__)
+# if defined(__has_attribute)
+#  if __has_attribute(visibility)
+#   define XJNI_EXPORT_API __attribute__((visibility("default")))
+#   define XJNI_IMPORT_API __attribute__((visibility("default")))
+#   define XJNI_API __attribute__((visibility("default")))
+#   define XJNI_PRIVATE_API __attribute__((visibility("hidden")))
+#  else
+#   define XJNI_EXPORT_API
+#   define XJNI_IMPORT_API
+#   define XJNI_API
+#   define XJNI_PRIVATE_API
+#  endif
+# else
+#  define XJNI_EXPORT_API
+#  define XJNI_IMPORT_API
+#  define XJNI_API
+#  define XJNI_PRIVATE_API
+# endif
+#else
+# define XJNI_EXPORT_API
+# define XJNI_IMPORT_API
+# define XJNI_API
+# define XJNI_PRIVATE_API
+#endif
 
 #endif /* __XJNIDEF_H__ */

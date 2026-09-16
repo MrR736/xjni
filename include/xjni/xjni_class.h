@@ -3,7 +3,7 @@
  * @brief XJNI Java Object <-> C++ Class Mapping Utilities
  * @date 2026
  * @author MrR736
- * @license GPL-3.0
+ * @license MIT
  *
  * Generic callback-based Java object <-> native C++ object bridge.
  */

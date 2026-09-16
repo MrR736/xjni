@@ -10,7 +10,7 @@
  *
  * @author MrR736
  * @date 2026
- * @copyright GPL-3
+ * @copyright MIT
  */
 
 #ifndef __XJNI_H__
@@ -20,25 +20,25 @@
 #include <stddef.h>
 #include <jni.h>
 
-#include <xjni_new.h>
-#include <xjni_class.h>
-#include <xjni_classcache.h>
-#include <xjni_hashmap.h>
-#include <xjni_printf.h>
-#include <xjni_arrayfield.h>
-#include <xjni_string.h>
-#include <xjni_stringarray.h>
-#include <xjni_stringbuilder.h>
-#include <xjni_stringbuffer.h>
-#include <xjni_stringreader.h>
-#include <xjni_stringwriter.h>
-#include <xjni_va_list.h>
-#include <xjni_struct.h>
-#include <xjni_thread.h>
-#include <xjni_utils.h>
-#include <xjni_log.h>
-#include <xjni_windows.h>
-#include <xjni2d.h>
+#include "xjni_new.h"
+#include "xjni_class.h"
+#include "xjni_classcache.h"
+#include "xjni_hashmap.h"
+#include "xjni_printf.h"
+#include "xjni_arrayfield.h"
+#include "xjni_string.h"
+#include "xjni_stringarray.h"
+#include "xjni_stringbuilder.h"
+#include "xjni_stringbuffer.h"
+#include "xjni_stringreader.h"
+#include "xjni_stringwriter.h"
+#include "xjni_va_list.h"
+#include "xjni_struct.h"
+#include "xjni_thread.h"
+#include "xjni_utils.h"
+#include "xjni_log.h"
+#include "xjni_windows.h"
+#include "xjni2d.h"
 
 /** @defgroup XJNI_VERSION Version Macros
  *  @brief Version information for XJNI
@@ -51,7 +51,7 @@
 #define _XJNI_VERSION_MINOR	1
 #endif
 #ifndef _XJNI_VERSION_PATCH
-#define _XJNI_VERSION_PATCH	2
+#define _XJNI_VERSION_PATCH	3
 #endif
 
 #define _XJNI_VERSION		((_XJNI_VERSION_MAJOR * 1000) + (_XJNI_VERSION_MINOR * 100) + _XJNI_VERSION_PATCH)

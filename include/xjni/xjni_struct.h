@@ -3,7 +3,7 @@
  * @brief XJNI Struct Mapping Utilities
  * @date 2026
  * @author MrR736
- * @license GPL-3.0
+ * @license MIT
  *
  * @details
  * The XJNI Struct module provides a generic, callback-based interface for
@@ -60,7 +60,8 @@
 
 #include <stdint.h>
 #include <jni.h>
-#include <xjni_thread.h>
+
+#include "xjni_thread.h"
 
 #ifdef __cplusplus
 extern "C" {

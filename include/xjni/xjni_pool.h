@@ -8,14 +8,15 @@
  *
  * @author MrR736
  * @date 2025
- * @copyright GPL-3
+ * @copyright MIT
  */
 
 #ifndef __XJNI_POOL_H__
 #define __XJNI_POOL_H__
 
 #include <stddef.h>
-#include <xjni_thread.h>
+#include "xjnidef.h"
+#include "xjni_thread.h"
 
 /**
  * @struct xjni_pool
@@ -62,7 +63,7 @@ extern "C" {
  *
  * @return Pointer to the created xjni_pool, or NULL on allocation failure.
  */
-xjni_pool* xjni_pool_Create(size_t capacity, size_t element_size, int use_mutex);
+XJNI_API xjni_pool* xjni_pool_Create(size_t capacity, size_t element_size, int use_mutex);
 
 /**
  * @brief Allocate an element from the pool.
@@ -71,7 +72,7 @@ xjni_pool* xjni_pool_Create(size_t capacity, size_t element_size, int use_mutex)
  *
  * @return Pointer to an element, or NULL if the pool is exhausted.
  */
-void* xjni_pool_AllocFromPool(xjni_pool* mp);
+XJNI_API void* xjni_pool_AllocFromPool(xjni_pool* mp);
 
 /**
  * @brief Free a previously allocated element back to the pool.
@@ -85,7 +86,7 @@ void* xjni_pool_AllocFromPool(xjni_pool* mp);
  * @param mp   Pointer to the memory pool.
  * @param elem Pointer to the element to free.
  */
-void xjni_pool_FreeElement(xjni_pool* mp, void* elem);
+XJNI_API void xjni_pool_FreeElement(xjni_pool* mp, void* elem);
 
 /**
  * @brief Free the entire memory pool.
@@ -96,7 +97,7 @@ void xjni_pool_FreeElement(xjni_pool* mp, void* elem);
  *         XJNI_POOL_ERROR_IN_USE if elements are still allocated,
  *         XJNI_POOL_ERROR_NULL if mp is NULL.
  */
-int xjni_pool_Free(xjni_pool* mp);
+XJNI_API int xjni_pool_Free(xjni_pool* mp);
 
 #ifdef DEBUG
 /**
@@ -105,7 +106,7 @@ int xjni_pool_Free(xjni_pool* mp);
  * @param mp Pointer to the memory pool.
  * @return Number of used elements, or 0 if mp is NULL.
  */
-size_t xjni_pool_UsedCount(xjni_pool* mp);
+XJNI_API size_t xjni_pool_UsedCount(xjni_pool* mp);
 
 /**
  * @brief Get number of free elements in the pool.
@@ -113,7 +114,7 @@ size_t xjni_pool_UsedCount(xjni_pool* mp);
  * @param mp Pointer to the memory pool.
  * @return Number of free elements, or 0 if mp is NULL.
  */
-size_t xjni_pool_FreeCount(xjni_pool* mp);
+XJNI_API size_t xjni_pool_FreeCount(xjni_pool* mp);
 
 /**
  * @brief Get the total capacity of the pool.
@@ -121,7 +122,7 @@ size_t xjni_pool_FreeCount(xjni_pool* mp);
  * @param mp Pointer to the memory pool.
  * @return Total number of elements in the pool, or 0 if mp is NULL.
  */
-size_t xjni_pool_Capacity(xjni_pool* mp);
+XJNI_API size_t xjni_pool_Capacity(xjni_pool* mp);
 #endif
 
 #ifdef __cplusplus

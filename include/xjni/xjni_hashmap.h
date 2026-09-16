@@ -17,7 +17,7 @@
  *
  * @author MrR736
  * @date 2026
- * @license GPL-3.0
+ * @license MIT
  */
 
 #ifndef XJNI_HASHMAP_H
@@ -25,8 +25,8 @@
 
 #include <inttypes.h>
 
-#include <xjni_thread.h>
-#include <xjnidef.h>
+#include "xjni_thread.h"
+#include "xjnidef.h"
 
 /**
  * @defgroup XJNI_HashMap HashMap

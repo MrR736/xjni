@@ -6,7 +6,7 @@
  *
  * @author MrR736
  * @date 2025
- * @copyright GPL-3
+ * @copyright MIT
  */
 
 #ifndef __XJNI_STRINGARRAY_H__

@@ -8,14 +8,14 @@
  *
  * @author MrR736
  * @date 2026
- * @copyright GPL-3
+ * @copyright MIT
  */
 
 #ifndef __XJNI_VA_LIST_H__
 #define __XJNI_VA_LIST_H__
 
 #include <stdio.h>
-#include <xjni_args.h>
+#include "xjni_args.h"
 
 #ifdef __cplusplus
 extern "C" {

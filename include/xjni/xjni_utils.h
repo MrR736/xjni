@@ -7,7 +7,7 @@
  *
  * @author MrR736
  * @date 2026
- * @license GPL-3.0
+ * @license MIT
  */
 
 #ifndef __XJNI_UTILS_H__
