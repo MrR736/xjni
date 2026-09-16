@@ -3,11 +3,12 @@
  * @brief XJNI Java Object <-> C++ Class Mapping Utilities
  * @date 2026
  * @author MrR736
- * @license GPL-3.0
+ * @license MIT
  *
  * Generic callback-based Java object <-> native C++ object bridge.
  */
 
+#include "base-jni.h"
 #include "xjni_class.h"
 
 #include <cstring>
@@ -26,8 +27,7 @@ static inline void xjni_class_free(xjni_class_ctx_t* ctx,void* object) {
 	}
 }
 
-extern "C"
-JNIEXPORT void JNICALL
+JNIEXPORTC void JNICALL
 xjni_class_ctx_init(
 	xjni_class_ctx_t* ctx,xjni_class_set_t set,xjni_class_get_t get,
 	xjni_class_free_t freef,xjni_class_alloc_t alloc,xjni_class_jalloc_t jalloc,
@@ -42,8 +42,7 @@ xjni_class_ctx_init(
 	ctx->flags  = flags;
 }
 
-extern "C"
-JNIEXPORT jobject JNICALL
+JNIEXPORTC jobject JNICALL
 xjni_class_new(xjni_class_ctx_t* ctx,JNIEnv* env,const void* data,size_t size) {
 	if (!xjni_class_valid(ctx) || env == nullptr) {
 		return nullptr;
@@ -88,8 +87,7 @@ xjni_class_new(xjni_class_ctx_t* ctx,JNIEnv* env,const void* data,size_t size) {
 	return result;
 }
 
-extern "C"
-JNIEXPORT void* JNICALL
+JNIEXPORTC void* JNICALL
 xjni_class_get(xjni_class_ctx_t* ctx,JNIEnv* env,jobject obj) {
 	if (!xjni_class_valid(ctx) || env == nullptr || obj == nullptr || ctx->get == nullptr) {
 		return nullptr;
@@ -102,8 +100,7 @@ xjni_class_get(xjni_class_ctx_t* ctx,JNIEnv* env,jobject obj) {
 	return object;
 }
 
-extern "C"
-JNIEXPORT void JNICALL
+JNIEXPORTC void JNICALL
 xjni_class_release(xjni_class_ctx_t* ctx,JNIEnv* env,jobject obj,void* object,jint mode) {
 	if (!xjni_class_valid(ctx) || env == nullptr || object == nullptr) {
 		return;
@@ -123,8 +120,7 @@ xjni_class_release(xjni_class_ctx_t* ctx,JNIEnv* env,jobject obj,void* object,ji
 	xjni_class_free(ctx, object);
 }
 
-extern "C"
-JNIEXPORT void JNICALL
+JNIEXPORTC void JNICALL
 xjni_class_get_region(xjni_class_ctx_t* ctx,JNIEnv* env,jobject obj,size_t size,void* buf) {
 	if (!xjni_class_valid(ctx) || env == nullptr || obj == nullptr || buf == nullptr || size == 0) {
 		return;
@@ -135,8 +131,7 @@ xjni_class_get_region(xjni_class_ctx_t* ctx,JNIEnv* env,jobject obj,size_t size,
 	xjni_class_free(ctx,object);
 }
 
-extern "C"
-JNIEXPORT void JNICALL
+JNIEXPORTC void JNICALL
 xjni_class_set_region(xjni_class_ctx_t* ctx,JNIEnv* env,jobject obj,const void* data,size_t size,const void* buf) {
 	if (!xjni_class_valid(ctx) || env == nullptr || obj == nullptr || buf == nullptr || size == 0) {
 		return;

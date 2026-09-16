@@ -170,10 +170,8 @@ Include the main header:
 
 ```c
 JNIEXPORT void JNICALL
-Java_Array2DTest_nativeTest(JNIEnv *env, jobject obj, jobjectArray intArr)
-{
+Java_Array2DTest_nativeTest(JNIEnv *env, jobject obj, jobjectArray intArr) {
     jint **ints = GetInt2DArrayElements(env, intArr, NULL);
-
     ints[0][0] = 42;
     ints[1][2] = 99;
 
@@ -206,15 +204,15 @@ cmake --build . --target xjni2d_test_run
 
 ## Versioning
 
-Current version: **1.1.2**
+Current version: **1.1.3**
 
 ### Compile-Time Macros
 
 ```c
-_XJNI_VERSION        // 1101
+_XJNI_VERSION        // 1103
 _XJNI_VERSION_MAJOR  // 1
 _XJNI_VERSION_MINOR  // 1
-_XJNI_VERSION_PATCH  // 2
+_XJNI_VERSION_PATCH  // 3
 ```
 
 ### Runtime Query
@@ -228,11 +226,11 @@ printf("xjni version: %s\n", ver);
 
 ## License
 
-Licensed under the **GNU General Public License v3.0**.
+Licensed under the **MIT License**.
 
 ---
 
 ## Author
 
 **MrR736**
-[MrR736@users.github.com](mailto:MrR736@users.github.com)
+<[MrR736@users.github.com](mailto:MrR736@users.github.com)>

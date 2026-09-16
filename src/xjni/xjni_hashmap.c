@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2025 MrR736
  *
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-License-Identifier: MIT
  */
 
 #include <stdlib.h>

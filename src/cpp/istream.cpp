@@ -1,8 +1,8 @@
-#include <jni.h>
+#include "base-jni.h"
 
 #include "xjava.h"
 
-extern "C" JNIEXPORT jlong JNICALL
+JNIEXPORTC jlong JNICALL
 Java_xjava_io_IStream_nativeNew(JNIEnv* env,jclass /* clazz */,jbyteArray buffer) {
 	if (buffer == nullptr) return 0;
 	const jsize length = env->GetArrayLength(buffer);
@@ -14,12 +14,12 @@ Java_xjava_io_IStream_nativeNew(JNIEnv* env,jclass /* clazz */,jbyteArray buffer
 	return reinterpret_cast<jlong>(stream);
 }
 
-extern "C" JNIEXPORT void JNICALL
+JNIEXPORTC void JNICALL
 Java_xjava_io_IStream_nativeDelete(JNIEnv*,jclass,jlong streamHandle) {
 	delete reinterpret_cast<u8istringstream*>(streamHandle);
 }
 
-extern "C" JNIEXPORT jint JNICALL
+JNIEXPORTC jint JNICALL
 Java_xjava_io_IStream_nativeRead__J(
 	JNIEnv* env,
 	jclass /* clazz */,
@@ -34,7 +34,7 @@ Java_xjava_io_IStream_nativeRead__J(
 	return -1;
 }
 
-extern "C" JNIEXPORT jint JNICALL
+JNIEXPORTC jint JNICALL
 Java_xjava_io_IStream_nativeRead__J_3BII(
 	JNIEnv* env,
 	jclass /* clazz */,
@@ -54,7 +54,7 @@ Java_xjava_io_IStream_nativeRead__J_3BII(
 	return static_cast<jint>(count);
 }
 
-extern "C" JNIEXPORT jint JNICALL
+JNIEXPORTC jint JNICALL
 Java_xjava_io_IStream_nativeAvailable(JNIEnv*,jclass,jlong streamHandle) {
 	auto* stream = reinterpret_cast<std::istream*>(streamHandle);
 	if (stream == nullptr) return 0;
@@ -72,7 +72,7 @@ Java_xjava_io_IStream_nativeAvailable(JNIEnv*,jclass,jlong streamHandle) {
 		return static_cast<jint>(available);
 }
 
-extern "C" JNIEXPORT jlong JNICALL
+JNIEXPORTC jlong JNICALL
 Java_xjava_io_IStream_nativeSkip(JNIEnv* /* env */,jclass /* clazz */,jlong streamHandle,jlong count) {
 	auto* stream = reinterpret_cast<std::istream*>(static_cast<std::uintptr_t>(streamHandle));
 	if (stream == nullptr || count <= 0) { return 0; }

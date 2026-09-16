@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.20)
-project(xjni VERSION 1.1.2 LANGUAGES C CXX)
+project(xjni VERSION 1.1.3 LANGUAGES C CXX)
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+include(JLD)
 
 include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)
@@ -48,6 +52,20 @@ endif()
 
 include(UseJava)
 
+# JUnit 4
+add_java_library(junit
+	GROUP junit
+	ARTIFACT junit
+	VERSION 4.13.2
+)
+
+# JUnit 4 requires Hamcrest Core
+add_java_library(hamcrest-core
+	GROUP org.hamcrest
+	ARTIFACT hamcrest-core
+	VERSION 1.3
+)
+
 # ------------------------------------
 # Compiler standards
 # ------------------------------------
@@ -70,6 +88,7 @@ endif()
 
 set(XJNI_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(XJNI_SOURCES
+	${XJNI_SOURCE_DIR}/src/cpp/file.c
 	${XJNI_SOURCE_DIR}/src/cpp/ifstream.cpp
 	${XJNI_SOURCE_DIR}/src/cpp/ofstream.cpp
 	${XJNI_SOURCE_DIR}/src/cpp/istream.cpp
@@ -102,6 +121,7 @@ set(XJNI_SOURCES
 # --------------------------------------------------------
 set(XJAVA_SOURCES
 	${XJNI_SOURCE_DIR}/src/java/xjava/XJNILibrary.java
+	${XJNI_SOURCE_DIR}/src/java/xjava/io/FILE.java
 	${XJNI_SOURCE_DIR}/src/java/xjava/io/IFStream.java
 	${XJNI_SOURCE_DIR}/src/java/xjava/io/OFStream.java
 	${XJNI_SOURCE_DIR}/src/java/xjava/io/IStream.java
@@ -181,12 +201,17 @@ endif()
 
 target_include_directories(xjni
 	PUBLIC
+		$<BUILD_INTERFACE:${XJNI_SOURCE_DIR}/src/internal>
 		$<BUILD_INTERFACE:${XJNI_SOURCE_DIR}/include>
 		$<BUILD_INTERFACE:${XJNI_SOURCE_DIR}/include/xjni>
 		$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 		$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/xjni>
 		${JNI_INCLUDE_DIRS}
 )
+
+if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+	target_link_libraries(xjni PRIVATE atomic)
+endif()
 
 # Version info
 if(NOT WIN32)
@@ -208,6 +233,7 @@ if(XJNI_BUILD_STATIC)
 	set_target_properties(xjni_static PROPERTIES OUTPUT_NAME xjni)
 	target_include_directories(xjni_static
 		PUBLIC
+			$<BUILD_INTERFACE:${XJNI_SOURCE_DIR}/src/internal>
 			$<BUILD_INTERFACE:${XJNI_SOURCE_DIR}/include>
 			$<BUILD_INTERFACE:${XJNI_SOURCE_DIR}/include/xjni>
 			$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
@@ -221,6 +247,10 @@ if(XJNI_BUILD_STATIC)
 
 	if(XJNI_BUILD_DEBUG)
 		target_compile_definitions(xjni_static PUBLIC DEBUG)
+	endif()
+
+	if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+		target_link_libraries(xjni PRIVATE atomic)
 	endif()
 endif()
 
@@ -352,6 +382,8 @@ if(XJNI_BUILD_TESTS)
 		${CMAKE_SOURCE_DIR}/test/java/JNITestObject.java
 		${CMAKE_SOURCE_DIR}/test/java/JNITestBase.java
 		${CMAKE_SOURCE_DIR}/test/java/JNITestDerived.java
+
+		${CMAKE_SOURCE_DIR}/test/java/xjava/io/FILETest.java
 	)
 
 
@@ -366,11 +398,10 @@ if(XJNI_BUILD_TESTS)
 			VERSION ${PROJECT_VERSION}
 			OUTPUT_NAME "xjni-test"
 			OUTPUT_DIR "${JAR_OUTPUT_DIR}"
-			INCLUDE_JARS xjava-jar
+			INCLUDE_JARS xjava-jar jld::junit jld::hamcrest-core
 			GENERATE_NATIVE_HEADERS xjni-test-native
 				DESTINATION "${HEADER_OUTPUT_DIR}"
 		)
-
 		set(XJNI_TEST_JAR
 			"${JAR_OUTPUT_DIR}/xjni-test.jar"
 		)
@@ -378,7 +409,10 @@ if(XJNI_BUILD_TESTS)
 		set(XJNI_TEST_JAR "${JAR_OUTPUT_DIR}/xjni-test.jar")
 		add_custom_command(
 			OUTPUT "${XJNI_TEST_JAR}"
-			COMMAND ${_JAVAC_CMD} -encoding UTF-8 -d "${JAR_CLASSES_OUTPUT_DIR}" ${XJNI_JAVA_SOURCES}
+			COMMAND ${_JAVAC_CMD} -encoding UTF-8
+			-d "${JAR_CLASSES_OUTPUT_DIR}"
+			-classpath "${XJAVA_JAR}${_JAVA_PATH_SER}$<TARGET_PROPERTY:jld::junit,JLD_JAR>${_JAVA_PATH_SER}$<TARGET_PROPERTY:jld::hamcrest-core,JLD_JAR>"
+			${XJNI_JAVA_SOURCES}
 			COMMAND ${_JAR_CMD} cf "${XJNI_TEST_JAR}" -C "${JAR_CLASSES_OUTPUT_DIR}" .
 			WORKING_DIRECTORY "${JAR_OUTPUT_DIR}"
 			DEPENDS ${XJNI_JAVA_SOURCES}
@@ -639,6 +673,65 @@ if(XJNI_BUILD_TESTS)
 
 	endforeach()
 
+	# ========================================================
+	# JUnit FILE test
+	# ========================================================
+
+	java_get_classpath(
+		XJNI_JUNIT_CLASSPATH
+		jld::junit
+		jld::hamcrest-core
+	)
+
+	set(XJNI_FILE_TEST_CLASSPATH
+		"${XJAVA_JAR}${_JAVA_PATH_SER}${XJNI_TEST_JAR}${_JAVA_PATH_SER}${XJNI_JUNIT_CLASSPATH}"
+	)
+
+	add_custom_target(
+		run_FILETest
+
+		COMMAND
+			"${_JAVA_CMD}"
+
+			"-Djava.library.path=${LIBS_TEST_OUTPUT_DIR}${_JAVA_PATH_SER}${CMAKE_CURRENT_BINARY_DIR}"
+
+			"-cp"
+			"${XJNI_FILE_TEST_CLASSPATH}"
+
+			org.junit.runner.JUnitCore
+			xjava.io.FILETest
+
+			WORKING_DIRECTORY
+				"${JAR_OUTPUT_DIR}"
+
+		DEPENDS
+			xjni
+			xjni_test
+			xjni-test-jar
+
+		COMMENT
+			"Running JUnit xjava.io.FILETest"
+
+		VERBATIM
+	)
+
+	add_test(
+		NAME xjava.io.FILETest
+		COMMAND
+			"${_JAVA_CMD}"
+			"-Djava.library.path=${LIBS_TEST_OUTPUT_DIR}${_JAVA_PATH_SER}${CMAKE_CURRENT_BINARY_DIR}"
+			"-cp"
+			"${XJNI_FILE_TEST_CLASSPATH}"
+			org.junit.runner.JUnitCore
+			xjava.io.FILETest
+	)
+
+	set_tests_properties(
+		xjava.io.FILETest
+		PROPERTIES
+			WORKING_DIRECTORY "${JAR_OUTPUT_DIR}"
+			ENVIRONMENT "LD_LIBRARY_PATH=${LIBS_TEST_OUTPUT_DIR}:$ENV{LD_LIBRARY_PATH}"
+	)
 
 	# ========================================================
 	# Run all Java tests
@@ -647,4 +740,5 @@ if(XJNI_BUILD_TESTS)
 	foreach(TEST_TARGET IN LISTS XJNI_JAVA_TEST_TARGETS)
 		add_dependencies(RUN_ALLTEST "${TEST_TARGET}")
 	endforeach()
+	add_dependencies(RUN_ALLTEST run_FILETest)
 endif()

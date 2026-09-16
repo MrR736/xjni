@@ -1,8 +1,8 @@
-#include <jni.h>
+#include "base-jni.h"
 
 #include "xjava.h"
 
-extern "C" JNIEXPORT jlong JNICALL
+JNIEXPORTC jlong JNICALL
 Java_xjava_io_IFStream_nativeNew(JNIEnv* env,jclass /* clazz */,jstring buffer) {
 	if (buffer == nullptr) return 0;
 	const char* data = env->GetStringUTFChars(buffer, nullptr);
@@ -17,12 +17,12 @@ Java_xjava_io_IFStream_nativeNew(JNIEnv* env,jclass /* clazz */,jstring buffer) 
 	return reinterpret_cast<jlong>(stream);
 }
 
-extern "C" JNIEXPORT void JNICALL
+JNIEXPORTC void JNICALL
 Java_xjava_io_IFStream_nativeDelete(JNIEnv*,jclass,jlong streamHandle) {
 	delete reinterpret_cast<jni::filesystem::ifstream*>(streamHandle);
 }
 
-extern "C" JNIEXPORT jint JNICALL
+JNIEXPORTC jint JNICALL
 Java_xjava_io_IFStream_nativeRead__J(
 	JNIEnv* env,
 	jclass /* clazz */,
@@ -35,7 +35,7 @@ Java_xjava_io_IFStream_nativeRead__J(
 	return -1;
 }
 
-extern "C" JNIEXPORT jint JNICALL
+JNIEXPORTC jint JNICALL
 Java_xjava_io_IFStream_nativeRead__J_3BII(JNIEnv* env,jclass /* clazz */,jlong streamHandle,jbyteArray buffer,jint offset,jint length) {
 	auto* stream = reinterpret_cast<jni::filesystem::ifstream*>(static_cast<std::uintptr_t>(streamHandle));
 	if (stream == nullptr || buffer == nullptr) { return -1; }
@@ -48,7 +48,7 @@ Java_xjava_io_IFStream_nativeRead__J_3BII(JNIEnv* env,jclass /* clazz */,jlong s
 	return static_cast<jint>(count);
 }
 
-extern "C" JNIEXPORT jint JNICALL
+JNIEXPORTC jint JNICALL
 Java_xjava_io_IFStream_nativeAvailable(JNIEnv*,jclass,jlong streamHandle) {
 	auto* stream = reinterpret_cast<jni::filesystem::ifstream*>(streamHandle);
 	if (stream == nullptr) return 0;
@@ -66,7 +66,7 @@ Java_xjava_io_IFStream_nativeAvailable(JNIEnv*,jclass,jlong streamHandle) {
 	return static_cast<jint>(available);
 }
 
-extern "C" JNIEXPORT jlong JNICALL
+JNIEXPORTC jlong JNICALL
 Java_xjava_io_IFStream_nativeSkip(JNIEnv* /* env */,jclass /* clazz */,jlong streamHandle,jlong count) {
 	auto* stream = reinterpret_cast<jni::filesystem::ifstream*>(static_cast<std::uintptr_t>(streamHandle));
 	if (stream == nullptr || count <= 0) { return 0; }

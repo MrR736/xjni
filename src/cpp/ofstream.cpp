@@ -1,8 +1,8 @@
-#include <jni.h>
+#include "base-jni.h"
 
 #include "xjava.h"
 
-extern "C" JNIEXPORT jlong JNICALL
+JNIEXPORTC jlong JNICALL
 Java_xjava_io_OFStream_nativeNew(JNIEnv* env,jclass /* clazz */,jstring buffer,jboolean append) {
 	if (buffer == nullptr) return 0;
 	const char* data = env->GetStringUTFChars(buffer, nullptr);
@@ -21,19 +21,19 @@ Java_xjava_io_OFStream_nativeNew(JNIEnv* env,jclass /* clazz */,jstring buffer,j
 	return result;
 }
 
-extern "C" JNIEXPORT void JNICALL
+JNIEXPORTC void JNICALL
 Java_xjava_io_OFStream_nativeDelete(JNIEnv*,jclass,jlong streamHandle) {
 	delete reinterpret_cast<jni::filesystem::ofstream*>(streamHandle);
 }
 
-extern "C" JNIEXPORT void JNICALL
+JNIEXPORTC void JNICALL
 Java_xjava_io_OFStream_nativeWrite__JI(JNIEnv* /* env */,jclass /* clazz */,jlong streamHandle,jint value) {
 	auto* stream = reinterpret_cast<jni::filesystem::ofstream*>(static_cast<std::uintptr_t>(streamHandle));
 	if (stream == nullptr) return;
 	stream->put(static_cast<char>(static_cast<unsigned char>(value)));
 }
 
-extern "C" JNIEXPORT void JNICALL
+JNIEXPORTC void JNICALL
 Java_xjava_io_OFStream_nativeWrite__J_3BII(JNIEnv* env,jclass /* clazz */,jlong streamHandle,jbyteArray buffer,jint offset,jint length) {
 	auto* stream = reinterpret_cast<jni::filesystem::ofstream*>(static_cast<std::uintptr_t>(streamHandle));
 	if (stream == nullptr || buffer == nullptr) return;
@@ -43,7 +43,7 @@ Java_xjava_io_OFStream_nativeWrite__J_3BII(JNIEnv* env,jclass /* clazz */,jlong 
 	env->ReleaseByteArrayElements(buffer,data,JNI_ABORT);
 }
 
-extern "C" JNIEXPORT void JNICALL
+JNIEXPORTC void JNICALL
 Java_xjava_io_OFStream_nativeFlush(JNIEnv* /* env */,jclass /* clazz */,jlong streamHandle) {
 	auto* stream = reinterpret_cast<jni::filesystem::ofstream*>(static_cast<std::uintptr_t>(streamHandle));
 	if (stream != nullptr) stream->flush();
