@@ -129,9 +129,10 @@ public class FILETest {
 	public void testModeConstructor() throws Exception {
 		FILE file = new FILE(
 			tempFile.getParent(),
-			tempFile.getName(),
-			"wb"
+			tempFile.getName()
 		);
+
+		file.open("wb");
 
 		try {
 			assertTrue(file.isOpen());
@@ -279,15 +280,23 @@ public class FILETest {
 	@Test
 	public void testWriteCreatesFile() throws Exception {
 		File output = new File("/tmp", "created.bin");
-		assertFalse(output.exists());
-		FILE file = new FILE(output.getPath());
+		Files.deleteIfExists(output.toPath());
+
 		try {
-			file.open("wb");
-			assertTrue(file.isOpen());
+			assertFalse(output.exists());
+
+			FILE file = new FILE(output.getPath());
+			try {
+				file.open("wb");
+				assertTrue(file.isOpen());
+			} finally {
+				file.close();
+			}
+
+			assertFalse(file.isOpen());
+			assertTrue(output.exists());
 		} finally {
-			file.close();
+			Files.deleteIfExists(output.toPath());
 		}
-		assertFalse(file.isOpen());
-		assertTrue(output.exists());
 	}
 }

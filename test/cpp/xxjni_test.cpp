@@ -18,6 +18,7 @@
 #include <cstring>
 #include <sstream>
 #include <string>
+#include <iostream>
 
 namespace {
 static bool clearJavaException(JNIEnv* env, std::string* text = nullptr) {
@@ -471,8 +472,8 @@ static void testThreading(TestState& t) {
 	t.check(th.running(), "thread.running");
 
 	void* result = nullptr;
-	rc = th.join(&result);
-	t.check(rc == 0 && result == &value, "thread.join");
+	auto rcc = th.join(&result);
+	t.check(rcc == 0 && result == &value, "thread.join");
 	t.check(g_threadValue.load() == 7, "thread routine");
 
 	xxjni::xxjni_mutex mutex;

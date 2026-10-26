@@ -1,5 +1,6 @@
 public final class XXJNITest {
     static {
+        System.loadLibrary("xjni");
         System.loadLibrary("xxjni_cpp_test");
     }
 

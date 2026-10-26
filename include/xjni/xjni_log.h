@@ -17,6 +17,8 @@
 #include <stdarg.h>
 #include <jni.h>
 
+#include "xjnidef.h"
+
 /** Default tag used in logging */
 #define XJNI_DEFAULT_TAG "XJNI"
 
@@ -43,7 +45,7 @@ typedef enum xjni_LogPriority {
 	xjni_log_cprint(prio,__LINE__,__FILE__,tag,fmt,##__VA_ARGS__)
 
 /** Platform-specific macros for log printing */
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(_WIN32) || defined(DISABLE_XLOG_COLOR)
 #define xjni_log_vccprint xjni_log_vcprint
 #define xjni_log_ccprint xjni_log_cprint
 #define xjni_log_vprintc xjni_log_vprint
@@ -83,15 +85,15 @@ typedef enum xjni_LogPriority {
 extern "C" {
 #endif
 
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(_WIN32) && !defined(DISABLE_XLOG_COLOR)
 /** Log to console with colors (non-Android) */
-JNIEXPORT int JNICALL xjni_log_vccprint(int prio,int line,const char* file,const char* tag,const char* fmt,va_list ap);
-JNIEXPORT int JNICALL xjni_log_ccprint(int prio,int line,const char* file,const char* tag,const char* fmt,...);
+XJNIAPI int XJNICALL xjni_log_vccprint(int prio,int line,const char* file,const char* tag,const char* fmt,va_list ap);
+XJNIAPI int XJNICALL xjni_log_ccprint(int prio,int line,const char* file,const char* tag,const char* fmt,...);
 #endif
 
 /** Log to console with optional colors */
-JNIEXPORT int JNICALL xjni_log_vcprint(int prio,int line,const char* file,const char* tag,const char* fmt,va_list ap);
-JNIEXPORT int JNICALL xjni_log_cprint(int prio,int line,const char* file,const char* tag,const char* fmt,...);
+XJNIAPI int XJNICALL xjni_log_vcprint(int prio,int line,const char* file,const char* tag,const char* fmt,va_list ap);
+XJNIAPI int XJNICALL xjni_log_cprint(int prio,int line,const char* file,const char* tag,const char* fmt,...);
 
 #ifdef __cplusplus
 }

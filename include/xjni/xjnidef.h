@@ -16,6 +16,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <limits.h>
 
 /* ----------------- C Standard Versions ----------------- */
 #define STDC94		199409L  /**< C90 amendment (ISO/IEC 9899:1990 + 1994) */
@@ -28,12 +29,25 @@
 /* ----------------- C++ Standard Versions ----------------- */
 #define STDC98PP	199711L  /**< C++98 */
 #define STDC03PP	STDC98PP /**< C++03 */
-#define STDC11PP	201103L  /**< C++11 */
+#define STDC0XPP	201103L  /**< C++0x */
+#define STDC11PP	STDC0XPP /**< C++11 */
 #define STDC14PP	201402L  /**< C++14 */
 #define STDC17PP	201703L  /**< C++17 */
 #define STDC20PP	202002L  /**< C++20 */
-#define STDC23PP	202300L  /**< C++23 */
-#define STDC26PP	202600L  /**< C++26 */
+
+#if __cplusplus == 202100L   /**< C++23 */
+#define STDC23PP	202100L
+#elif __cplusplus == 202302L
+#define STDC23PP	202302L
+#else
+#define STDC23PP	202300L
+#endif
+
+#if __cplusplus == 202400L   /**< C++26 */
+#define STDC26PP	202400L
+#else
+#define STDC26PP	202600L
+#endif
 
 /* ----------------- C Standard Version Comparison Macros ----------------- */
 #ifdef __STDC_VERSION__
@@ -76,7 +90,7 @@
  */
 
 /** @brief Use 64-bit pointer architecture */
-#if defined(UINTPTR_MAX)
+#ifdef UINTPTR_MAX
 # if UINTPTR_MAX == UINT64_MAX
 #  define __XJNI_x64__ 1
 # elif UINTPTR_MAX == UINT32_MAX
@@ -85,10 +99,11 @@
 #  error "Unsupported pointer size."
 # endif
 #else
-# if defined(__x86_64__) || defined(_M_X64) || defined(_M_AMD64) || defined(__aarch64__) || defined(__LP64__) || \
-     defined(__amd64__) || (defined(__WORDSIZE) && __WORDSIZE == 64)
+# if defined(__x86_64__) || defined(_M_X64) || defined(_M_AMD64) || \
+	 defined(__aarch64__) || defined(__LP64__) || defined(_LP64) || defined(__amd64__) || \
+	 (defined(__WORDSIZE) && __WORDSIZE == 64) || (defined(__riscv_xlen) && __riscv_xlen == 64) || defined(__powerpc64__)
 #  define __XJNI_x64__ 1
-# else
+# elif defined(__i386__) || defined(_M_IX86) || defined(__arm__) || (defined(__riscv_xlen) && __riscv_xlen == 32)
 #  define __XJNI_x32__ 1
 # endif
 #endif
@@ -103,13 +118,17 @@
 
 #if defined(__aarch64__) || defined(_M_ARM64)
 # define __XJNI_ARM64__ 1
-#elif defined(__arm__) || defined(_M_ARM)
+#endif
+
+#if defined(__arm__) || defined(_M_ARM)
 # define __XJNI_ARM__ 1
 #endif
 
 #if defined(__mips64)
 # define __XJNI_MIPS64__ 1
-#elif defined(__mips__) || defined(__mips)
+#endif
+
+#if defined(__mips__) || defined(__mips)
 # define __XJNI_MIPS__ 1
 #endif
 
@@ -162,6 +181,8 @@
 #ifndef __xjni_builtin
 # ifdef __has_builtin
 #  define __xjni_builtin(x) __has_builtin(x)
+# elif defined(__GNUC__)
+#  define __xjni_builtin(x) 1
 # else
 #  define __xjni_builtin(x) 0
 # endif
@@ -179,7 +200,7 @@
 #ifndef __xjni_types_compatible_p
 # ifdef __cplusplus
 extern "C++" {
-#  if CPLUSPLUS_EQ(STDC20PP)
+#  if CPLUSPLUS_GE(STDC20PP)
 #   include <type_traits>
 #   define __xjni_types_compatible_p(t1, t2) \
 	std::is_same_v<std::remove_cvref_t<t1>, std::remove_cvref_t<t2>>
@@ -273,15 +294,15 @@ struct __xjni_types_compatible_impl<T, const volatile T> {
 # if __xjni_builtin(__builtin_popcount)
 #  define __xjni_popcount(x) __builtin_popcount(x)
 # else
+static inline int __xjni_popcount(unsigned int x) {
+	int count=0;
 #  ifdef __XJNI_MODERN_CPU__
-static inline int __xjni_popcount(unsigned int x) {
-	int count; for(count=0;x;x&=x-1) count++; return count;
-}
+	for(count=0;x;x&=x-1) count++;
 #  else
-static inline int __xjni_popcount(unsigned int x) {
-	int count=0; while(x){ x&=x-1; count++; } return count;
-}
+	while(x){ x&=x-1; count++; }
 #  endif
+	return count;
+}
 # endif
 #endif
 
@@ -292,15 +313,15 @@ static inline int __xjni_popcount(unsigned int x) {
 # if __xjni_builtin(__builtin_popcountl)
 #  define __xjni_popcountl(x) __builtin_popcountl(x)
 # else
+static inline int __xjni_popcountl(unsigned long x) {
+	int count=0;
 #  ifdef __XJNI_MODERN_CPU__
-static inline int __xjni_popcountl(unsigned long x) {
-	int count; for(count=0;x;x&=x-1) count++; return count;
-}
+	for(count=0;x;x&=x-1) count++;
 #  else
-static inline int __xjni_popcountl(unsigned long x) {
-	int count=0; while(x){ x&=x-1; count++; } return count;
-}
+	while(x){ x&=x-1; count++; }
 #  endif
+	return count;
+}
 # endif
 #endif
 
@@ -311,15 +332,15 @@ static inline int __xjni_popcountl(unsigned long x) {
 # if __xjni_builtin(__builtin_popcountll)
 #  define __xjni_popcountll(x) __builtin_popcountll(x)
 # else
+static inline int __xjni_popcountll(unsigned long long x) {
+	int count=0;
 #  ifdef __XJNI_MODERN_CPU__
-static inline int __xjni_popcountll(unsigned long long x) {
-	int count; for(count=0;x;x&=x-1) count++; return count;
-}
+	for(count=0;x;x&=x-1) count++;
 #  else
-static inline int __xjni_popcountll(unsigned long long x) {
-	int count=0; while(x){ x&=x-1; count++; } return count;
-}
+	while(x) { x&=x-1; count++; }
 #  endif
+	return count;
+}
 # endif
 #endif
 
@@ -345,8 +366,15 @@ static inline int __xjni_clz(unsigned int x) {
 #  define __xjni_clzl(x) __builtin_clzl(x)
 # else
 static inline int __xjni_clzl(unsigned long x) {
-	if(x==0) return sizeof(unsigned long)*8; int n=0; unsigned long mask=1UL<<(sizeof(unsigned long)*8-1);
-	while((x&mask)==0){ n++; mask>>=1; } return n;
+	const int bits = (int)(sizeof(unsigned long) * CHAR_BIT);
+	int n = 0;
+	if (x == 0) return bits;
+	unsigned long mask = 1UL << (bits - 1);
+	while ((x & mask) == 0) {
+		++n;
+		mask >>= 1;
+	}
+	return n;
 }
 # endif
 #endif
@@ -359,8 +387,15 @@ static inline int __xjni_clzl(unsigned long x) {
 #  define __xjni_clzll(x) __builtin_clzll(x)
 # else
 static inline int __xjni_clzll(unsigned long long x) {
-	if(x==0) return 64; int n=0; unsigned long long mask=1ULL<<63;
-	while((x&mask)==0){ n++; mask>>=1; } return n;
+	const int bits = (int)(sizeof(unsigned long long) * CHAR_BIT);
+	int n = 0;
+	if (x == 0) return bits;
+	unsigned long long mask = 1ULL << (bits - 1);
+	while ((x & mask) == 0) {
+		++n;
+		mask >>= 1;
+	}
+	return n;
 }
 # endif
 #endif
@@ -431,39 +466,90 @@ static inline int __xjni_clzll(unsigned long long x) {
 # define XJNI_EXTENSION
 #endif
 
-#if defined(_WIN32) || defined(__CYGWIN__)
-# define XJNI_EXPORT_API __declspec(dllimport)
-# define XJNI_IMPORT_API __declspec(dllimport)
-# if defined(XJNI_BUILD)
-#  define XJNI_API XJNI_EXPORT_API
-# else
-#  define XJNI_API XJNI_IMPORT_API
-# endif
-# define XJNI_PRIVATE_API
-#elif defined(__GNUC__) || defined(__clang__)
-# if defined(__has_attribute)
-#  if __has_attribute(visibility)
-#   define XJNI_EXPORT_API __attribute__((visibility("default")))
-#   define XJNI_IMPORT_API __attribute__((visibility("default")))
-#   define XJNI_API __attribute__((visibility("default")))
-#   define XJNI_PRIVATE_API __attribute__((visibility("hidden")))
+#if defined(__GNUC__) || defined(__clang__)
+# define __xattribute__(V) __attribute__( V )
+# ifdef __has_attribute
+#  define __has_xattribute(V) __has_attribute(V)
+#  if __has_xattribute(visibility)
+#   define __xvisibility__(V) __attribute__((visibility( #V )))
 #  else
-#   define XJNI_EXPORT_API
-#   define XJNI_IMPORT_API
-#   define XJNI_API
-#   define XJNI_PRIVATE_API
+#   define __xvisibility__(V)
 #  endif
 # else
-#  define XJNI_EXPORT_API
-#  define XJNI_IMPORT_API
-#  define XJNI_API
-#  define XJNI_PRIVATE_API
+#  define __has_xattribute(V)
+#  define __xvisibility__(V)
 # endif
 #else
-# define XJNI_EXPORT_API
-# define XJNI_IMPORT_API
-# define XJNI_API
-# define XJNI_PRIVATE_API
+# define __has_xattribute(V)
+# define __xattribute__(V)
+# define __xvisibility__(V)
 #endif
+
+#if defined(_WIN32) || defined(__CYGWIN__)
+# define XJNI_EXPORT_API __declspec(dllexport)
+# define XJNI_IMPORT_API __declspec(dllimport)
+#else
+# define XJNI_EXPORT_API  __xvisibility__(default)
+# define XJNI_IMPORT_API  __xvisibility__(default)
+#endif
+
+#ifdef XJNI_STATIC
+# define XJNIAPI
+#elif defined(XJNI_BUILD)
+# define XJNIAPI XJNI_EXPORT_API
+#else
+# define XJNIAPI XJNI_IMPORT_API
+#endif
+
+#ifndef XJNICALL
+#ifdef _WIN32
+#define XJNICALL	__cdecl
+#else
+#define XJNICALL
+#endif
+#endif
+
+#ifndef XJNI_PRIVATE_API
+#define XJNI_PRIVATE_API __xvisibility__(hidden)
+#endif
+
+#ifdef __cplusplus
+#if __cplusplus >= 201703L
+#define XJNI_MAYBE_UNUSED [[maybe_unused]]
+#else
+#define XJNI_MAYBE_UNUSED
+#endif
+#elif defined(__has_c_attribute)
+#if __has_c_attribute(maybe_unused)
+#define XJNI_MAYBE_UNUSED [[maybe_unused]]
+#else
+#define XJNI_MAYBE_UNUSED
+#endif
+#elif defined(__GNUC__) || defined(__clang__)
+#define XJNI_MAYBE_UNUSED __attribute__((unused))
+#else
+#define XJNI_MAYBE_UNUSED
+#endif
+
+#ifndef XTHREAD_LOCAL
+# if defined(__cplusplus)
+#  if __cplusplus >= 201103L
+#   define XTHREAD_LOCAL thread_local
+#  elif defined(_MSC_VER)
+#   define XTHREAD_LOCAL __declspec(thread)
+#  elif defined(__GNUC__) || defined(__clang__)
+#   define XTHREAD_LOCAL __thread
+#  endif
+# elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L
+#  define XTHREAD_LOCAL _Thread_local
+# elif defined(_MSC_VER)
+#  define XTHREAD_LOCAL __declspec(thread)
+# elif defined(__GNUC__) || defined(__clang__)
+#  define XTHREAD_LOCAL __thread
+# endif
+#endif
+
+#define xthread_local XTHREAD_LOCAL
+#define __xthread XTHREAD_LOCAL
 
 #endif /* __XJNIDEF_H__ */

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(xjni VERSION 1.1.3 LANGUAGES C CXX)
+project(xjni VERSION 1.1.4 LANGUAGES C CXX)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
@@ -18,6 +18,9 @@ option(XJNI_BUILD_TESTS "Build JNI/Java tests" OFF)
 option(XJNI_BUILD_STATIC "Build static library" ON)
 option(XJNI_BUILD_DOCS "Build Doxygen documentation" ON)
 
+option(DISABLE_XLOG_COLOR "disable Logs with Colored" ON)
+option(XJNI_BUILD_XJAVA "Build xjava library" ON)
+
 # ------------------------------------
 # Detect Java / JNI
 # ------------------------------------
@@ -33,18 +36,25 @@ else()
 	set(CMAKE_IMPORT_LIBRARY_PREFIX "")
 
 	find_program(WINE_EXECUTABLE NAMES wine wine64)
+	find_program(WINEPATH_EXECUTABLE NAMES winepath)
 	if(WINE_EXECUTABLE)
 		set(GENERATE_HEADERS FALSE)
 		include(FetchContent)
 		FetchContent_Declare(
 			win_openjdk
-			URL https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.10%2B7/OpenJDK17U-jdk_x64_windows_hotspot_17.0.10_7.zip
+			URL https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.9%2B10/OpenJDK21U-jdk_x64_windows_hotspot_21.0.9_10.zip
 		)
 		FetchContent_MakeAvailable(win_openjdk)
 		set(WIN_JAVA_HOME ${win_openjdk_SOURCE_DIR})
 		set(WIN_JAR_EXECUTABLE "${WIN_JAVA_HOME}/bin/jar.exe")
 		set(WIN_JAVA_EXECUTABLE "${WIN_JAVA_HOME}/bin/java.exe")
 		set(WIN_JAVAC_EXECUTABLE "${WIN_JAVA_HOME}/bin/javac.exe")
+
+		FetchContent_Declare(
+			ghc_filesystem
+			URL https://github.com/gulrak/filesystem/archive/refs/tags/v1.5.16.tar.gz
+		)
+		FetchContent_MakeAvailable(ghc_filesystem)
 	else()
 		set(GENERATE_HEADERS TRUE)
 	endif()
@@ -78,6 +88,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Source files
 # ------------------------------------
 if (WIN32)
+	include_directories(
+		"${ghc_filesystem_SOURCE_DIR}/include"
+		"${WIN_JAVA_HOME}/include"
+		"${WIN_JAVA_HOME}/include/win32"
+	)
 	set(JNI_CFLAGS "-I${WIN_JAVA_HOME}/include -I${WIN_JAVA_HOME}/include/win32")
 else()
 	set(JNI_CFLAGS "")
@@ -87,13 +102,14 @@ else()
 endif()
 
 set(XJNI_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+set(XJNI_JNI_SOURCES
+	${XJNI_SOURCE_DIR}/src/jni/file.c
+	${XJNI_SOURCE_DIR}/src/jni/ifstream.cpp
+	${XJNI_SOURCE_DIR}/src/jni/ofstream.cpp
+	${XJNI_SOURCE_DIR}/src/jni/istream.cpp
+	${XJNI_SOURCE_DIR}/src/jni/ostream.cpp
+)
 set(XJNI_SOURCES
-	${XJNI_SOURCE_DIR}/src/cpp/file.c
-	${XJNI_SOURCE_DIR}/src/cpp/ifstream.cpp
-	${XJNI_SOURCE_DIR}/src/cpp/ofstream.cpp
-	${XJNI_SOURCE_DIR}/src/cpp/istream.cpp
-	${XJNI_SOURCE_DIR}/src/cpp/ostream.cpp
-
 	${XJNI_SOURCE_DIR}/src/xjni/xjni_args.c
 	${XJNI_SOURCE_DIR}/src/xjni/xjni_hashmap.c
 	${XJNI_SOURCE_DIR}/src/xjni/xjni_classcache.c
@@ -121,11 +137,17 @@ set(XJNI_SOURCES
 # --------------------------------------------------------
 set(XJAVA_SOURCES
 	${XJNI_SOURCE_DIR}/src/java/xjava/XJNILibrary.java
+
+	${XJNI_SOURCE_DIR}/src/java/xjava/io/DataIStream.java
+	${XJNI_SOURCE_DIR}/src/java/xjava/io/DataOStream.java
 	${XJNI_SOURCE_DIR}/src/java/xjava/io/FILE.java
 	${XJNI_SOURCE_DIR}/src/java/xjava/io/IFStream.java
 	${XJNI_SOURCE_DIR}/src/java/xjava/io/OFStream.java
 	${XJNI_SOURCE_DIR}/src/java/xjava/io/IStream.java
 	${XJNI_SOURCE_DIR}/src/java/xjava/io/OStream.java
+
+	${XJNI_SOURCE_DIR}/src/java/xjava/lang/XSystem.java
+
 	${XJNI_SOURCE_DIR}/src/java/xjava/nio/file/attribute/FILETIME.java
 )
 
@@ -162,41 +184,62 @@ else()
 	set(_JAVA_CMD ${Java_JAVA_EXECUTABLE})
 endif()
 
-set(XJAVA_JAR "${JAR_OUTPUT_DIR}/xjava-${PROJECT_VERSION}.jar")
-if(GENERATE_HEADERS)
-	add_jar(xjava-jar
-		${XJAVA_SOURCES}
-		VERSION ${PROJECT_VERSION}
-		OUTPUT_NAME "xjava"
-		OUTPUT_DIR "${JAR_OUTPUT_DIR}"
-		GENERATE_NATIVE_HEADERS xjava-native
-		DESTINATION "${HEADER_OUTPUT_DIR}"
-	)
-else()
-	add_custom_command(
-		OUTPUT "${XJAVA_JAR}"
-		COMMAND ${_JAVAC_CMD} -encoding UTF-8 -d "${XJAR_CLASSES_OUTPUT_DIR}" ${XJAVA_SOURCES}
-		COMMAND ${_JAR_CMD} cf "${XJAVA_JAR}" -C "${XJAR_CLASSES_OUTPUT_DIR}" .
-		WORKING_DIRECTORY "${JAR_OUTPUT_DIR}"
-		DEPENDS ${XJAVA_SOURCES}
-		COMMENT "Compiling Java test sources"
-		VERBATIM
-	)
-	add_custom_target(xjni-test-jar DEPENDS "${XJAVA_JAR}")
+if(XJNI_BUILD_XJAVA)
+	set(XJAVA_JAR "${JAR_OUTPUT_DIR}/xjava-${PROJECT_VERSION}.jar")
+	if(GENERATE_HEADERS)
+		add_jar(xjava-jar
+			${XJAVA_SOURCES}
+			VERSION ${PROJECT_VERSION}
+			OUTPUT_NAME "xjava"
+			OUTPUT_DIR "${JAR_OUTPUT_DIR}"
+			GENERATE_NATIVE_HEADERS xjava-native
+			DESTINATION "${HEADER_OUTPUT_DIR}"
+		)
+	else()
+		add_custom_command(
+			OUTPUT "${XJAVA_JAR}"
+			COMMAND "${CMAKE_COMMAND}" -E make_directory
+					"${XJAR_CLASSES_OUTPUT_DIR}"
+			COMMAND ${_JAVAC_CMD}
+					-encoding UTF-8
+					-d "${XJAR_CLASSES_OUTPUT_DIR}"
+					${XJAVA_SOURCES}
+			COMMAND ${_JAR_CMD} cf "${XJAVA_JAR}"
+					-C "${XJAR_CLASSES_OUTPUT_DIR}" .
+			WORKING_DIRECTORY "${JAR_OUTPUT_DIR}"
+			DEPENDS ${XJAVA_SOURCES}
+			COMMENT "Compiling Java library sources"
+			VERBATIM
+		)
+
+		add_custom_target(xjava-jar DEPENDS "${XJAVA_JAR}")
+	endif()
 endif()
 
 # ------------------------------------
 # Shared library
 # ------------------------------------
-add_library(xjni SHARED ${XJNI_SOURCES})
+if(XJNI_BUILD_XJAVA)
+	add_library(xjni SHARED ${XJNI_JNI_SOURCES} ${XJNI_SOURCES})
+else()
+	add_library(xjni SHARED ${XJNI_SOURCES})
+endif()
+
+target_compile_definitions(xjni PUBLIC XJNI_BUILD)
+
+if (DISABLE_XLOG_COLOR)
+	target_compile_definitions(xjni PUBLIC DISABLE_XLOG_COLOR)
+endif()
 
 if (WIN32)
 	target_include_directories(xjni PRIVATE
 		${WIN_JAVA_HOME}/include
 		${WIN_JAVA_HOME}/include/win32
 	)
+	target_link_options(xjni PUBLIC -static -static-libgcc -static-libstdc++)
+	target_link_options(xjni PRIVATE "LINKER:--output-def=${CMAKE_CURRENT_BINARY_DIR}/xjni.def")
 else()
-	target_link_libraries(xjni PUBLIC JNI::JNI)
+	target_link_libraries(xjni PUBLIC JNI::JNI pthread)
 endif()
 
 target_include_directories(xjni
@@ -231,6 +274,10 @@ endif()
 if(XJNI_BUILD_STATIC)
 	add_library(xjni_static STATIC ${XJNI_SOURCES})
 	set_target_properties(xjni_static PROPERTIES OUTPUT_NAME xjni)
+	target_compile_definitions(xjni_static PRIVATE XJNI_STATIC)
+	if (DISABLE_XLOG_COLOR)
+		target_compile_definitions(xjni_static PUBLIC DISABLE_XLOG_COLOR)
+	endif()
 	target_include_directories(xjni_static
 		PUBLIC
 			$<BUILD_INTERFACE:${XJNI_SOURCE_DIR}/src/internal>
@@ -241,7 +288,9 @@ if(XJNI_BUILD_STATIC)
 			${JNI_INCLUDE_DIRS}
 	)
 
-	if(NOT WIN32)
+	if(WIN32)
+		target_link_options(xjni_static PUBLIC -static -static-libgcc -static-libstdc++)
+	else()
 		target_link_libraries(xjni_static PUBLIC JNI::JNI)
 	endif()
 
@@ -382,9 +431,11 @@ if(XJNI_BUILD_TESTS)
 		${CMAKE_SOURCE_DIR}/test/java/JNITestObject.java
 		${CMAKE_SOURCE_DIR}/test/java/JNITestBase.java
 		${CMAKE_SOURCE_DIR}/test/java/JNITestDerived.java
-
-		${CMAKE_SOURCE_DIR}/test/java/xjava/io/FILETest.java
 	)
+
+	if(XJNI_BUILD_XJAVA)
+		list(APPEND XJNI_JAVA_SOURCES ${CMAKE_SOURCE_DIR}/test/java/xjava/io/FILETest.java)
+	endif()
 
 
 	# ========================================================
@@ -392,7 +443,6 @@ if(XJNI_BUILD_TESTS)
 	# ========================================================
 
 	if(GENERATE_HEADERS)
-
 		add_jar(
 			xjni-test-jar ${XJNI_JAVA_SOURCES}
 			VERSION ${PROJECT_VERSION}
@@ -402,33 +452,42 @@ if(XJNI_BUILD_TESTS)
 			GENERATE_NATIVE_HEADERS xjni-test-native
 				DESTINATION "${HEADER_OUTPUT_DIR}"
 		)
-		set(XJNI_TEST_JAR
-			"${JAR_OUTPUT_DIR}/xjni-test.jar"
-		)
+		set(XJNI_TEST_JAR "${JAR_OUTPUT_DIR}/xjni-test.jar")
 	else()
 		set(XJNI_TEST_JAR "${JAR_OUTPUT_DIR}/xjni-test.jar")
+
 		add_custom_command(
 			OUTPUT "${XJNI_TEST_JAR}"
-			COMMAND ${_JAVAC_CMD} -encoding UTF-8
-			-d "${JAR_CLASSES_OUTPUT_DIR}"
-			-classpath "${XJAVA_JAR}${_JAVA_PATH_SER}$<TARGET_PROPERTY:jld::junit,JLD_JAR>${_JAVA_PATH_SER}$<TARGET_PROPERTY:jld::hamcrest-core,JLD_JAR>"
-			${XJNI_JAVA_SOURCES}
-			COMMAND ${_JAR_CMD} cf "${XJNI_TEST_JAR}" -C "${JAR_CLASSES_OUTPUT_DIR}" .
+
+			COMMAND "${CMAKE_COMMAND}" -E make_directory
+					"${JAR_CLASSES_OUTPUT_DIR}"
+
+			COMMAND ${_JAVAC_CMD}
+					-encoding UTF-8
+					-d "${JAR_CLASSES_OUTPUT_DIR}"
+					-classpath
+					"${XJAVA_JAR}${_JAVA_PATH_SER}$<TARGET_PROPERTY:jld::junit,JLD_JAR>${_JAVA_PATH_SER}$<TARGET_PROPERTY:jld::hamcrest-core,JLD_JAR>"
+					${XJNI_JAVA_SOURCES}
+
+			COMMAND ${_JAR_CMD} cf "${XJNI_TEST_JAR}"
+					-C "${JAR_CLASSES_OUTPUT_DIR}" .
+
 			WORKING_DIRECTORY "${JAR_OUTPUT_DIR}"
-			DEPENDS ${XJNI_JAVA_SOURCES}
+			DEPENDS
+				${XJNI_JAVA_SOURCES}
+				xjava-jar
 			COMMENT "Compiling Java test sources"
 			VERBATIM
 		)
+
 		add_custom_target(xjni-test-jar DEPENDS "${XJNI_TEST_JAR}")
 	endif()
-
 
 	# ========================================================
 	# C JNI test library
 	# ========================================================
 
 	add_library(xjni_test SHARED
-
 		${CMAKE_SOURCE_DIR}/test/c/xjni_stringarray_test.c
 		${CMAKE_SOURCE_DIR}/test/c/xjni_arrayfield_test.c
 		${CMAKE_SOURCE_DIR}/test/c/xjni_stringbuffer_test.c
@@ -455,18 +514,12 @@ if(XJNI_BUILD_TESTS)
 		)
 	endif()
 
-	target_link_libraries(xjni_test PRIVATE xjni )
+	target_link_libraries(xjni_test PRIVATE xjni)
 
 	set_target_properties(xjni_test PROPERTIES
-
-		ARCHIVE_OUTPUT_DIRECTORY
-			"${LIBS_TEST_OUTPUT_DIR}"
-
-		LIBRARY_OUTPUT_DIRECTORY
-			"${LIBS_TEST_OUTPUT_DIR}"
-
-		RUNTIME_OUTPUT_DIRECTORY
-			"${LIBS_TEST_OUTPUT_DIR}"
+		ARCHIVE_OUTPUT_DIRECTORY "${LIBS_TEST_OUTPUT_DIR}"
+		LIBRARY_OUTPUT_DIRECTORY "${LIBS_TEST_OUTPUT_DIR}"
+		RUNTIME_OUTPUT_DIRECTORY "${LIBS_TEST_OUTPUT_DIR}"
 	)
 
 
@@ -481,46 +534,30 @@ if(XJNI_BUILD_TESTS)
 
 	target_include_directories(xxjni_cpp_test
 		PRIVATE
-
 			${CMAKE_SOURCE_DIR}/include
 			${CMAKE_SOURCE_DIR}/include/xjni
 			${CMAKE_SOURCE_DIR}/include/xxjni
 			${CMAKE_SOURCE_DIR}/src
-
 			${JNI_INCLUDE_DIRS}
 	)
 
 	if(WIN32)
-
 		target_include_directories(xxjni_cpp_test
 			PRIVATE
 				${WIN_JAVA_HOME}/include
 				${WIN_JAVA_HOME}/include/win32
 		)
-
+		target_link_options(xxjni_cpp_test PUBLIC -static -static-libgcc -static-libstdc++)
 	endif()
 
-	target_link_libraries(xxjni_cpp_test
-		PRIVATE
-			xjni
-	)
+	target_link_libraries(xxjni_cpp_test PUBLIC xjni)
 
 	set_target_properties(xxjni_cpp_test PROPERTIES
-
-		CXX_STANDARD
-			11
-
-		CXX_STANDARD_REQUIRED
-			ON
-
-		ARCHIVE_OUTPUT_DIRECTORY
-			"${LIBS_TEST_OUTPUT_DIR}"
-
-		LIBRARY_OUTPUT_DIRECTORY
-			"${LIBS_TEST_OUTPUT_DIR}"
-
-		RUNTIME_OUTPUT_DIRECTORY
-			"${LIBS_TEST_OUTPUT_DIR}"
+		CXX_STANDARD 11
+		CXX_STANDARD_REQUIRED ON
+		ARCHIVE_OUTPUT_DIRECTORY "${LIBS_TEST_OUTPUT_DIR}"
+		LIBRARY_OUTPUT_DIRECTORY "${LIBS_TEST_OUTPUT_DIR}"
+		RUNTIME_OUTPUT_DIRECTORY "${LIBS_TEST_OUTPUT_DIR}"
 	)
 
 
@@ -537,11 +574,7 @@ if(XJNI_BUILD_TESTS)
 			${CMAKE_SOURCE_DIR}/src
 			${CMAKE_SOURCE_DIR}/include
 	)
-
-	target_link_libraries(xjni_hashmap_test
-		PRIVATE
-			xjni
-	)
+	target_link_libraries(xjni_hashmap_test PRIVATE xjni)
 
 
 	# ========================================================
@@ -615,35 +648,48 @@ if(XJNI_BUILD_TESTS)
 	# Individual Java test build targets
 	# ========================================================
 
-	foreach(TESTCLASS IN LISTS XJNI_JAVA_TEST_CLASSES)
+	if (WINEPATH_EXECUTABLE)
+		execute_process(
+			COMMAND winepath -w "${LIBS_TEST_OUTPUT_DIR}"
+			OUTPUT_VARIABLE WINEPATH_WINDOWS
+			OUTPUT_STRIP_TRAILING_WHITESPACE
+			COMMAND_ERROR_IS_FATAL ANY
+		)
+	else()
+		set(WINEPATH_WINDOWS ${LIBS_TEST_OUTPUT_DIR})
+	endif()
 
+	foreach(TESTCLASS IN LISTS XJNI_JAVA_TEST_CLASSES)
 		set(TEST_TARGET "run_${TESTCLASS}")
 
-		add_custom_target(${TEST_TARGET}
-
-			COMMAND
-				"${_JAVA_CMD}"
-				"-Djava.library.path=${LIBS_TEST_OUTPUT_DIR}${_JAVA_PATH_SER}${CMAKE_CURRENT_BINARY_DIR}"
-				"-cp"
-				"${XJAVA_JAR}${_JAVA_PATH_SER}${XJNI_TEST_JAR}"
-				"${TESTCLASS}"
-
-			WORKING_DIRECTORY
-				"${JAR_OUTPUT_DIR}"
-
-			DEPENDS
-				xjni
-				xjni_test
-				xjni-test-jar
-
-			COMMENT
-				"Running Java test ${TESTCLASS}"
-
-			VERBATIM
-		)
+		if(WINE_EXECUTABLE)
+			add_custom_target(${TEST_TARGET}
+				COMMAND "${CMAKE_COMMAND}" -E env
+					"WINEPATH=${WINEPATH_WINDOWS}"
+					${_JAVA_CMD}
+					"-Djava.library.path=${LIBS_TEST_OUTPUT_DIR}${_JAVA_PATH_SER}${CMAKE_CURRENT_BINARY_DIR}"
+					"-cp" "${XJAVA_JAR}${_JAVA_PATH_SER}${XJNI_TEST_JAR}"
+					"${TESTCLASS}"
+				WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+				DEPENDS xjni xjni_test xjni-test-jar
+				COMMENT "Running Java test ${TESTCLASS}"
+				VERBATIM
+			)
+		else()
+			add_custom_target(${TEST_TARGET}
+				COMMAND
+					${_JAVA_CMD}
+					"-Djava.library.path=${LIBS_TEST_OUTPUT_DIR}${_JAVA_PATH_SER}${CMAKE_CURRENT_BINARY_DIR}"
+					"-cp" "${XJAVA_JAR}${_JAVA_PATH_SER}${XJNI_TEST_JAR}"
+					"${TESTCLASS}"
+				WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+				DEPENDS xjni xjni_test xjni-test-jar
+				COMMENT "Running Java test ${TESTCLASS}"
+				VERBATIM
+			)
+		endif()
 
 		list(APPEND XJNI_JAVA_TEST_TARGETS "${TEST_TARGET}")
-
 	endforeach()
 
 
@@ -652,11 +698,10 @@ if(XJNI_BUILD_TESTS)
 	# ========================================================
 
 	foreach(TESTCLASS IN LISTS XJNI_JAVA_TEST_CLASSES)
-
 		add_test(
 			NAME "${TESTCLASS}"
 			COMMAND
-				"${_JAVA_CMD}"
+				${_JAVA_CMD}
 				"-Djava.library.path=${LIBS_TEST_OUTPUT_DIR}${_JAVA_PATH_SER}${CMAKE_CURRENT_BINARY_DIR}"
 				"-cp"
 				"${XJAVA_JAR}${_JAVA_PATH_SER}${XJNI_TEST_JAR}"
@@ -673,65 +718,64 @@ if(XJNI_BUILD_TESTS)
 
 	endforeach()
 
-	# ========================================================
-	# JUnit FILE test
-	# ========================================================
 
-	java_get_classpath(
-		XJNI_JUNIT_CLASSPATH
-		jld::junit
-		jld::hamcrest-core
-	)
+	if(XJNI_BUILD_XJAVA)
+		# ========================================================
+		# JUnit FILE test
+		# ========================================================
 
-	set(XJNI_FILE_TEST_CLASSPATH
-		"${XJAVA_JAR}${_JAVA_PATH_SER}${XJNI_TEST_JAR}${_JAVA_PATH_SER}${XJNI_JUNIT_CLASSPATH}"
-	)
+		java_get_classpath(
+			XJNI_JUNIT_CLASSPATH
+			jld::junit
+			jld::hamcrest-core
+		)
 
-	add_custom_target(
-		run_FILETest
+		set(XJNI_FILE_TEST_CLASSPATH
+			"${XJAVA_JAR}${_JAVA_PATH_SER}${XJNI_TEST_JAR}${_JAVA_PATH_SER}${XJNI_JUNIT_CLASSPATH}"
+		)
 
-		COMMAND
-			"${_JAVA_CMD}"
+		add_custom_target(
+			run_FILETest
 
-			"-Djava.library.path=${LIBS_TEST_OUTPUT_DIR}${_JAVA_PATH_SER}${CMAKE_CURRENT_BINARY_DIR}"
+			COMMAND
+				${_JAVA_CMD}
+				"-Djava.library.path=${LIBS_TEST_OUTPUT_DIR}${_JAVA_PATH_SER}${CMAKE_CURRENT_BINARY_DIR}"
+				"-cp" "${XJNI_FILE_TEST_CLASSPATH}"
+				org.junit.runner.JUnitCore
+				xjava.io.FILETest
 
-			"-cp"
-			"${XJNI_FILE_TEST_CLASSPATH}"
+				WORKING_DIRECTORY
+					"${JAR_OUTPUT_DIR}"
 
-			org.junit.runner.JUnitCore
+			DEPENDS
+				xjni
+				xjni_test
+				xjni-test-jar
+
+			COMMENT
+				"Running JUnit xjava.io.FILETest"
+
+			VERBATIM
+		)
+
+		add_test(
+			NAME xjava.io.FILETest
+			COMMAND
+				${_JAVA_CMD}
+				"-Djava.library.path=${LIBS_TEST_OUTPUT_DIR}${_JAVA_PATH_SER}${CMAKE_CURRENT_BINARY_DIR}"
+				"-cp"
+				"${XJNI_FILE_TEST_CLASSPATH}"
+				org.junit.runner.JUnitCore
+				xjava.io.FILETest
+		)
+
+		set_tests_properties(
 			xjava.io.FILETest
-
-			WORKING_DIRECTORY
-				"${JAR_OUTPUT_DIR}"
-
-		DEPENDS
-			xjni
-			xjni_test
-			xjni-test-jar
-
-		COMMENT
-			"Running JUnit xjava.io.FILETest"
-
-		VERBATIM
-	)
-
-	add_test(
-		NAME xjava.io.FILETest
-		COMMAND
-			"${_JAVA_CMD}"
-			"-Djava.library.path=${LIBS_TEST_OUTPUT_DIR}${_JAVA_PATH_SER}${CMAKE_CURRENT_BINARY_DIR}"
-			"-cp"
-			"${XJNI_FILE_TEST_CLASSPATH}"
-			org.junit.runner.JUnitCore
-			xjava.io.FILETest
-	)
-
-	set_tests_properties(
-		xjava.io.FILETest
-		PROPERTIES
-			WORKING_DIRECTORY "${JAR_OUTPUT_DIR}"
-			ENVIRONMENT "LD_LIBRARY_PATH=${LIBS_TEST_OUTPUT_DIR}:$ENV{LD_LIBRARY_PATH}"
-	)
+			PROPERTIES
+				WORKING_DIRECTORY "${JAR_OUTPUT_DIR}"
+				ENVIRONMENT "LD_LIBRARY_PATH=${LIBS_TEST_OUTPUT_DIR}:$ENV{LD_LIBRARY_PATH}"
+		)
+	endif()
 
 	# ========================================================
 	# Run all Java tests
@@ -740,5 +784,8 @@ if(XJNI_BUILD_TESTS)
 	foreach(TEST_TARGET IN LISTS XJNI_JAVA_TEST_TARGETS)
 		add_dependencies(RUN_ALLTEST "${TEST_TARGET}")
 	endforeach()
-	add_dependencies(RUN_ALLTEST run_FILETest)
+
+	if(XJNI_BUILD_XJAVA)
+		add_dependencies(RUN_ALLTEST run_FILETest)
+	endif()
 endif()

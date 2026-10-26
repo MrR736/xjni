@@ -13,6 +13,9 @@
 #ifndef __XJNI_THREAD_H__
 #define __XJNI_THREAD_H__
 
+#include "xjni_windows.h"
+#include "xjnidef.h"
+
 #ifdef _WIN32
 # include <windows.h>
 
@@ -133,18 +136,6 @@ typedef int xjni_thread_result_t;
 #include <stdbool.h>
 #include <time.h>
 
-#ifdef _WIN32
-#ifdef XJNI_THREAD_BUILD
-#define XJNI_THREAD_API __declspec(dllexport)
-#else
-#define XJNI_THREAD_API __declspec(dllimport)
-#endif
-#define XJNI_THREAD_CALL __stdcall
-#else
-#define XJNI_THREAD_API
-#define XJNI_THREAD_CALL
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -156,7 +147,7 @@ extern "C" {
  * @param init_routine Function to call exactly once.
  * @return 0 on success, non-zero on failure.
  */
-XJNI_THREAD_API xjni_thread_result_t XJNI_THREAD_CALL xjni_once(xjni_once_t *once_control, void (*init_routine)(void));
+XJNIAPI xjni_thread_result_t XJNICALL xjni_once(xjni_once_t *once_control, void (XJNICALL *init_routine)(void));
 
 /**
  * @brief Execute a function only once across all threads, with parameters and a return status.
@@ -178,7 +169,7 @@ XJNI_THREAD_API xjni_thread_result_t XJNI_THREAD_CALL xjni_once(xjni_once_t *onc
  *       will be executed at most once across all threads that call this function with the
  *       same `once_control`.
  */
-XJNI_THREAD_API xjni_thread_result_t XJNI_THREAD_CALL
+XJNIAPI xjni_thread_result_t XJNICALL
 xjni_oncew(xjni_once_t* once_control,
 	   bool (*init_routine)(void* Parameter, void* Context),
 	   void* Parameter,void* Context);
@@ -188,35 +179,35 @@ xjni_oncew(xjni_once_t* once_control,
  * @param mutex Pointer to the mutex to initialize.
  * @return 0 on success, non-zero on failure.
  */
-XJNI_THREAD_API xjni_thread_result_t XJNI_THREAD_CALL xjni_mutex_init(xjni_mutex_t *mutex);
+XJNIAPI xjni_thread_result_t XJNICALL xjni_mutex_init(xjni_mutex_t *mutex);
 
 /**
  * @brief Destroy a mutex.
  * @param mutex Pointer to the mutex to destroy.
  * @return 0 on success, non-zero on failure.
  */
-XJNI_THREAD_API xjni_thread_result_t XJNI_THREAD_CALL xjni_mutex_destroy(xjni_mutex_t *mutex);
+XJNIAPI xjni_thread_result_t XJNICALL xjni_mutex_destroy(xjni_mutex_t *mutex);
 
 /**
  * @brief Lock a mutex, blocking if necessary.
  * @param mutex Pointer to the mutex to lock.
  * @return 0 on success, non-zero on failure.
  */
-XJNI_THREAD_API xjni_thread_result_t XJNI_THREAD_CALL xjni_mutex_lock(xjni_mutex_t *mutex);
+XJNIAPI xjni_thread_result_t XJNICALL xjni_mutex_lock(xjni_mutex_t *mutex);
 
 /**
  * @brief Unlock a mutex.
  * @param mutex Pointer to the mutex to unlock.
  * @return 0 on success, non-zero on failure.
  */
-XJNI_THREAD_API xjni_thread_result_t XJNI_THREAD_CALL xjni_mutex_unlock(xjni_mutex_t *mutex);
+XJNIAPI xjni_thread_result_t XJNICALL xjni_mutex_unlock(xjni_mutex_t *mutex);
 
 /**
  * @brief Try to lock a mutex without blocking.
  * @param mutex Pointer to the mutex to try-lock.
  * @return 0 if lock acquired, non-zero if already locked.
  */
-XJNI_THREAD_API xjni_thread_result_t XJNI_THREAD_CALL xjni_mutex_trylock(xjni_mutex_t *mutex);
+XJNIAPI xjni_thread_result_t XJNICALL xjni_mutex_trylock(xjni_mutex_t *mutex);
 
 /**
  * @brief Lock a mutex with a timeout.
@@ -224,13 +215,13 @@ XJNI_THREAD_API xjni_thread_result_t XJNI_THREAD_CALL xjni_mutex_trylock(xjni_mu
  * @param abstime Absolute time to wait until giving up.
  * @return 0 if lock acquired, non-zero on timeout or failure.
  */
-XJNI_THREAD_API int XJNI_THREAD_CALL xjni_mutex_timedlock(xjni_mutex_t *mutex, const struct timespec *abstime);
+XJNIAPI int XJNICALL xjni_mutex_timedlock(xjni_mutex_t *mutex, const struct timespec *abstime);
 
 /**
  * @brief Get the current realtime clock.
  * @param ts Pointer to a timespec struct to populate with current time.
  */
-XJNI_THREAD_API void XJNI_THREAD_CALL xjni_get_realtime(struct timespec *ts);
+XJNIAPI void XJNICALL xjni_get_realtime(struct timespec *ts);
 
 /**
  * @brief Create a new thread.
@@ -242,7 +233,9 @@ XJNI_THREAD_API void XJNI_THREAD_CALL xjni_get_realtime(struct timespec *ts);
  *         - Windows: DWORD, 0 on success, GetLastError() code on failure.
  *         - POSIX: 0 on success, error number on failure.
  */
-XJNI_THREAD_API xjni_thread_result_t XJNI_THREAD_CALL xjni_create(xjni_thread_t *thread,void *(*start_routine)(void*),void *arg);
+XJNIAPI xjni_thread_result_t XJNICALL xjni_create(xjni_thread_t *thread,void *(XJNICALL *start_routine)(void*),void *arg);
+
+XJNIAPI xjni_thread_result_t XJNICALL xjni_createw(xjni_thread_t *thread,LPTHREAD_START_ROUTINE lpStartAddress,LPVOID lpParameter);
 
 /**
  * @brief Wait for a thread to finish execution and optionally retrieve its result.
@@ -253,7 +246,7 @@ XJNI_THREAD_API xjni_thread_result_t XJNI_THREAD_CALL xjni_create(xjni_thread_t 
  *         - Windows: DWORD, 0 on success, GetLastError() code on failure.
  *         - POSIX: 0 on success, error number on failure.
  */
-XJNI_THREAD_API xjni_thread_result_t XJNI_THREAD_CALL xjni_join(xjni_thread_t thread, void **retval);
+XJNIAPI xjni_thread_result_t XJNICALL xjni_join(xjni_thread_t thread, void **retval);
 
 /**
  * @brief Get the handle of the current thread.
@@ -262,7 +255,7 @@ XJNI_THREAD_API xjni_thread_result_t XJNI_THREAD_CALL xjni_join(xjni_thread_t th
  *         - Windows: HANDLE of the calling thread (note: pseudo-handle may be returned).
  *         - POSIX: pthread_t of the calling thread.
  */
-XJNI_THREAD_API xjni_thread_t XJNI_THREAD_CALL xjni_self(void);
+XJNIAPI xjni_thread_t XJNICALL xjni_self(void);
 
 /**
  * @brief Detach a thread, allowing its resources to be reclaimed automatically.
@@ -272,7 +265,7 @@ XJNI_THREAD_API xjni_thread_t XJNI_THREAD_CALL xjni_self(void);
  *         - Windows: DWORD, 0 on success, GetLastError() on failure.
  *         - POSIX: 0 on success, error number on failure.
  */
-XJNI_THREAD_API xjni_thread_result_t XJNI_THREAD_CALL xjni_detach(xjni_thread_t thread);
+XJNIAPI xjni_thread_result_t XJNICALL xjni_detach(xjni_thread_t thread);
 
 /**
  * @brief Check if two thread handles represent the same thread.
@@ -281,7 +274,7 @@ XJNI_THREAD_API xjni_thread_result_t XJNI_THREAD_CALL xjni_detach(xjni_thread_t 
  * @param t2 Second thread handle.
  * @return int Non-zero if threads are equal, 0 otherwise.
  */
-XJNI_THREAD_API int XJNI_THREAD_CALL xjni_equal(xjni_thread_t t1, xjni_thread_t t2);
+XJNIAPI int XJNICALL xjni_equal(xjni_thread_t t1, xjni_thread_t t2);
 
 /**
  * @brief Request cancellation of a thread.
@@ -291,7 +284,7 @@ XJNI_THREAD_API int XJNI_THREAD_CALL xjni_equal(xjni_thread_t t1, xjni_thread_t 
  *         - Windows: ENOSYS (cancellation unsupported).
  *         - POSIX/Android: 0 on success, error number on failure.
  */
-XJNI_THREAD_API xjni_thread_result_t XJNI_THREAD_CALL xjni_cancel(xjni_thread_t th);
+XJNIAPI xjni_thread_result_t XJNICALL xjni_cancel(xjni_thread_t th);
 
 /**
  * @brief Set the thread's cancellation type.
@@ -300,7 +293,7 @@ XJNI_THREAD_API xjni_thread_result_t XJNI_THREAD_CALL xjni_cancel(xjni_thread_t 
  * @param oldtype Optional pointer to store previous cancellation type.
  * @return int 0 on success, or platform-specific error code.
  */
-XJNI_THREAD_API int XJNI_THREAD_CALL xjni_setcanceltype(int type, int *oldtype);
+XJNIAPI int XJNICALL xjni_setcanceltype(int type, int *oldtype);
 
 /**
  * @brief Set the thread's cancellation state.
@@ -309,7 +302,7 @@ XJNI_THREAD_API int XJNI_THREAD_CALL xjni_setcanceltype(int type, int *oldtype);
  * @param oldstate Optional pointer to store previous cancellation state.
  * @return int 0 on success, or platform-specific error code.
  */
-XJNI_THREAD_API int XJNI_THREAD_CALL xjni_setcancelstate(int state, int *oldstate);
+XJNIAPI int XJNICALL xjni_setcancelstate(int state, int *oldstate);
 
 #ifdef __cplusplus
 }

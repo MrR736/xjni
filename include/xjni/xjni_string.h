@@ -26,6 +26,8 @@
 #include <wchar.h>
 #include <jni.h>
 
+#include "xjnidef.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -34,11 +36,11 @@ extern "C" {
  *  @brief Standard memory operations for JNI
  *  @{
  */
-JNIEXPORT void* JNICALL jmemcpy(void *dest,const void *src,size_t n);
-JNIEXPORT void* JNICALL jmemmove(void *dest,const void *src,size_t n);
-JNIEXPORT void* JNICALL jmemchr(const void *s,jint c,size_t n);
-JNIEXPORT void* JNICALL jmemset(void *s,jint c,size_t n);
-JNIEXPORT jint  JNICALL jmemcmp(const void *cs,const void *ct,size_t count);
+XJNIAPI void* XJNICALL jmemcpy(void *dest,const void *src,size_t n);
+XJNIAPI void* XJNICALL jmemmove(void *dest,const void *src,size_t n);
+XJNIAPI void* XJNICALL jmemchr(const void *s,jint c,size_t n);
+XJNIAPI void* XJNICALL jmemset(void *s,jint c,size_t n);
+XJNIAPI jint  XJNICALL jmemcmp(const void *cs,const void *ct,size_t count);
 /** @} */
 
 /** @defgroup XJNI_String jchar String Utilities
@@ -53,7 +55,7 @@ JNIEXPORT jint  JNICALL jmemcmp(const void *cs,const void *ct,size_t count);
  * @param out_size Size of output buffer
  * @return Number of bytes written
  */
-JNIEXPORT jint JNICALL xjni_tochar(const jchar c, char* out, size_t out_size);
+XJNIAPI jint XJNICALL xjni_tochar(const jchar c, char* out, size_t out_size);
 
 /**
  * @brief Convert UTF-8 char array to jchar
@@ -62,7 +64,7 @@ JNIEXPORT jint JNICALL xjni_tochar(const jchar c, char* out, size_t out_size);
  * @param out Output jchar buffer
  * @return Number of jchars written
  */
-JNIEXPORT jint JNICALL xjni_tojchar(const char* utf8, size_t utf8_len, jchar* out);
+XJNIAPI jint XJNICALL xjni_tojchar(const char* utf8, size_t utf8_len, jchar* out);
 
 /**
  * @brief Convert UTF-16 (jchar*) string to UTF-8 string.
@@ -79,7 +81,7 @@ JNIEXPORT jint JNICALL xjni_tojchar(const char* utf8, size_t utf8_len, jchar* ou
  *
  * @note The returned string is always null-terminated.
  */
-JNIEXPORT char* JNICALL xjni_tostring(const jchar* c);
+XJNIAPI char* XJNICALL xjni_tostring(const jchar* c);
 
 /**
  * @brief Convert UTF-8 string to UTF-16 (jchar*) string.
@@ -96,7 +98,7 @@ JNIEXPORT char* JNICALL xjni_tostring(const jchar* c);
  *
  * @note The returned string is always null-terminated.
  */
-JNIEXPORT jchar* JNICALL xjni_tojstring(const char* c);
+XJNIAPI jchar* XJNICALL xjni_tojstring(const char* c);
 
 /**
  * @brief Copy UTF-8 string to jchar array
@@ -105,7 +107,7 @@ JNIEXPORT jchar* JNICALL xjni_tojstring(const char* c);
  * @param dstlen [in/out] Size of dst buffer, updated with written length
  * @return JNI_TRUE on success, JNI_FALSE on failure
  */
-JNIEXPORT jboolean JNICALL xjni_fromstring(const char *src, jchar *dst, size_t *dstlen);
+XJNIAPI jboolean XJNICALL xjni_fromstring(const char *src, jchar *dst, size_t *dstlen);
 
 /**
  * @brief Copy jchar array to UTF-8 string
@@ -114,30 +116,30 @@ JNIEXPORT jboolean JNICALL xjni_fromstring(const char *src, jchar *dst, size_t *
  * @param dstlen [in/out] Size of dst buffer, updated with written length
  * @return JNI_TRUE on success, JNI_FALSE on failure
  */
-JNIEXPORT jboolean JNICALL xjni_fromjstring(const jchar *src, char *dst, size_t *dstlen);
+XJNIAPI jboolean XJNICALL xjni_fromjstring(const jchar *src, char *dst, size_t *dstlen);
 
-JNIEXPORT size_t JNICALL jstrlen(const jchar* __s);
-JNIEXPORT size_t JNICALL jstrnlen(const jchar * s,size_t count);
-JNIEXPORT jchar* JNICALL jstrchr(const jchar *s,jint c);
-JNIEXPORT jchar* JNICALL jstrchrnul(const jchar *__s,jint __c);
-JNIEXPORT jchar* JNICALL jstrrchr(const jchar *s,jint c);
-JNIEXPORT jchar* JNICALL jstrcpy(jchar* __dest,const jchar* __src);
-JNIEXPORT size_t JNICALL jstrlcpy(jchar *dest,const jchar *src,size_t size);
-JNIEXPORT jchar* JNICALL jstrcat(jchar* __dest,const jchar* __src);
-JNIEXPORT size_t JNICALL jstrlcat(jchar *dest,const jchar *src,size_t size);
-JNIEXPORT jint   JNICALL jstrcmp(const jchar *cs,const jchar *ct);
-JNIEXPORT jint   JNICALL jstrncmp(const jchar *cs,const jchar *ct,size_t count);
-JNIEXPORT jchar* JNICALL jstrpbrk(const jchar * cs,const jchar * ct);
-JNIEXPORT jchar* JNICALL jstrstr(const jchar *s1,const jchar *s2);
-JNIEXPORT size_t JNICALL jstrcspn(const jchar *__s,const jchar *__reject);
-JNIEXPORT size_t JNICALL jstrspn(const jchar *s,const jchar *accept);
-JNIEXPORT jchar* JNICALL jstrdup(const jchar *s);
-JNIEXPORT jchar* JNICALL jstrndup(const jchar *__string,size_t __n);
-JNIEXPORT jint   JNICALL jstrcoll(const jchar *__s1,const jchar *__s2);
-JNIEXPORT size_t JNICALL jstrxfrm(jchar* __dest,const jchar* __src,size_t __n);
-JNIEXPORT jchar* JNICALL jstrtok(jchar* __s,const jchar* __delim);
-JNIEXPORT void   JNICALL jstrreverse(jchar* __str);
-JNIEXPORT jchar* JNICALL jstrrev(const jchar* jstr);
+XJNIAPI size_t XJNICALL jstrlen(const jchar* __s);
+XJNIAPI size_t XJNICALL jstrnlen(const jchar * s,size_t count);
+XJNIAPI jchar* XJNICALL jstrchr(const jchar *s,jint c);
+XJNIAPI jchar* XJNICALL jstrchrnul(const jchar *__s,jint __c);
+XJNIAPI jchar* XJNICALL jstrrchr(const jchar *s,jint c);
+XJNIAPI jchar* XJNICALL jstrcpy(jchar* __dest,const jchar* __src);
+XJNIAPI size_t XJNICALL jstrlcpy(jchar *dest,const jchar *src,size_t size);
+XJNIAPI jchar* XJNICALL jstrcat(jchar* __dest,const jchar* __src);
+XJNIAPI size_t XJNICALL jstrlcat(jchar *dest,const jchar *src,size_t size);
+XJNIAPI jint   XJNICALL jstrcmp(const jchar *cs,const jchar *ct);
+XJNIAPI jint   XJNICALL jstrncmp(const jchar *cs,const jchar *ct,size_t count);
+XJNIAPI jchar* XJNICALL jstrpbrk(const jchar * cs,const jchar * ct);
+XJNIAPI jchar* XJNICALL jstrstr(const jchar *s1,const jchar *s2);
+XJNIAPI size_t XJNICALL jstrcspn(const jchar *__s,const jchar *__reject);
+XJNIAPI size_t XJNICALL jstrspn(const jchar *s,const jchar *accept);
+XJNIAPI jchar* XJNICALL jstrdup(const jchar *s);
+XJNIAPI jchar* XJNICALL jstrndup(const jchar *__string,size_t __n);
+XJNIAPI jint   XJNICALL jstrcoll(const jchar *__s1,const jchar *__s2);
+XJNIAPI size_t XJNICALL jstrxfrm(jchar* __dest,const jchar* __src,size_t __n);
+XJNIAPI jchar* XJNICALL jstrtok(jchar* __s,const jchar* __delim);
+XJNIAPI void   XJNICALL jstrreverse(jchar* __str);
+XJNIAPI jchar* XJNICALL jstrrev(const jchar* jstr);
 /** @} */
 
 /** @defgroup XJNI_ConvertString Convert & Encoding Utilities
@@ -167,8 +169,26 @@ JNIEXPORT jchar* JNICALL jstrrev(const jchar* jstr);
  *
  * @note The returned string is always null-terminated.
  */
-JNIEXPORT char* JNICALL xjni_wcstombs(const wchar_t *wcs);
+XJNIAPI char* XJNICALL xjni_wcstombs(const wchar_t *wcs);
 
+/**
+ * @brief Convert wide-character string (wchar_t*) to UTF-8 string.
+ *
+ * Converts a null-terminated wide-character string into a newly allocated
+ * null-terminated UTF-8 encoded string.
+ *
+ * Platform behavior:
+ * - On Windows: wchar_t is UTF-16; conversion uses WideCharToMultiByte().
+ * - On POSIX systems: wchar_t is UTF-32; conversion uses wcstombs().
+ *
+ * @param wcs Null-terminated wide-character input string.
+ * @param out_size string size.
+ * @return Newly allocated UTF-8 string that must be freed with free(),
+ *         or NULL if conversion fails or memory allocation fails.
+ *
+ * @note The returned string is always null-terminated.
+ */
+XJNIAPI char* XJNICALL xjni_wcstombs_len(const wchar_t *wcs,size_t* out_size);
 
 /**
  * @brief Convert UTF-8 string to wide-character string (wchar_t*).
@@ -186,8 +206,26 @@ JNIEXPORT char* JNICALL xjni_wcstombs(const wchar_t *wcs);
  *
  * @note The returned string is always null-terminated.
  */
-JNIEXPORT wchar_t* JNICALL xjni_mbstowcs(const char *mbs);
+XJNIAPI wchar_t* XJNICALL xjni_mbstowcs(const char *mbs);
 
+/**
+ * @brief Convert UTF-8 string to wide-character string (wchar_t*).
+ *
+ * Converts a null-terminated UTF-8 encoded string into a newly allocated
+ * null-terminated wide-character string.
+ *
+ * Platform behavior:
+ * - On Windows: wchar_t is UTF-16; conversion uses MultiByteToWideChar().
+ * - On POSIX systems: wchar_t is UTF-32; conversion uses mbstowcs().
+ *
+ * @param mbs Null-terminated UTF-8 input string.
+ * @param out_size string size.
+ * @return Newly allocated wide-character string that must be freed with free(),
+ *         or NULL if the input contains invalid UTF-8 sequences or memory allocation fails.
+ *
+ * @note The returned string is always null-terminated.
+ */
+XJNIAPI wchar_t* XJNICALL xjni_mbstowcs_len(const char *mbs,size_t* out_size);
 
 /**
  * @brief Convert UTF-16 (jchar*) string to wide-character string (wchar_t*).
@@ -206,7 +244,7 @@ JNIEXPORT wchar_t* JNICALL xjni_mbstowcs(const char *mbs);
  *
  * @note The returned string is always null-terminated.
  */
-JNIEXPORT wchar_t* JNICALL xjni_jmbstowcs(const jchar* c);
+XJNIAPI wchar_t* XJNICALL xjni_jmbstowcs(const jchar* c);
 
 
 /**
@@ -226,7 +264,7 @@ JNIEXPORT wchar_t* JNICALL xjni_jmbstowcs(const jchar* c);
  *
  * @note The returned string is always null-terminated.
  */
-JNIEXPORT jchar* JNICALL xjni_jwcstombs(const wchar_t* c);
+XJNIAPI jchar* XJNICALL xjni_jwcstombs(const wchar_t* c);
 
 /** @} */
 

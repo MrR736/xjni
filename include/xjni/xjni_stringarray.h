@@ -14,6 +14,8 @@
 
 #include <jni.h>
 
+#include "xjnidef.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -32,7 +34,7 @@ extern "C" {
  * @param count Number of elements in the array.
  * @return Java String[] object.
  */
-JNIEXPORT jobjectArray JNICALL NewStringUTFArray(JNIEnv *env, const char **utf, jsize count);
+XJNIAPI jobjectArray XJNICALL NewStringUTFArray(JNIEnv *env, const char **utf, jsize count);
 
 /**
  * @brief Get UTF-8 C string pointers from a Java String[] array.
@@ -41,7 +43,7 @@ JNIEXPORT jobjectArray JNICALL NewStringUTFArray(JNIEnv *env, const char **utf, 
  * @param isCopy Optional output, indicates if a copy was made.
  * @return Array of UTF-8 C strings. Do not free() directly; release with ReleaseStringUTFArrayChars().
  */
-JNIEXPORT const char** JNICALL GetStringUTFArrayChars(JNIEnv *env, jobjectArray array, jboolean *isCopy);
+XJNIAPI const char** XJNICALL GetStringUTFArrayChars(JNIEnv *env, jobjectArray array, jboolean *isCopy);
 
 /**
  * @brief Release UTF-8 C string array obtained from GetStringUTFArrayChars.
@@ -50,7 +52,7 @@ JNIEXPORT const char** JNICALL GetStringUTFArrayChars(JNIEnv *env, jobjectArray 
  * @param elements Array of UTF-8 C strings obtained previously.
  * @param mode Mode for releasing (0 = copy back and free, JNI_ABORT = free without copy back).
  */
-JNIEXPORT void JNICALL ReleaseStringUTFArrayChars(JNIEnv *env, jobjectArray array, const char **elements, jint mode);
+XJNIAPI void XJNICALL ReleaseStringUTFArrayChars(JNIEnv *env, jobjectArray array, const char **elements, jint mode);
 
 /**
  * @brief Copy a region of Java String[] into a C buffer of UTF-8 strings.
@@ -60,7 +62,7 @@ JNIEXPORT void JNICALL ReleaseStringUTFArrayChars(JNIEnv *env, jobjectArray arra
  * @param len Number of elements to copy.
  * @param buf Output buffer of C strings.
  */
-JNIEXPORT void JNICALL GetStringUTFArrayRegion(JNIEnv *env, jobjectArray str, jsize start, jsize len, char **buf);
+XJNIAPI void XJNICALL GetStringUTFArrayRegion(JNIEnv *env, jobjectArray str, jsize start, jsize len, char **buf);
 
 /**
  * @brief Set a region of a Java String[] from a C buffer of UTF-8 strings.
@@ -70,7 +72,7 @@ JNIEXPORT void JNICALL GetStringUTFArrayRegion(JNIEnv *env, jobjectArray str, js
  * @param len Number of elements to set.
  * @param buf Buffer of C strings.
  */
-JNIEXPORT void JNICALL SetStringUTFArrayRegion(JNIEnv *env, jobjectArray array, jsize start, jsize len, const char **buf);
+XJNIAPI void XJNICALL SetStringUTFArrayRegion(JNIEnv *env, jobjectArray array, jsize start, jsize len, const char **buf);
 
 /**
  * @brief Get the length of a Java String[] array.
@@ -78,7 +80,7 @@ JNIEXPORT void JNICALL SetStringUTFArrayRegion(JNIEnv *env, jobjectArray array, 
  * @param str Java String[] object.
  * @return Number of elements in the array.
  */
-JNIEXPORT jsize JNICALL GetStringUTFArrayLength(JNIEnv *env, jobjectArray str);
+XJNIAPI jsize XJNICALL GetStringUTFArrayLength(JNIEnv *env, jobjectArray str);
 //@}
 
 /** @name Unicode (jchar) String Array Operations */
@@ -91,7 +93,7 @@ JNIEXPORT jsize JNICALL GetStringUTFArrayLength(JNIEnv *env, jobjectArray str);
  * @param n Number of strings.
  * @return Java String[] object.
  */
-JNIEXPORT jobjectArray JNICALL NewStringArray(JNIEnv *env, const jchar **unicode, jsize len, jsize n);
+XJNIAPI jobjectArray XJNICALL NewStringArray(JNIEnv *env, const jchar **unicode, jsize len, jsize n);
 
 /**
  * @brief Get the length of a Java String[] array.
@@ -99,7 +101,7 @@ JNIEXPORT jobjectArray JNICALL NewStringArray(JNIEnv *env, const jchar **unicode
  * @param str Java String[] object.
  * @return Number of elements in the array.
  */
-JNIEXPORT jsize JNICALL GetStringArrayLength(JNIEnv *env, jobjectArray str);
+XJNIAPI jsize XJNICALL GetStringArrayLength(JNIEnv *env, jobjectArray str);
 
 /**
  * @brief Get Unicode strings (jchar arrays) from a Java String[].
@@ -108,7 +110,7 @@ JNIEXPORT jsize JNICALL GetStringArrayLength(JNIEnv *env, jobjectArray str);
  * @param isCopy Optional output, indicates if a copy was made.
  * @return Array of jchar pointers. Release with ReleaseStringArrayChars().
  */
-JNIEXPORT const jchar** JNICALL GetStringArrayChars(JNIEnv *env, jobjectArray str, jboolean *isCopy);
+XJNIAPI const jchar** XJNICALL GetStringArrayChars(JNIEnv *env, jobjectArray str, jboolean *isCopy);
 
 /**
  * @brief Release Unicode strings obtained from GetStringArrayChars.
@@ -116,7 +118,7 @@ JNIEXPORT const jchar** JNICALL GetStringArrayChars(JNIEnv *env, jobjectArray st
  * @param str Java String[] object.
  * @param chars Array of jchar pointers obtained previously.
  */
-JNIEXPORT void JNICALL ReleaseStringArrayChars(JNIEnv *env, jobjectArray str, const jchar **chars);
+XJNIAPI void XJNICALL ReleaseStringArrayChars(JNIEnv *env, jobjectArray str, const jchar **chars);
 
 /**
  * @brief Copy a region of Java String[] into a C buffer of jchar strings.
@@ -126,7 +128,7 @@ JNIEXPORT void JNICALL ReleaseStringArrayChars(JNIEnv *env, jobjectArray str, co
  * @param len Number of elements to copy.
  * @param buf Output buffer of jchar strings.
  */
-JNIEXPORT void JNICALL GetStringArrayRegion(JNIEnv *env, jobjectArray str, jsize start, jsize len, jchar **buf);
+XJNIAPI void XJNICALL GetStringArrayRegion(JNIEnv *env, jobjectArray str, jsize start, jsize len, jchar **buf);
 
 /**
  * @brief Set a region of a Java String[] from a C buffer of jchar strings.
@@ -136,7 +138,7 @@ JNIEXPORT void JNICALL GetStringArrayRegion(JNIEnv *env, jobjectArray str, jsize
  * @param len Number of elements to set.
  * @param buf Buffer of jchar strings.
  */
-JNIEXPORT void JNICALL SetStringArrayRegion(JNIEnv *env, jobjectArray array, jsize start, jsize len, const jchar **buf);
+XJNIAPI void XJNICALL SetStringArrayRegion(JNIEnv *env, jobjectArray array, jsize start, jsize len, const jchar **buf);
 //@}
 
 /** @} */ // end of JNI_StringArray group

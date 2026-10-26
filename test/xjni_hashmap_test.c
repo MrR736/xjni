@@ -3,7 +3,6 @@
 #include <string.h>
 #include <assert.h>
 #include <time.h>
-#include <pthread.h>
 
 #include "xjni_hashmap.h"
 
@@ -177,7 +176,7 @@ void test_multithread_timed() {
 	XJNI_HashMap map;
 	XJNI_HashMapInit(&map, 64);
 
-	pthread_t threads[THREAD_COUNT];
+	xjni_thread_t threads[THREAD_COUNT];
 	ThreadDataTimed threadData[THREAD_COUNT];
 
 	// Start threads
@@ -185,12 +184,12 @@ void test_multithread_timed() {
 		threadData[i].map = &map;
 		threadData[i].id = i;
 		threadData[i].duration = 0.0;
-		pthread_create(&threads[i], NULL, thread_worker_timed, &threadData[i]);
+		xjni_create(&threads[i], thread_worker_timed, &threadData[i]);
 	}
 
 	// Join threads
 	for (int i = 0; i < THREAD_COUNT; i++) {
-		pthread_join(threads[i], NULL);
+		xjni_join(threads[i], NULL);
 	}
 
 	// Print per-thread performance
@@ -213,17 +212,17 @@ void test_multithread() {
 	XJNI_HashMap map;
 	XJNI_HashMapInit(&map, 64);
 
-	pthread_t threads[THREAD_COUNT];
+	xjni_thread_t threads[THREAD_COUNT];
 	ThreadData threadData[THREAD_COUNT];
 
 	for (int i = 0; i < THREAD_COUNT; i++) {
 		threadData[i].map = &map;
 		threadData[i].id = i;
-		pthread_create(&threads[i], NULL, thread_worker, &threadData[i]);
+		xjni_create(&threads[i], thread_worker, &threadData[i]);
 	}
 
 	for (int i = 0; i < THREAD_COUNT; i++) {
-		pthread_join(threads[i], NULL);
+		xjni_join(threads[i], NULL);
 	}
 
 	TEST_ASSERT(XJNI_HashMapCheckInvariant(&map), "Invariant after multithread failed");

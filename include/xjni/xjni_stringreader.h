@@ -14,6 +14,8 @@
 
 #include <jni.h>
 
+#include "xjnidef.h"
+
 /** @typedef jstringReader
  *  @brief Represents a Java StringReader object.
  */
@@ -36,7 +38,7 @@ extern "C" {
  * @param str Java String to read from.
  * @return A new Java StringReader object.
  */
-JNIEXPORT jstringReader JNICALL NewStringReader(JNIEnv *env, jstring str);
+XJNIAPI jstringReader XJNICALL NewStringReader(JNIEnv *env, jstring str);
 
 /**
  * @brief Create a new StringReader from a UTF-8 C string.
@@ -44,7 +46,7 @@ JNIEXPORT jstringReader JNICALL NewStringReader(JNIEnv *env, jstring str);
  * @param str UTF-8 C string to read from.
  * @return A new Java StringReader object.
  */
-JNIEXPORT jstringReader JNICALL NewStringReaderUTF(JNIEnv *env, const char* str);
+XJNIAPI jstringReader XJNICALL NewStringReaderUTF(JNIEnv *env, const char* str);
 //@}
 
 /** @name Conversion */
@@ -55,7 +57,7 @@ JNIEXPORT jstringReader JNICALL NewStringReaderUTF(JNIEnv *env, const char* str)
  * @param sr StringReader object.
  * @return Java String containing the content of the StringReader.
  */
-JNIEXPORT jstring JNICALL StringReaderToString(JNIEnv *env, jstringReader sr);
+XJNIAPI jstring XJNICALL StringReaderToString(JNIEnv *env, jstringReader sr);
 
 /**
  * @brief Convert the content of a StringReader to a heap-allocated modified UTF-8 C string.
@@ -64,7 +66,7 @@ JNIEXPORT jstring JNICALL StringReaderToString(JNIEnv *env, jstringReader sr);
  * @return Heap-allocated UTF-8 string. Caller MUST free() the returned pointer.
  * @warning Caller is responsible for freeing the memory using free().
  */
-JNIEXPORT char* JNICALL StringReaderToStringUTF(JNIEnv *env, jstringReader sr);
+XJNIAPI char* XJNICALL StringReaderToStringUTF(JNIEnv *env, jstringReader sr);
 //@}
 
 /** @name Stream Operations */
@@ -75,7 +77,7 @@ JNIEXPORT char* JNICALL StringReaderToStringUTF(JNIEnv *env, jstringReader sr);
  * @param sr StringReader object.
  * @note Throws a Java IOException if the reader is closed.
  */
-JNIEXPORT void JNICALL StringReaderEnsureOpen(JNIEnv *env, jstringReader sr);
+XJNIAPI void XJNICALL StringReaderEnsureOpen(JNIEnv *env, jstringReader sr);
 
 /**
  * @brief Read a single character from the StringReader.
@@ -83,7 +85,7 @@ JNIEXPORT void JNICALL StringReaderEnsureOpen(JNIEnv *env, jstringReader sr);
  * @param sr StringReader object.
  * @return Character as jint, or -1 if end-of-stream.
  */
-JNIEXPORT jint JNICALL StringReaderRead(JNIEnv *env, jstringReader sr);
+XJNIAPI jint XJNICALL StringReaderRead(JNIEnv *env, jstringReader sr);
 
 /**
  * @brief Read multiple characters into a Java char array.
@@ -94,7 +96,7 @@ JNIEXPORT jint JNICALL StringReaderRead(JNIEnv *env, jstringReader sr);
  * @param len Maximum number of characters to read.
  * @return Number of characters actually read, or -1 if end-of-stream.
  */
-JNIEXPORT jint JNICALL StringReaderReadCharArrayIntInt(JNIEnv *env, jstringReader sr, jcharArray obj, jint offset, jint len);
+XJNIAPI jint XJNICALL StringReaderReadCharArrayIntInt(JNIEnv *env, jstringReader sr, jcharArray obj, jint offset, jint len);
 
 /**
  * @brief Skip a specified number of characters in the stream.
@@ -103,7 +105,7 @@ JNIEXPORT jint JNICALL StringReaderReadCharArrayIntInt(JNIEnv *env, jstringReade
  * @param ns Number of characters to skip.
  * @return Actual number of characters skipped.
  */
-JNIEXPORT jlong JNICALL StringReaderReadSkip(JNIEnv *env, jstringReader sr, jlong ns);
+XJNIAPI jlong XJNICALL StringReaderReadSkip(JNIEnv *env, jstringReader sr, jlong ns);
 
 /**
  * @brief Check if the reader is ready to be read without blocking.
@@ -111,7 +113,7 @@ JNIEXPORT jlong JNICALL StringReaderReadSkip(JNIEnv *env, jstringReader sr, jlon
  * @param sr StringReader object.
  * @return JNI_TRUE if ready, JNI_FALSE otherwise.
  */
-JNIEXPORT jboolean JNICALL StringReaderReadReady(JNIEnv *env, jstringReader sr);
+XJNIAPI jboolean XJNICALL StringReaderReadReady(JNIEnv *env, jstringReader sr);
 
 /**
  * @brief Check if mark/reset operations are supported by this reader.
@@ -119,7 +121,7 @@ JNIEXPORT jboolean JNICALL StringReaderReadReady(JNIEnv *env, jstringReader sr);
  * @param sr StringReader object.
  * @return JNI_TRUE if mark/reset is supported, JNI_FALSE otherwise.
  */
-JNIEXPORT jboolean JNICALL StringReaderReadMarkSupported(JNIEnv *env, jstringReader sr);
+XJNIAPI jboolean XJNICALL StringReaderReadMarkSupported(JNIEnv *env, jstringReader sr);
 
 /**
  * @brief Mark the current position in the stream.
@@ -127,21 +129,21 @@ JNIEXPORT jboolean JNICALL StringReaderReadMarkSupported(JNIEnv *env, jstringRea
  * @param sr StringReader object.
  * @param readAheadLimit Limit of characters that can be read before mark becomes invalid.
  */
-JNIEXPORT void JNICALL StringReaderMark(JNIEnv *env, jstringReader sr, jint readAheadLimit);
+XJNIAPI void XJNICALL StringReaderMark(JNIEnv *env, jstringReader sr, jint readAheadLimit);
 
 /**
  * @brief Reset the stream to the last marked position.
  * @param env Pointer to the JNI environment.
  * @param sr StringReader object.
  */
-JNIEXPORT void JNICALL StringReaderReset(JNIEnv *env, jstringReader sr);
+XJNIAPI void XJNICALL StringReaderReset(JNIEnv *env, jstringReader sr);
 
 /**
  * @brief Close the StringReader.
  * @param env Pointer to the JNI environment.
  * @param sr StringReader object.
  */
-JNIEXPORT void JNICALL StringReaderClose(JNIEnv *env, jstringReader sr);
+XJNIAPI void XJNICALL StringReaderClose(JNIEnv *env, jstringReader sr);
 //@}
 
 /** @} */ // end of JNI_StringReader group

@@ -4,6 +4,8 @@
 
 The library is suitable for both embedded JNI runtimes and larger native integrations where safety, performance, and maintainability are priorities.
 
+> **Note for Windows users:** Older versions of the xjni static library may cause linker errors. Upgrade to **xjni 1.1.4 or later** to avoid these issues.
+
 ---
 
 ## Key Features
@@ -30,11 +32,13 @@ Includes safe acquisition and release patterns for native-side modification.
 
 Structured `jargs_t` abstraction for building `jobjectArray` arguments:
 
-* Append, insert, replace, remove operations
-* Primitive support: `int`, `long`, `byte`, `short`, `float`, `double`, `boolean`
-* UTF-8 string helpers
-* Automatic boxing (e.g., `java.lang.Integer`, `java.lang.Byte`, etc.)
-* Correct C default promotion handling in variadic APIs
+- Append, insert, replace, and remove operations
+- Primitive support: `int`, `long`, `byte`, `short`, `float`, `double`, `boolean`, and `char`
+- Primitive array support: `int[]`, `long[]`, `byte[]`, `short[]`, `float[]`, `double[]`, `boolean[]`, and `char[]`
+- Multidimensional array support, including 2D primitive and object arrays
+- UTF-8 string helpers
+- Automatic boxing (e.g., `java.lang.Integer`, `java.lang.Byte`, etc.)
+- Correct C default argument promotion handling in variadic APIs
 
 ---
 
@@ -81,10 +85,16 @@ All returned dynamic buffers must be released using `free()`.
 
 Portable logging layer with:
 
-* Android-style priority levels
-* Automatic file and line tagging
-* Colored output (non-Android platforms)
-* `printf`-style formatting
+- Android-style priority levels
+- Automatic file and line tagging
+- Colored output on non-Android, non-Windows platforms
+- `printf`-style formatting
+- CMake option to disable colored log output:
+  ```cmake
+  option(DISABLE_XLOG_COLOR "Disable colored log output" ON)
+  ```
+
+> **Note for Windows users:** Older versions of `xjni_log` may have issues with colored output and platform-specific logging behavior. Upgrade to **xjni 1.1.4 or later** to benefit from these fixes.
 
 ---
 
@@ -102,11 +112,13 @@ Thread-safe LRU class cache to reduce repeated `FindClass()` calls:
 
 Cross-platform threading support:
 
-* Mutex abstraction
-* One-time initialization (`xjni_once`, `xjni_oncew`)
-* Thread create/join/detach/self
-* Cancellation type/state management
-* Realtime clock retrieval
+- Mutex abstraction
+- One-time initialization (`xjni_once`, `xjni_oncew`)
+- Thread creation, joining, detaching, and self-identification
+- Cancellation type and state management
+- Realtime clock retrieval
+
+> **Note for Windows users:** Older versions of `xjni_thread` may contain bugs affecting Windows compatibility. Upgrade to **xjni 1.1.4 or later** to benefit from these fixes.
 
 ---
 
@@ -139,10 +151,12 @@ Designed for lightweight runtime infrastructure usage.
 
 ### 10. Memory Pool (`xjni_pool`)
 
-* Growable slab allocator
-* Optional lock-free freelist
-* High-concurrency optimized
-* Debug-hardened mode (poisoning + double-free detection)
+- Growable slab allocator
+- Optional lock-free freelist
+- Optimized for high concurrency
+- Debug-hardened mode with memory poisoning and double-free detection
+
+> **Note for users:** Older versions of `xjni_pool` may contain bugs. Upgrade to **xjni 1.1.3 or later** to avoid these issues.
 
 ---
 
@@ -151,9 +165,8 @@ Designed for lightweight runtime infrastructure usage.
 ```bash
 git clone https://github.com/MrR736/xjni.git
 cd xjni
-mkdir build && cd build
-cmake ..
-cmake --build . --config Release
+cmake -S . -B build
+cmake --build build --config Release
 ```
 
 ---
@@ -163,7 +176,7 @@ cmake --build . --config Release
 Include the main header:
 
 ```c
-#include <xjni.h>
+#include <xjni/xjni.h>
 ```
 
 ### Example: Modify 2D int array
@@ -195,24 +208,22 @@ throwJava(env, "MyTag", "Custom message", "java/lang/RuntimeException");
 CMake test targets:
 
 ```bash
-cmake --build . --target xjni_stringarray_test_run
-cmake --build . --target xjni_arrayfield_test_run
-cmake --build . --target xjni2d_test_run
+cmake --build . --target RUN_ALLTEST
 ```
 
 ---
 
 ## Versioning
 
-Current version: **1.1.3**
+Current version: **1.1.4**
 
 ### Compile-Time Macros
 
 ```c
-_XJNI_VERSION        // 1103
+_XJNI_VERSION        // 1104
 _XJNI_VERSION_MAJOR  // 1
 _XJNI_VERSION_MINOR  // 1
-_XJNI_VERSION_PATCH  // 3
+_XJNI_VERSION_PATCH  // 4
 ```
 
 ### Runtime Query

@@ -12,8 +12,8 @@
 #define __XJNI_CLASS_H__
 
 #include <jni.h>
-#include <stdint.h>
-#include <stddef.h>
+
+#include "xjnidef.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,7 +43,7 @@ extern "C" {
  *
  * @return Native object or NULL.
  */
-typedef void* (*xjni_class_alloc_t)(JNIEnv* env,const void* data,size_t size);
+typedef void* (XJNICALL *xjni_class_alloc_t)(JNIEnv* env,const void* data,size_t size);
 
 /**
  * @brief Allocate a Java object.
@@ -53,7 +53,7 @@ typedef void* (*xjni_class_alloc_t)(JNIEnv* env,const void* data,size_t size);
  *
  * @return Java object or NULL.
  */
-typedef jobject (*xjni_class_jalloc_t)(JNIEnv* env,size_t size);
+typedef jobject (XJNICALL *xjni_class_jalloc_t)(JNIEnv* env,size_t size);
 
 /**
  * @brief Copy native C++ object -> Java object.
@@ -62,7 +62,7 @@ typedef jobject (*xjni_class_jalloc_t)(JNIEnv* env,size_t size);
  * @param in Native object.
  * @param out Java object.
  */
-typedef void (*xjni_class_set_t)(JNIEnv* env,const void* in,jobject out);
+typedef void (XJNICALL *xjni_class_set_t)(JNIEnv* env,const void* in,jobject out);
 
 /**
  * @brief Copy Java object -> native C++ object.
@@ -74,7 +74,7 @@ typedef void (*xjni_class_set_t)(JNIEnv* env,const void* in,jobject out);
  *
  * @return Native object or NULL.
  */
-typedef void* (*xjni_class_get_t)(JNIEnv* env,jobject in);
+typedef void* (XJNICALL *xjni_class_get_t)(JNIEnv* env,jobject in);
 
 /**
  * @brief Destroy a native C++ object.
@@ -83,7 +83,7 @@ typedef void* (*xjni_class_get_t)(JNIEnv* env,jobject in);
  *
  *     delete static_cast<MyClass*>(ptr);
  */
-typedef void (*xjni_class_free_t)(void* ptr);
+typedef void (XJNICALL *xjni_class_free_t)(void* ptr);
 
 /* ============================================================= */
 /* Context                                                       */
@@ -108,7 +108,7 @@ typedef struct xjni_class_ctx_t {
 /**
  * @brief Initialize context.
  */
-JNIEXPORT void JNICALL
+XJNIAPI void XJNICALL
 xjni_class_ctx_init(
     xjni_class_ctx_t* ctx,
     xjni_class_set_t set,
@@ -128,7 +128,7 @@ xjni_class_ctx_init(
  *
  * Native object is temporary and is released after set().
  */
-JNIEXPORT jobject JNICALL
+XJNIAPI jobject XJNICALL
 xjni_class_new(xjni_class_ctx_t* ctx,JNIEnv* env,const void* data,size_t size);
 
 /**
@@ -136,7 +136,7 @@ xjni_class_new(xjni_class_ctx_t* ctx,JNIEnv* env,const void* data,size_t size);
  *
  * Returned object belongs to caller.
  */
-JNIEXPORT void* JNICALL
+XJNIAPI void* XJNICALL
 xjni_class_get(xjni_class_ctx_t* ctx,JNIEnv* env,jobject obj);
 
 /**
@@ -154,7 +154,7 @@ xjni_class_get(xjni_class_ctx_t* ctx,JNIEnv* env,jobject obj);
  *     discard native changes
  *     free(native)
  */
-JNIEXPORT void JNICALL
+XJNIAPI void XJNICALL
 xjni_class_release(xjni_class_ctx_t* ctx,JNIEnv* env,jobject obj,void* object,jint mode);
 
 /* ============================================================= */
@@ -169,7 +169,7 @@ xjni_class_release(xjni_class_ctx_t* ctx,JNIEnv* env,jobject obj,void* object,ji
  * This is intended for classes whose native representation is safely
  * copyable into the supplied buffer.
  */
-JNIEXPORT void JNICALL
+XJNIAPI void XJNICALL
 xjni_class_get_region(xjni_class_ctx_t* ctx,JNIEnv* env,jobject obj,size_t size,void* buf);
 
 /**
@@ -177,7 +177,7 @@ xjni_class_get_region(xjni_class_ctx_t* ctx,JNIEnv* env,jobject obj,size_t size,
  *
  * `data` is optional initial data passed to alloc().
  */
-JNIEXPORT void JNICALL
+XJNIAPI void XJNICALL
 xjni_class_set_region(xjni_class_ctx_t* ctx,JNIEnv* env,jobject obj,const void* data,size_t size,const void* buf);
 
 static inline void xjni_class_free_null(void* ptr) { (void)ptr; }
